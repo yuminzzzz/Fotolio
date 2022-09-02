@@ -1,17 +1,20 @@
 import app from "../utils/firebase";
+import { db } from "../utils/firebase";
+
 import React, { useState } from "react";
-import {
-  collection,
-  setDoc,
-  serverTimestamp,
-  doc,
-  getFirestore,
-} from "firebase/firestore";
+import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
+import styled from "styled-components";
 
-const db = getFirestore(app);
+const Wrapper = styled.div`
+  border: solid 1px black;
+  width: 1016px;
+  height: 600px;
+  display: flex;
+`;
+
 const storage = getStorage(app);
 
 const Upload: React.FC = () => {
@@ -52,9 +55,9 @@ const Upload: React.FC = () => {
   const previewUrl = file ? URL.createObjectURL(file) : "";
 
   return (
-    <div style={{ border: "solid 1px black", width: "100%", height: "600px" }}>
+    <Wrapper>
       <div style={{ position: "relative", width: "300px", height: "300px" }}>
-        <img style={{ width: "100%", height: "100%" }} src={previewUrl}></img>
+        <img style={{ width: "100%", height: "100%" }} src={previewUrl} alt="upload preview"></img>
         {!file && (
           <label
             htmlFor="uploader"
@@ -131,8 +134,8 @@ const Upload: React.FC = () => {
       <button style={{ width: "50px", height: "30px" }} onClick={post}>
         發佈
       </button>
-    </div>
+    </Wrapper>
   );
 };
-
 export default Upload;
+export { Wrapper };
