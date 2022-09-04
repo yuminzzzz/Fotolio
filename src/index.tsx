@@ -2,8 +2,8 @@ import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import App from "./App";
-import Upload from "./pages/Upload";
-import Post from "./pages/Post";
+import Upload from "./pages/Upload/Upload";
+import Post from "./pages/Post/Post";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement

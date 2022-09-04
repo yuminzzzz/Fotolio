@@ -1,5 +1,5 @@
-import app from "../utils/firebase";
-import { db } from "../utils/firebase";
+import app from "../../utils/firebase";
+import { db } from "../../utils/firebase";
 
 import React, { useState } from "react";
 import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
@@ -9,10 +9,12 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
-  border: solid 1px black;
+  border: solid 1px lightgrey;
   width: 1016px;
-  height: 600px;
+  min-height: 640px;
   display: flex;
+  border-radius: 30px;
+  // overflow: hidden;
 `;
 
 const storage = getStorage(app);
