@@ -8,10 +8,11 @@ import {
   collection,
 } from "firebase/firestore";
 import { Wrapper } from "../Upload/Upload";
+import styled from "styled-components";
 import Comment from "./Comment";
 import MyComment from "./MyComment";
 import EditTextButton from "./EditTextButton";
-import styled from "styled-components";
+import DeleteCheck from "../../component/DeleteCheck";
 
 interface PostData {
   author_id: string;
@@ -93,6 +94,7 @@ const Post: React.FC = () => {
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");
   const [rawComment, setRawComment] = useState("");
+  const [modifyCheck, setModifyCheck] = useState(false);
 
   useEffect(() => {
     const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
@@ -114,92 +116,102 @@ const Post: React.FC = () => {
     getData();
   }, []);
   return (
-    <Wrapper>
-      <img
-        src={post?.url}
-        alt="post"
-        style={{
-          width: "508px",
-          height: "100%",
-          objectFit: "cover",
-          color: "lightgrey",
-          backgroundColor: "lightgrey",
-          borderTopLeftRadius: "30px",
-          borderBottomLeftRadius: "30px",
-        }}
-      ></img>
+    <>
+      <Wrapper>
+        <img
+          src={post?.url}
+          alt="post"
+          style={{
+            width: "508px",
+            height: "100%",
+            objectFit: "cover",
+            color: "lightgrey",
+            backgroundColor: "lightgrey",
+            borderTopLeftRadius: "30px",
+            borderBottomLeftRadius: "30px",
+          }}
+        ></img>
 
-      <CommentSection>
-        <PostTitle>{post?.title}</PostTitle>
-        <PostDescription>{post?.description}</PostDescription>
-        <AuthorWrapper>
-          <AuthorAvatar></AuthorAvatar>
-          <AuthorName>{post?.author_id}</AuthorName>
-        </AuthorWrapper>
+        <CommentSection>
+          <PostTitle>{post?.title}</PostTitle>
+          <PostDescription>{post?.description}</PostDescription>
+          <AuthorWrapper>
+            <AuthorAvatar></AuthorAvatar>
+            <AuthorName>{post?.author_id}</AuthorName>
+          </AuthorWrapper>
 
-        <CommentWrapper>
-          {message.map(
-            (
-              item: {
-                author_name: string;
-                message: string;
-                author_id: string;
-                comment_id: string;
-              },
-              index: number
-            ) => {
-              if (targetComment === item.comment_id) {
-                return (
-                  <>
-                    <MyComment
-                      comment={item.message}
-                      rawComment={rawComment}
-                      setRawComment={setRawComment}
-                    />
-                    <EditTextButton
-                      setTargetComment={setTargetComment}
-                      rawComment={rawComment}
-                      comment={item.message}
+          <CommentWrapper>
+            {message.map(
+              (
+                item: {
+                  author_name: string;
+                  message: string;
+                  author_id: string;
+                  comment_id: string;
+                },
+                index: number
+              ) => {
+                if (targetComment === item.comment_id) {
+                  return (
+                    <>
+                      <MyComment
+                        comment={item.message}
+                        rawComment={rawComment}
+                        setRawComment={setRawComment}
+                      />
+                      <EditTextButton
+                        setTargetComment={setTargetComment}
+                        rawComment={rawComment}
+                        comment={item.message}
+                        commentId={item.comment_id}
+                        setModifyCheck={setModifyCheck}
+                      />
+                    </>
+                  );
+                } else {
+                  return (
+                    <Comment
+                      key={index}
+                      userName={item.author_name}
+                      message={item.message}
+                      authorId={item.author_id}
                       commentId={item.comment_id}
+                      typing={typing}
+                      setTyping={setTyping}
+                      setTargetComment={setTargetComment}
                     />
-                  </>
-                );
-              } else {
-                return (
-                  <Comment
-                    key={index}
-                    userName={item.author_name}
-                    message={item.message}
-                    authorId={item.author_id}
-                    commentId={item.comment_id}
-                    typing={typing}
-                    setTyping={setTyping}
-                    setTargetComment={setTargetComment}
-                  />
-                );
+                  );
+                }
               }
-            }
-          )}
-        </CommentWrapper>
-        <MyCommentWrapper>
-          <UserAvatar></UserAvatar>
+            )}
+          </CommentWrapper>
+          <MyCommentWrapper>
+            <UserAvatar></UserAvatar>
 
-          <MyComment
-            response={response}
-            setResponse={setResponse}
-            typing={typing}
-            setTyping={setTyping}
-          />
-        </MyCommentWrapper>
-        {typing && (
-          <EditTextButton
-            response={response}
-            setResponse={setResponse}
-            setTyping={setTyping}
-          />
-        )}
-      </CommentSection>
-    </Wrapper>
+            <MyComment
+              response={response}
+              setResponse={setResponse}
+              typing={typing}
+              setTyping={setTyping}
+            />
+          </MyCommentWrapper>
+          {typing && (
+            <EditTextButton
+              response={response}
+              setResponse={setResponse}
+              setTyping={setTyping}
+            />
+          )}
+        </CommentSection>
+      </Wrapper>
+      {modifyCheck && (
+        <DeleteCheck
+          setModifyCheck={setModifyCheck}
+          setTargetComment={setTargetComment}
+          prompt={"確定要捨棄嗎?"}
+        />
+      )}
+    </>
   );
 };
 

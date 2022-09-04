@@ -20,7 +20,7 @@ interface Props {
 }
 
 const Button = styled.button<Props>`
-  width: 60px;
+  min-width: 60px;
   height: 40px;
   color: ${(props) => (props.cancel ? "black" : "lightgrey")};
   padding: 8px 12px;
@@ -44,14 +44,18 @@ const EditTextButton = ({
   rawComment,
   comment,
   commentId,
+  setModifyCheck,
+  promptButton,
 }: {
   response?: string;
   rawComment?: string;
   comment?: string;
   commentId?: string;
+  promptButton?: string;
   setResponse?: Dispatch<SetStateAction<string>>;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
+  setModifyCheck?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const postComment = () => {
     if (!response) return;
@@ -85,9 +89,14 @@ const EditTextButton = ({
       <Button
         cancel={true}
         onClick={() => {
-          if (setTargetComment) {
-            setTargetComment("");
+          if (promptButton) {
+            setModifyCheck && setModifyCheck(false);
             return;
+          }
+          if (setTargetComment) {
+            if (rawComment !== comment) {
+              setModifyCheck && setModifyCheck(true);
+            } else setTargetComment("");
           }
           setTyping && setTyping(false);
           setResponse && setResponse("");
@@ -95,7 +104,17 @@ const EditTextButton = ({
       >
         取消
       </Button>
-      {setResponse ? (
+      {promptButton ? (
+        <CompleteButton
+          cancel={false}
+          onClick={() => {
+            setModifyCheck && setModifyCheck(false);
+            setTargetComment && setTargetComment("");
+          }}
+        >
+          {promptButton}
+        </CompleteButton>
+      ) : setResponse ? (
         response !== "" ? (
           <CompleteButton cancel={false} onClick={postComment}>
             完成
