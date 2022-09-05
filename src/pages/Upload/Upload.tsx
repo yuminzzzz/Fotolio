@@ -1,23 +1,34 @@
-import app from "../utils/firebase";
-import { db } from "../utils/firebase";
+import app from "../../utils/firebase";
+import { db } from "../../utils/firebase";
 
-import React, { useState } from "react";
-import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
+import { useState } from "react";
+import {
+  collection,
+  setDoc,
+  serverTimestamp,
+  doc,
+  getDoc,
+  updateDoc,
+  DocumentSnapshot,
+  DocumentData,
+} from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 
 const Wrapper = styled.div`
-  border: solid 1px black;
+  border: solid 1px lightgrey;
   width: 1016px;
-  height: 600px;
+  min-height: 604px;
   display: flex;
+  border-radius: 30px;
+  // overflow: hidden;
 `;
 
 const storage = getStorage(app);
 
-const Upload: React.FC = () => {
+const Upload = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<any>("");
@@ -42,6 +53,24 @@ const Upload: React.FC = () => {
           };
           setDoc(docRef, data);
         });
+        // set post_id into users post array, record how many posts user post
+        const setPost = async () => {
+          interface user {
+            user_avatar: string;
+            user_collection: string[];
+            user_id: string;
+            user_name: string;
+            user_post: string[];
+          }
+          const setPostDocRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
+          const docSnap = await getDoc(setPostDocRef);
+          const userData = docSnap.data() as user;
+          let rawUserPost = userData.user_post;
+          let updateUserPost = [...rawUserPost, docRef.id];
+          await updateDoc(setPostDocRef, { user_post: updateUserPost });
+        };
+
+        setPost();
         alert("上傳成功");
         setFile("");
         setTitle("");
@@ -57,7 +86,11 @@ const Upload: React.FC = () => {
   return (
     <Wrapper>
       <div style={{ position: "relative", width: "300px", height: "300px" }}>
-        <img style={{ width: "100%", height: "100%" }} src={previewUrl} alt="upload preview"></img>
+        <img
+          style={{ width: "100%", height: "100%" }}
+          src={previewUrl}
+          alt="upload preview"
+        ></img>
         {!file && (
           <label
             htmlFor="uploader"
