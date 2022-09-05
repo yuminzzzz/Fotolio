@@ -31,9 +31,9 @@ function App() {
   return (
     <div className="App">
       <GlobalStyle />
-      <header className="App-header">
-        {/* <img src={logo} className="App-logo" alt="logo" /> */}
-      </header>
+      {/* <header className="App-header">
+        <img src={logo} className="App-logo" alt="logo" />
+      </header> */}
       <Outlet />
     </div>
   );

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import {
   doc,
@@ -14,6 +15,7 @@ import MyComment from "./MyComment";
 import EditTextButton from "./EditTextButton";
 import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
+import LastPageButton from "./LastPageButton";
 
 interface PostData {
   author_id: string;
@@ -65,8 +67,6 @@ const AuthorWrapper = styled.div`
 
 const CommentWrapper = styled.div`
   width: 100%;
-  min-height: 200px;
-  border: solid 1px red;
   margin-top: 40px;
 `;
 
@@ -96,7 +96,7 @@ const Post = () => {
   const [response, setResponse] = useState("");
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
-  // const postId = useParams();
+  // const postId = useParams().id;
 
   useEffect(() => {
     const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
@@ -119,13 +119,14 @@ const Post = () => {
   }, []);
   return (
     <>
+      <LastPageButton />
       <Wrapper>
         <img
           src={post?.url}
           alt="post"
           style={{
             width: "508px",
-            height: "100%",
+            height: "604px",
             objectFit: "cover",
             color: "lightgrey",
             backgroundColor: "lightgrey",

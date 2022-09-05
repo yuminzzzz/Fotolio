@@ -20,7 +20,7 @@ import styled from "styled-components";
 const Wrapper = styled.div`
   border: solid 1px lightgrey;
   width: 1016px;
-  min-height: 640px;
+  min-height: 604px;
   display: flex;
   border-radius: 30px;
   // overflow: hidden;
