@@ -13,6 +13,7 @@ import Comment from "./Comment";
 import MyComment from "./MyComment";
 import EditTextButton from "./EditTextButton";
 import DeleteCheck from "../../component/DeleteCheck";
+import Collect from "../../component/Collect";
 
 interface PostData {
   author_id: string;
@@ -40,7 +41,7 @@ const CommentSection = styled.div`
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 0 32px 108px;
+  padding: 32px 32px 108px;
 `;
 
 const PostTitle = styled.h1`
@@ -85,7 +86,7 @@ const UserAvatar = styled.div`
   border-radius: 50%;
 `;
 
-const Post: React.FC = () => {
+const Post = () => {
   const [post, setPost] = useState<DocumentData | PostData | undefined>(
     undefined
   );
@@ -95,11 +96,12 @@ const Post: React.FC = () => {
   const [response, setResponse] = useState("");
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
+  // const postId = useParams();
 
   useEffect(() => {
     const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
     const unsub = onSnapshot(q, (querySnapshot) => {
-      const fake: any = [];
+      const fake: object[] = [];
       querySnapshot.forEach((doc: { data: () => any }) => {
         fake.push(doc.data());
       });
@@ -133,6 +135,8 @@ const Post: React.FC = () => {
         ></img>
 
         <CommentSection>
+          <Collect postId={""} /* postId={postId} */ />
+
           <PostTitle>{post?.title}</PostTitle>
           <PostDescription>{post?.description}</PostDescription>
           <AuthorWrapper>

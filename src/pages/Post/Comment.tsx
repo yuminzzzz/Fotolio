@@ -85,14 +85,7 @@ const Comment = ({
     setEditOrDelete(false);
   };
 
-  // const updateComment = (commentId: string) => {
-  //   // const docRef = doc(
-  //   //   collection(db, `/posts/SCaXBHGLZjkLeqhc32Kt/messages/${commentId}`)
-  //   // );
-  //   console.log(commentId);
-  // };
-
-  const testStyle = {
+  const ellipsis = {
     borderRadius: "50%",
     fontSize: "12px",
     cursor: "pointer",
@@ -107,10 +100,11 @@ const Comment = ({
         <Avatar></Avatar>
         <UserName>{userName}</UserName>
         <Message>{message}</Message>
+        {/* authorId === userId ? <Ellipsis></Ellipsis>:"" */}
         <Ellipsis>
           <FontAwesomeIcon
             icon={faEllipsis}
-            style={testStyle}
+            style={ellipsis}
             id={commentId}
             onClick={() => {
               if (EditOrDelete) {
