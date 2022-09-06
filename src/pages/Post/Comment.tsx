@@ -27,6 +27,18 @@ const UserName = styled.p``;
 
 const Ellipsis = styled.div`
   position: relative;
+  width: 24px;
+  height: 24px;
+  padding: 6px;
+  color: grey;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+  &:hover {
+    background-color: lightgrey;
+  }
 `;
 
 const EditComment = styled.div`
@@ -76,22 +88,12 @@ const Comment = ({
   setTargetComment: Dispatch<SetStateAction<string>>;
 }) => {
   const [EditOrDelete, setEditOrDelete] = useState(false);
-  const [isHover, setIsHover] = useState(false);
 
   const deleteComment = async () => {
     await deleteDoc(
       doc(db, `/posts/SCaXBHGLZjkLeqhc32Kt/messages/${commentId}`)
     );
     setEditOrDelete(false);
-  };
-
-  const ellipsis = {
-    borderRadius: "50%",
-    fontSize: "12px",
-    cursor: "pointer",
-    padding: "6px",
-    color: "grey",
-    backgroundColor: isHover ? "lightgrey" : "white",
   };
 
   return (
@@ -101,20 +103,18 @@ const Comment = ({
         <UserName>{userName}</UserName>
         <Message>{message}</Message>
         {/* authorId === userId ? <Ellipsis></Ellipsis>:"" */}
-        <Ellipsis>
+        <Ellipsis
+          onClick={() => {
+            if (EditOrDelete) {
+              setEditOrDelete(false);
+              return;
+            }
+            setEditOrDelete(true);
+          }}
+        >
           <FontAwesomeIcon
             icon={faEllipsis}
-            style={ellipsis}
-            id={commentId}
-            onClick={() => {
-              if (EditOrDelete) {
-                setEditOrDelete(false);
-                return;
-              }
-              setEditOrDelete(true);
-            }}
-            onMouseEnter={() => setIsHover(true)}
-            onMouseLeave={() => setIsHover(false)}
+            style={{ pointerEvents: "none" }}
           />
           {EditOrDelete && (
             <EditComment
