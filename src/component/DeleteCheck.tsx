@@ -35,23 +35,31 @@ const ButtonWrapper = styled.div`
 `;
 
 const DeleteCheck = ({
-  prompt,
+  promptTitle,
   setModifyCheck,
   setTargetComment,
+  setDeleteModifyCheck,
+  setEditOrDelete,
 }: {
-  prompt: string;
+  promptTitle: string;
   setModifyCheck?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
+  setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
+  setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
+  console.log(promptTitle);
   return (
     <Wrapper>
       <Prompt>
-        <PromptTitle>{prompt}</PromptTitle>
+        <PromptTitle>{promptTitle}</PromptTitle>
         <ButtonWrapper>
           <EditTextButton
-            promptButton={"捨棄變更"}
+            buttonTag="deleteCheck"
+            promptButton={promptTitle}
             setModifyCheck={setModifyCheck}
             setTargetComment={setTargetComment}
+            setDeleteModifyCheck={setDeleteModifyCheck}
+            setEditOrDelete={setEditOrDelete}
           ></EditTextButton>
         </ButtonWrapper>
       </Prompt>

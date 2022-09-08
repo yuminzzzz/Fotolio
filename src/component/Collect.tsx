@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";

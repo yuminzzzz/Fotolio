@@ -16,6 +16,7 @@ import EditTextButton from "./EditTextButton";
 import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
 import LastPageButton from "./LastPageButton";
+import Ellipsis from "../../component/Ellipsis";
 
 interface PostData {
   author_id: string;
@@ -44,6 +45,11 @@ const CommentSection = styled.div`
   flex-direction: column;
   position: relative;
   padding: 32px 32px 108px;
+`;
+
+const ButtonWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
 `;
 
 const PostTitle = styled.h1`
@@ -96,6 +102,7 @@ const Post = () => {
   const [response, setResponse] = useState("");
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
+  const [deleteTag, setDeleteTag] = useState(true);
   // const postId = useParams().id;
 
   useEffect(() => {
@@ -117,6 +124,27 @@ const Post = () => {
     };
     getData();
   }, []);
+
+  //  check if the post id match with users post list
+  // useEffect(() => {
+  //   const checkIsUsersPost = async () => {
+  //     interface User {
+  //       user_avatar: string;
+  //       user_collection: string[];
+  //       user_id: string;
+  //       user_name: string;
+  //       user_post: string[];
+  //     }
+  //     const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
+  //     const docSnap = await getDoc(docRef);
+  //     const userData = docSnap.data() as User;
+  //     if (userData.user_post.includes("SCaXBHGLZjkLeqhc32Kt")) {
+  //       setDeleteTag(true);
+  //     }
+  //   };
+  //   checkIsUsersPost();
+  // }, []);
+
   return (
     <>
       <LastPageButton />
@@ -136,7 +164,15 @@ const Post = () => {
         ></img>
 
         <CommentSection>
-          <Collect postId={""} /* postId={postId} */ />
+          <ButtonWrapper>
+            <Ellipsis
+              roundSize={"48px"}
+              deleteTag={deleteTag}
+              setModifyCheck={setModifyCheck}
+              modifyCheck={modifyCheck}
+            />
+            <Collect postId={""} /* postId={postId} */ />
+          </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>
           <PostDescription>{post?.description}</PostDescription>
@@ -158,20 +194,21 @@ const Post = () => {
               ) => {
                 if (targetComment === item.comment_id) {
                   return (
-                    <>
+                    <div key={item.comment_id}>
                       <MyComment
                         comment={item.message}
                         rawComment={rawComment}
                         setRawComment={setRawComment}
                       />
                       <EditTextButton
+                        buttonTag="comment"
                         setTargetComment={setTargetComment}
                         rawComment={rawComment}
                         comment={item.message}
                         commentId={item.comment_id}
                         setModifyCheck={setModifyCheck}
                       />
-                    </>
+                    </div>
                   );
                 } else {
                   return (
@@ -181,8 +218,6 @@ const Post = () => {
                       message={item.message}
                       authorId={item.author_id}
                       commentId={item.comment_id}
-                      typing={typing}
-                      setTyping={setTyping}
                       setTargetComment={setTargetComment}
                     />
                   );
@@ -202,6 +237,7 @@ const Post = () => {
           </MyCommentWrapper>
           {typing && (
             <EditTextButton
+              buttonTag="message"
               response={response}
               setResponse={setResponse}
               setTyping={setTyping}
@@ -213,7 +249,7 @@ const Post = () => {
         <DeleteCheck
           setModifyCheck={setModifyCheck}
           setTargetComment={setTargetComment}
-          prompt={"確定要捨棄嗎?"}
+          promptTitle={"確定要捨棄變更?"}
         />
       )}
     </>
