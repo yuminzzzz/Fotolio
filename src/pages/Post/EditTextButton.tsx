@@ -7,6 +7,8 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
+  getDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
@@ -46,16 +48,22 @@ const EditTextButton = ({
   commentId,
   setModifyCheck,
   promptButton,
+  buttonTag,
+  setDeleteModifyCheck,
+  setEditOrDelete,
 }: {
   response?: string;
   rawComment?: string;
   comment?: string;
   commentId?: string;
   promptButton?: string;
+  buttonTag: string;
   setResponse?: Dispatch<SetStateAction<string>>;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
   setModifyCheck?: Dispatch<SetStateAction<boolean>>;
+  setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
+  setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const postComment = () => {
     if (!response) return;
@@ -84,51 +92,120 @@ const EditTextButton = ({
     await updateDoc(docRef, { message: rawComment });
     setTargetComment && setTargetComment("");
   };
+
+  const deletePost = async () => {
+    interface user {
+      user_avatar: string;
+      user_collection: string[];
+      user_id: string;
+      user_name: string;
+      user_post: string[];
+    }
+    const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
+    const docSnap = await getDoc(docRef);
+    const userData = docSnap.data() as user;
+    let rawUserPost = userData.user_post;
+    // let rawUserCollection = userData.user_collection;
+    let updateUserPost;
+
+    // updateUserPost = rawUserPost.filter(
+    //   (item) => item !== "SCaXBHGLZjkLeqhc32Kt"
+    // );
+    // await updateDoc(docRef, { user_post: updateUserPost });
+
+    await deleteDoc(doc(db, "posts/2VWJd1ulDWUogRYteuQy"));
+  };
+  console.log(promptButton);
   return (
     <ButtonContainer>
-      <Button
-        cancel={true}
-        onClick={() => {
-          if (promptButton) {
-            setModifyCheck && setModifyCheck(false);
-            return;
-          }
-          if (setTargetComment) {
-            if (rawComment !== comment) {
-              setModifyCheck && setModifyCheck(true);
-            } else setTargetComment("");
-          }
-          setTyping && setTyping(false);
-          setResponse && setResponse("");
-        }}
-      >
-        取消
-      </Button>
-      {promptButton ? (
-        <CompleteButton
-          cancel={false}
-          onClick={() => {
-            setModifyCheck && setModifyCheck(false);
-            setTargetComment && setTargetComment("");
-          }}
-        >
-          {promptButton}
-        </CompleteButton>
-      ) : setResponse ? (
-        response !== "" ? (
-          <CompleteButton cancel={false} onClick={postComment}>
-            完成
-          </CompleteButton>
-        ) : (
-          <Button cancel={false}>完成</Button>
-        )
-      ) : rawComment !== comment && rawComment !== "" ? (
-        <CompleteButton cancel={false} onClick={updateComment}>
-          儲存
-        </CompleteButton>
-      ) : (
-        <Button cancel={false}>儲存</Button>
-      )}
+      {buttonTag === "deleteCheck" ? (
+        <>
+          {promptButton === "確定要捨棄變更?" && (
+            <>
+              <Button
+                cancel={true}
+                onClick={() => {
+                  setModifyCheck && setModifyCheck(false);
+                }}
+              >
+                取消
+              </Button>
+              <CompleteButton
+                cancel={false}
+                onClick={() => {
+                  setModifyCheck && setModifyCheck(false);
+                  setTargetComment && setTargetComment("");
+                }}
+              >
+                捨棄變更
+              </CompleteButton>
+            </>
+          )}
+          {promptButton === "確定要刪除貼文？" && (
+            <>
+              <Button
+                cancel={true}
+                onClick={() => {
+                  setDeleteModifyCheck && setDeleteModifyCheck(false);
+                }}
+              >
+                取消
+              </Button>
+              <CompleteButton
+                cancel={false}
+                onClick={() => {
+                  deletePost();
+                  setDeleteModifyCheck && setDeleteModifyCheck(false);
+                  setEditOrDelete && setEditOrDelete(false);
+                }}
+              >
+                刪除
+              </CompleteButton>
+            </>
+          )}
+        </>
+      ) : buttonTag === "comment" ? (
+        <>
+          <Button
+            cancel={true}
+            onClick={() => {
+              if (setTargetComment) {
+                if (rawComment !== comment) {
+                  setModifyCheck && setModifyCheck(true);
+                } else setTargetComment("");
+              }
+            }}
+          >
+            取消
+          </Button>
+          {rawComment !== comment && rawComment !== "" ? (
+            <CompleteButton cancel={false} onClick={updateComment}>
+              儲存
+            </CompleteButton>
+          ) : (
+            <Button cancel={false}>儲存</Button>
+          )}
+        </>
+      ) : buttonTag === "message" ? (
+        <>
+          <Button
+            cancel={true}
+            onClick={() => {
+              setTyping && setTyping(false);
+              setResponse && setResponse("");
+            }}
+          >
+            取消
+          </Button>
+          {response !== "" ? (
+            <CompleteButton cancel={false} onClick={postComment}>
+              完成
+            </CompleteButton>
+          ) : (
+            <Button cancel={false}>完成</Button>
+          )}
+        </>
+      ) : null}
     </ButtonContainer>
   );
 };
