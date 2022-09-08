@@ -117,9 +117,14 @@ const Ellipsis = ({
         xhr.responseType = "blob";
         xhr.onload = (event) => {
           const blob = xhr.response;
+          var a = document.createElement("a");
+          a.setAttribute("download", "");
+          a.href = URL.createObjectURL(blob);
+          a.click();
         };
         xhr.open("GET", url);
         xhr.send();
+        setEditOrDelete(false);
       })
       .catch((error) => {
         switch (error.code) {
@@ -155,11 +160,15 @@ const Ellipsis = ({
               e.stopPropagation();
             }}
           >
-            <EditButton onClick={downloadImg}>下載圖片</EditButton>
+            <EditButton onClick={downloadImg} id="download">
+              下載圖片
+            </EditButton>
             {deleteTag && (
               <EditButton
                 onClick={() => {
                   setDeleteModifyCheck(true);
+                  // BUGFIX
+                  // navigate to main page
                 }}
               >
                 刪除貼文
