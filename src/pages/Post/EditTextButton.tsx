@@ -107,6 +107,7 @@ const EditTextButton = ({
     let rawUserPost = userData.user_post;
     // let rawUserCollection = userData.user_collection;
     let updateUserPost;
+    //FIXBUG
 
     // updateUserPost = rawUserPost.filter(
     //   (item) => item !== "SCaXBHGLZjkLeqhc32Kt"
@@ -115,7 +116,7 @@ const EditTextButton = ({
 
     await deleteDoc(doc(db, "posts/2VWJd1ulDWUogRYteuQy"));
   };
-  console.log(promptButton);
+
   return (
     <ButtonContainer>
       {buttonTag === "deleteCheck" ? (

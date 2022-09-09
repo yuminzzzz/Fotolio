@@ -48,7 +48,7 @@ const Upload = () => {
             title,
             description,
             created_time: serverTimestamp(),
-            author_id: "RuJg8C2CyHSbGMUwxrMr",
+           
             url,
           };
           setDoc(docRef, data);

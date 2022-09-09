@@ -11,9 +11,6 @@ const GlobalStyle = createGlobalStyle`
   }
 
   #root {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-height: 100vh;
     position: relative;
     width: 100%;
@@ -32,9 +29,6 @@ function App() {
   return (
     <div className="App">
       <GlobalStyle />
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header> */}
       <Outlet />
     </div>
   );
