@@ -167,8 +167,6 @@ const Ellipsis = ({
               <EditButton
                 onClick={() => {
                   setDeleteModifyCheck(true);
-                  // BUGFIX
-                  // navigate to main page
                 }}
               >
                 刪除貼文

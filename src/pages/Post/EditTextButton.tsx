@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../../utils/firebase";
 import {
@@ -65,6 +66,8 @@ const EditTextButton = ({
   setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const navigate = useNavigate();
+
   const postComment = () => {
     if (!response) return;
     try {
@@ -114,7 +117,7 @@ const EditTextButton = ({
     // );
     // await updateDoc(docRef, { user_post: updateUserPost });
 
-    await deleteDoc(doc(db, "posts/2VWJd1ulDWUogRYteuQy"));
+    await deleteDoc(doc(db, "posts/ohUITabT1VO8IZJKcCjt"));
   };
 
   return (
@@ -158,6 +161,7 @@ const EditTextButton = ({
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
                   setEditOrDelete && setEditOrDelete(false);
+                  navigate("/");
                 }}
               >
                 刪除
