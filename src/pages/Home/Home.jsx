@@ -61,7 +61,7 @@ const Home = () => {
         {imgUrlArr.map((item, index) => {
           return (
             <SwiperSlide key={index}>
-              <img src={item} onClick={() => console.log("hello")} />
+              <img src={item} onClick={() => console.log("hello")} alt="img" />
             </SwiperSlide>
           );
         })}

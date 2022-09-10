@@ -18,7 +18,7 @@ root.render(
         <Route index element={<Home />} />
         <Route path="home" element={<HomeLogged />} />
         <Route path="upload" element={<Upload />} />
-        <Route path="posts" element={<Post />} />
+        <Route path="posts/:id" element={<Post />} />
         {/* <Route path="profile" element={<Profile />} /> */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

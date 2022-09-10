@@ -103,7 +103,8 @@ const Post = () => {
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
   const [deleteTag, setDeleteTag] = useState(true);
-  // const postId = useParams().id;
+  const [isSaved, setIsSaved] = useState(false);
+  const { id } = useParams();
 
   useEffect(() => {
     const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
@@ -118,33 +119,27 @@ const Post = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const docRef = doc(db, "posts/SCaXBHGLZjkLeqhc32Kt");
+      const docRef = doc(db, `posts/${id}`);
       const docSnap = await getDoc(docRef);
       setPost(docSnap.data());
     };
     getData();
   }, []);
 
-  //  check if the post id match with users post list
-  // useEffect(() => {
-  //   const checkIsUsersPost = async () => {
-  //     interface User {
-  //       user_avatar: string;
-  //       user_collection: string[];
-  //       user_id: string;
-  //       user_name: string;
-  //       user_post: string[];
-  //     }
-  //     const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
-  //     const docSnap = await getDoc(docRef);
-  //     const userData = docSnap.data() as User;
-  //     if (userData.user_post.includes("SCaXBHGLZjkLeqhc32Kt")) {
-  //       setDeleteTag(true);
-  //     }
-  //   };
-  //   checkIsUsersPost();
-  // }, []);
-
+  useEffect(() => {
+    const getData = async () => {
+      const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
+      const docSnap: DocumentData = await getDoc(docRef);
+      const userCollection = docSnap.data().user_collection;
+      if (userCollection.includes(id)) {
+        setIsSaved(true);
+        setDeleteTag(true);
+      } else {
+        setIsSaved(false);
+      }
+    };
+    getData();
+  }, []);
   return (
     <>
       <LastPageButton />
@@ -171,7 +166,7 @@ const Post = () => {
               setModifyCheck={setModifyCheck}
               modifyCheck={modifyCheck}
             />
-            <Collect postId={""} /* postId={postId} */ />
+            <Collect postId={id!} isSaved={isSaved} setIsSaved={setIsSaved} />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>

@@ -9,8 +9,6 @@ import {
   doc,
   getDoc,
   updateDoc,
-  DocumentSnapshot,
-  DocumentData,
 } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -48,7 +46,7 @@ const Upload = () => {
             title,
             description,
             created_time: serverTimestamp(),
-           
+
             url,
           };
           setDoc(docRef, data);
@@ -87,7 +85,12 @@ const Upload = () => {
     <Wrapper>
       <div style={{ position: "relative", width: "300px", height: "300px" }}>
         <img
-          style={{ width: "100%", height: "100%" }}
+          style={{
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            cursor: "pointer",
+          }}
           src={previewUrl}
           alt="upload preview"
         ></img>
@@ -99,6 +102,7 @@ const Upload = () => {
               left: "0",
               width: "100%",
               height: "100%",
+              cursor: "pointer",
               backgroundColor: "salmon",
               display: "inline-block",
               position: "absolute",
@@ -118,6 +122,7 @@ const Upload = () => {
               width: "30px",
               height: "30px",
               borderRadius: "50%",
+              cursor: "pointer",
             }}
             onClick={() => {
               setFile("");

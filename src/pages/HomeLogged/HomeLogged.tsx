@@ -1,9 +1,8 @@
-import React from 'react'
+import React from "react";
+import PinterestLayout from "../../component/PinterestLayout";
 
 const HomeLogged = () => {
-  return (
-    <div>HomeLogged</div>
-  )
-}
+  return <PinterestLayout />;
+};
 
-export default HomeLogged
+export default HomeLogged;

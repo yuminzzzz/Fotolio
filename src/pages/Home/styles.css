@@ -18,6 +18,7 @@
 .swiper-slide img {
   display: block;
   width: 100%;
+  background-color: lightgrey;
   object-fit: cover;
 }
 

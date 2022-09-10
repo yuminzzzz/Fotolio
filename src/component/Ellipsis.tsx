@@ -43,15 +43,26 @@ const Wrapper = styled.div<Props>`
     props.roundSize === "48px"
       ? "black"
       : props.roundSize === "32px"
-      ? "grey"
+      ? "black"
       : "grey"};
+  background-color: ${(props) =>
+    props.roundSize === "48px"
+      ? "#fff"
+      : props.roundSize === "32px"
+      ? "lightgrey"
+      : "#fff"};
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 50%;
   &:hover {
-    background-color: lightgrey;
+    background-color: ${(props) =>
+      props.roundSize === "48px"
+        ? "lightgrey"
+        : props.roundSize === "32px"
+        ? "white"
+        : "lightgrey"};
   }
 `;
 
@@ -142,7 +153,8 @@ const Ellipsis = ({
 
   return (
     <Wrapper
-      onClick={() => {
+      onClick={(e) => {
+        e.stopPropagation();
         if (editOrDelete) {
           setEditOrDelete(false);
           return;
