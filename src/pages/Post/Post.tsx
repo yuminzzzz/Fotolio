@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
+import { GlobalContext } from "../../App";
 import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import {
@@ -103,8 +104,8 @@ const Post = () => {
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
   const [deleteTag, setDeleteTag] = useState(true);
-  const [isSaved, setIsSaved] = useState(false);
   const { id } = useParams();
+  const st: any = useContext(GlobalContext);
 
   useEffect(() => {
     const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
@@ -132,10 +133,10 @@ const Post = () => {
       const docSnap: DocumentData = await getDoc(docRef);
       const userCollection = docSnap.data().user_collection;
       if (userCollection.includes(id)) {
-        setIsSaved(true);
+        st.setIsSaved(true);
         setDeleteTag(true);
       } else {
-        setIsSaved(false);
+        st.setIsSaved(false);
       }
     };
     getData();
@@ -166,7 +167,7 @@ const Post = () => {
               setModifyCheck={setModifyCheck}
               modifyCheck={modifyCheck}
             />
-            <Collect postId={id!} isSaved={isSaved} setIsSaved={setIsSaved} />
+            <Collect postId={id!} />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>

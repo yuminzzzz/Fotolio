@@ -1,7 +1,6 @@
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
-
-// import logo from './logo.svg';
 
 const GlobalStyle = createGlobalStyle`
 * {
@@ -24,13 +23,20 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
+export const GlobalContext = React.createContext(null);
 
 function App() {
+  const [isSaved, setIsSaved] = useState(false);
+  const initialState: any = {
+    isSaved,
+    setIsSaved,
+  };
+
   return (
-    <div className="App">
+    <GlobalContext.Provider value={initialState}>
       <GlobalStyle />
       <Outlet />
-    </div>
+    </GlobalContext.Provider>
   );
 }
 

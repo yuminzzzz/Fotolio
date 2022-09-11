@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { doc, DocumentData, getDoc } from "firebase/firestore";
-import { db } from "../utils/firebase";
 import Collect from "./Collect";
 import Ellipsis from "./Ellipsis";
 
@@ -64,22 +62,8 @@ const Pin = ({
   postSrc: string;
 }) => {
   const [isHover, setIsHover] = useState(false);
-  const [saved, setSaved] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const getData = async () => {
-      const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
-      const docSnap: DocumentData = await getDoc(docRef);
-      const userCollection = docSnap.data().user_collection;
-      if (userCollection.includes(postId)) {
-        setSaved(true);
-      } else {
-        setSaved(false);
-      }
-    };
-    getData();
-  }, []);
   return (
     <PinCard
       card={size}
@@ -93,7 +77,7 @@ const Pin = ({
       {isHover && (
         <HoverBackground>
           <CollectPosition>
-            <Collect postId={postId} isSaved={saved} />
+            <Collect postId={postId} />
           </CollectPosition>
           <EllipsisPosition>
             <Ellipsis roundSize={"32px"} />
