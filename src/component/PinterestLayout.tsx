@@ -1,7 +1,13 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import Pin from "./Pin";
 import { db } from "../utils/firebase";
-import { getDocs, collection } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  getDoc,
+  doc,
+  DocumentData,
+} from "firebase/firestore";
 import styled from "styled-components";
 
 const PinContainer = styled.div`
@@ -17,7 +23,7 @@ const PinContainer = styled.div`
   justify-content: center;
 `;
 
-const PinterestLayout = () => {
+const PinterestLayout = ({ location }: { location: string }) => {
   interface DocData {
     created_time: {
       seconds: number;
@@ -31,17 +37,39 @@ const PinterestLayout = () => {
   const [post, setPost] = useState<DocData[]>([]);
 
   useEffect(() => {
+    setPost([]);
     const getPost = async () => {
-      const querySnapshot = await getDocs(collection(db, "posts"));
-      const arr: any[] = [];
-      querySnapshot.forEach((doc) => {
-        arr.push(doc.data());
-      });
-      arr.sort(() => Math.random() - 0.5);
-      setPost(arr);
+      const userData: DocumentData = await getDoc(
+        doc(db, "users/RuJg8C2CyHSbGMUwxrMr")
+      );
+      if (location === "home") {
+        const querySnapshot = await getDocs(collection(db, "posts"));
+        const arr: any[] = [];
+        querySnapshot.forEach((doc) => {
+          arr.push(doc.data());
+        });
+        arr.sort(() => Math.random() - 0.5);
+        setPost(arr);
+      } else if (location === "build") {
+        const userPost = userData.data().user_post;
+        let arr: any[] = [];
+        for (let i = 0; i < userPost.length; i++) {
+          const docRef = await getDoc(doc(db, `posts/${userPost[i]}`));
+          arr.push(docRef.data());
+        }
+        setPost(arr);
+      } else if (location === "saved") {
+        const userCollection = userData.data().user_collection;
+        let arr: any[] = [];
+        for (let i = 0; i < userCollection.length; i++) {
+          const docRef = await getDoc(doc(db, `posts/${userCollection[i]}`));
+          arr.push(docRef.data());
+        }
+        setPost(arr);
+      }
     };
     getPost();
-  }, []);
+  }, [location]);
   return (
     <PinContainer>
       {post.map((item) => {

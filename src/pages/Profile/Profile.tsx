@@ -82,7 +82,11 @@ const Profile = () => {
           已儲存
         </Button>
       </ButtonWrapper>
-      {!status ? <PinterestLayout /> : <PinterestLayout />}
+      {!status ? (
+        <PinterestLayout location="build" />
+      ) : (
+        <PinterestLayout location="saved" />
+      )}
     </Wrapper>
   );
 };
