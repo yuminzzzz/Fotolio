@@ -104,11 +104,11 @@ const Post = () => {
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
   const [deleteTag, setDeleteTag] = useState(true);
-  const { id } = useParams();
+  const postId = useParams().id;
   const st: any = useContext(GlobalContext);
 
   useEffect(() => {
-    const q = collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages");
+    const q = collection(db, `/posts/${postId}/messages`);
     const unsub = onSnapshot(q, (querySnapshot) => {
       const fake: object[] = [];
       querySnapshot.forEach((doc: { data: () => any }) => {
@@ -120,7 +120,7 @@ const Post = () => {
 
   useEffect(() => {
     const getData = async () => {
-      const docRef = doc(db, `posts/${id}`);
+      const docRef = doc(db, `posts/${postId}`);
       const docSnap = await getDoc(docRef);
       setPost(docSnap.data());
     };
@@ -132,7 +132,7 @@ const Post = () => {
       const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
       const docSnap: DocumentData = await getDoc(docRef);
       const userCollection = docSnap.data().user_collection;
-      if (userCollection.includes(id)) {
+      if (userCollection.includes(postId)) {
         st.setIsSaved(true);
         setDeleteTag(true);
       } else {
@@ -167,7 +167,7 @@ const Post = () => {
               setModifyCheck={setModifyCheck}
               modifyCheck={modifyCheck}
             />
-            <Collect postId={id!} />
+            <Collect postId={postId!} />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>

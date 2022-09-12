@@ -9,6 +9,7 @@ import {
   doc,
   getDoc,
   updateDoc,
+  DocumentData,
 } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -46,24 +47,16 @@ const Upload = () => {
             title,
             description,
             created_time: serverTimestamp(),
-
+            author_id: "RuJg8C2CyHSbGMUwxrMr",
             url,
           };
           setDoc(docRef, data);
         });
         // set post_id into users post array, record how many posts user post
         const setPost = async () => {
-          interface user {
-            user_avatar: string;
-            user_collection: string[];
-            user_id: string;
-            user_name: string;
-            user_post: string[];
-          }
           const setPostDocRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-          const docSnap = await getDoc(setPostDocRef);
-          const userData = docSnap.data() as user;
-          let rawUserPost = userData.user_post;
+          const docSnap: DocumentData = await getDoc(setPostDocRef);
+          let rawUserPost = docSnap.data().user_post;
           let updateUserPost = [...rawUserPost, docRef.id];
           await updateDoc(setPostDocRef, { user_post: updateUserPost });
         };

@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../../utils/firebase";
 import {
@@ -10,6 +10,7 @@ import {
   updateDoc,
   getDoc,
   deleteDoc,
+  DocumentData,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
@@ -67,18 +68,16 @@ const EditTextButton = ({
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const navigate = useNavigate();
-
+  const postId = useParams().id;
   const postComment = () => {
     if (!response) return;
     try {
-      const docRef = doc(
-        collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages")
-      );
+      const docRef = doc(collection(db, `/posts/${postId}/messages`));
       const data = {
         comment_id: docRef.id,
-        author_id: "dfsdafds",
-        author_name: "王小明",
-        author_avatar: "image url",
+        user_id: "dfsdafds",
+        user_name: "王小明",
+        user_avatar: "image url",
         message: response,
         uploaded_time: serverTimestamp(),
       };
@@ -91,33 +90,18 @@ const EditTextButton = ({
   };
 
   const updateComment = async () => {
-    const docRef = doc(db, `/posts/SCaXBHGLZjkLeqhc32Kt/messages/${commentId}`);
+    const docRef = doc(db, `/posts/${postId}/messages/${commentId}`);
     await updateDoc(docRef, { message: rawComment });
     setTargetComment && setTargetComment("");
   };
 
   const deletePost = async () => {
-    interface user {
-      user_avatar: string;
-      user_collection: string[];
-      user_id: string;
-      user_name: string;
-      user_post: string[];
-    }
     const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap = await getDoc(docRef);
-    const userData = docSnap.data() as user;
-    let rawUserPost = userData.user_post;
-    // let rawUserCollection = userData.user_collection;
-    let updateUserPost;
-    //FIXBUG
-
-    // updateUserPost = rawUserPost.filter(
-    //   (item) => item !== "SCaXBHGLZjkLeqhc32Kt"
-    // );
-    // await updateDoc(docRef, { user_post: updateUserPost });
-
-    await deleteDoc(doc(db, "posts/ohUITabT1VO8IZJKcCjt"));
+    const docSnap: DocumentData = await getDoc(docRef);
+    let rawUserPost = docSnap.data().user_post;
+    let updateUserPost = rawUserPost.filter((item: string) => item !== postId);
+    await updateDoc(docRef, { user_post: updateUserPost });
+    await deleteDoc(doc(db, `posts/${postId}`));
   };
 
   return (

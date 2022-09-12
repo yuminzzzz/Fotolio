@@ -6,6 +6,7 @@ import Upload from "./pages/Upload/Upload";
 import Post from "./pages/Post/Post";
 import Home from "./pages/Home/Home";
 import HomeLogged from "./pages/HomeLogged/HomeLogged";
+import Profile from "./pages/Profile/Profile";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -19,7 +20,7 @@ root.render(
         <Route path="home" element={<HomeLogged />} />
         <Route path="upload" element={<Upload />} />
         <Route path="posts/:id" element={<Post />} />
-        {/* <Route path="profile" element={<Profile />} /> */}
+        <Route path="profile" element={<Profile />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
