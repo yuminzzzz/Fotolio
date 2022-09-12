@@ -164,7 +164,6 @@ const Post = () => {
             <Ellipsis
               roundSize={"48px"}
               deleteTag={deleteTag}
-              setModifyCheck={setModifyCheck}
               modifyCheck={modifyCheck}
             />
             <Collect postId={postId!} />

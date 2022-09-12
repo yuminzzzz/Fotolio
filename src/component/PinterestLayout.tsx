@@ -63,7 +63,9 @@ const PinterestLayout = ({ location }: { location: string }) => {
         let arr: any[] = [];
         for (let i = 0; i < userCollection.length; i++) {
           const docRef = await getDoc(doc(db, `posts/${userCollection[i]}`));
-          arr.push(docRef.data());
+          if (docRef.data()) {
+            arr.push(docRef.data());
+          }
         }
         setPost(arr);
       }

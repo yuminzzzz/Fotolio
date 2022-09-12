@@ -1,4 +1,5 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { GlobalContext } from "../App";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
@@ -69,6 +70,8 @@ const EditTextButton = ({
 }) => {
   const navigate = useNavigate();
   const postId = useParams().id;
+  const st: any = useContext(GlobalContext);
+
   const postComment = () => {
     if (!response) return;
     try {
@@ -196,8 +199,12 @@ const EditTextButton = ({
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton cancel={false}>登入</ActiveButton>
-          <Button cancel={true}>註冊</Button>
+          <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
+            登入
+          </ActiveButton>
+          <Button cancel={true} onClick={() => st.setLogin(true)}>
+            註冊
+          </Button>
         </>
       ) : buttonTag === "logged" ? (
         <>

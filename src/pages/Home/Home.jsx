@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
+import { GlobalContext } from "../../App";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -12,6 +13,7 @@ import { getDocs, collection } from "firebase/firestore";
 
 const Home = () => {
   const [imgUrlArr, setImgUrlArr] = useState([]);
+  const st = useContext(GlobalContext);
   useEffect(() => {
     let arr = [];
     const getPost = async () => {
@@ -61,7 +63,12 @@ const Home = () => {
         {imgUrlArr.map((item, index) => {
           return (
             <SwiperSlide key={index}>
-              <img src={item} onClick={() => console.log("hello")} alt="img" />
+              <img
+                src={item}
+                style={{ cursor: "pointer" }}
+                onClick={() => st.setLogin(true)}
+                alt="img"
+              />
             </SwiperSlide>
           );
         })}
