@@ -1,6 +1,8 @@
-import { Dispatch, SetStateAction } from "react";
+import { Dispatch, SetStateAction, useContext } from "react";
+import { GlobalContext } from "../App";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { db } from "../../utils/firebase";
+import { db } from "../utils/firebase";
 import {
   collection,
   setDoc,
@@ -9,12 +11,13 @@ import {
   updateDoc,
   getDoc,
   deleteDoc,
+  DocumentData,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
-  margin-top: 10px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 10px;
 `;
 
 interface Props {
@@ -33,7 +36,7 @@ const Button = styled.button<Props>`
   cursor: pointer;
 `;
 
-const CompleteButton = styled(Button)`
+const ActiveButton = styled(Button)`
   background-color: orange;
   color: #ffffff;
 `;
@@ -65,17 +68,19 @@ const EditTextButton = ({
   setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
+  const navigate = useNavigate();
+  const postId = useParams().id;
+  const st: any = useContext(GlobalContext);
+
   const postComment = () => {
     if (!response) return;
     try {
-      const docRef = doc(
-        collection(db, "/posts/SCaXBHGLZjkLeqhc32Kt/messages")
-      );
+      const docRef = doc(collection(db, `/posts/${postId}/messages`));
       const data = {
         comment_id: docRef.id,
-        author_id: "dfsdafds",
-        author_name: "王小明",
-        author_avatar: "image url",
+        user_id: "dfsdafds",
+        user_name: "王小明",
+        user_avatar: "image url",
         message: response,
         uploaded_time: serverTimestamp(),
       };
@@ -88,34 +93,20 @@ const EditTextButton = ({
   };
 
   const updateComment = async () => {
-    const docRef = doc(db, `/posts/SCaXBHGLZjkLeqhc32Kt/messages/${commentId}`);
+    const docRef = doc(db, `/posts/${postId}/messages/${commentId}`);
     await updateDoc(docRef, { message: rawComment });
     setTargetComment && setTargetComment("");
   };
 
   const deletePost = async () => {
-    interface user {
-      user_avatar: string;
-      user_collection: string[];
-      user_id: string;
-      user_name: string;
-      user_post: string[];
-    }
     const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap = await getDoc(docRef);
-    const userData = docSnap.data() as user;
-    let rawUserPost = userData.user_post;
-    // let rawUserCollection = userData.user_collection;
-    let updateUserPost;
-
-    // updateUserPost = rawUserPost.filter(
-    //   (item) => item !== "SCaXBHGLZjkLeqhc32Kt"
-    // );
-    // await updateDoc(docRef, { user_post: updateUserPost });
-
-    await deleteDoc(doc(db, "posts/2VWJd1ulDWUogRYteuQy"));
+    const docSnap: DocumentData = await getDoc(docRef);
+    let rawUserPost = docSnap.data().user_post;
+    let updateUserPost = rawUserPost.filter((item: string) => item !== postId);
+    await updateDoc(docRef, { user_post: updateUserPost });
+    await deleteDoc(doc(db, `posts/${postId}`));
   };
-  console.log(promptButton);
+
   return (
     <ButtonContainer>
       {buttonTag === "deleteCheck" ? (
@@ -130,7 +121,7 @@ const EditTextButton = ({
               >
                 取消
               </Button>
-              <CompleteButton
+              <ActiveButton
                 cancel={false}
                 onClick={() => {
                   setModifyCheck && setModifyCheck(false);
@@ -138,7 +129,7 @@ const EditTextButton = ({
                 }}
               >
                 捨棄變更
-              </CompleteButton>
+              </ActiveButton>
             </>
           )}
           {promptButton === "確定要刪除貼文？" && (
@@ -151,16 +142,17 @@ const EditTextButton = ({
               >
                 取消
               </Button>
-              <CompleteButton
+              <ActiveButton
                 cancel={false}
                 onClick={() => {
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
                   setEditOrDelete && setEditOrDelete(false);
+                  navigate("/");
                 }}
               >
                 刪除
-              </CompleteButton>
+              </ActiveButton>
             </>
           )}
         </>
@@ -179,9 +171,9 @@ const EditTextButton = ({
             取消
           </Button>
           {rawComment !== comment && rawComment !== "" ? (
-            <CompleteButton cancel={false} onClick={updateComment}>
+            <ActiveButton cancel={false} onClick={updateComment}>
               儲存
-            </CompleteButton>
+            </ActiveButton>
           ) : (
             <Button cancel={false}>儲存</Button>
           )}
@@ -198,12 +190,30 @@ const EditTextButton = ({
             取消
           </Button>
           {response !== "" ? (
-            <CompleteButton cancel={false} onClick={postComment}>
+            <ActiveButton cancel={false} onClick={postComment}>
               完成
-            </CompleteButton>
+            </ActiveButton>
           ) : (
             <Button cancel={false}>完成</Button>
           )}
+        </>
+      ) : buttonTag === "login" ? (
+        <>
+          <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
+            登入
+          </ActiveButton>
+          <Button cancel={true} onClick={() => st.setLogin(true)}>
+            註冊
+          </Button>
+        </>
+      ) : buttonTag === "logged" ? (
+        <>
+          <ActiveButton cancel={false} onClick={() => navigate("/")}>
+            首頁
+          </ActiveButton>
+          <Button cancel={true} onClick={() => navigate("/upload")}>
+            建立
+          </Button>
         </>
       ) : null}
     </ButtonContainer>

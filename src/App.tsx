@@ -1,7 +1,7 @@
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
-
-// import logo from './logo.svg';
+import Header from "./component/Header/Header";
 
 const GlobalStyle = createGlobalStyle`
 * {
@@ -11,9 +11,6 @@ const GlobalStyle = createGlobalStyle`
   }
 
   #root {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     min-height: 100vh;
     position: relative;
     width: 100%;
@@ -27,16 +24,32 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
+export const GlobalContext = React.createContext(null);
 
 function App() {
+  const [isSaved, setIsSaved] = useState(false);
+  const [login, setLogin] = useState(false);
+
+  const initialState: any =
+    // : {
+    //   isSaved: boolean;
+    //   setIsSaved: Dispatch<SetStateAction<boolean>>;
+    //   login: boolean;
+    //   setLogin: Dispatch<SetStateAction<boolean>>;
+    // }
+    {
+      isSaved,
+      setIsSaved,
+      login,
+      setLogin,
+    };
+
   return (
-    <div className="App">
+    <GlobalContext.Provider value={initialState}>
       <GlobalStyle />
-      {/* <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-      </header> */}
+      <Header />
       <Outlet />
-    </div>
+    </GlobalContext.Provider>
   );
 }
 

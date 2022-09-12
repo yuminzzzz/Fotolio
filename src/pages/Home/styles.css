@@ -1,0 +1,41 @@
+.swiper {
+  width: 100%;
+  padding-top: 50px;
+  padding-bottom: 50px;
+}
+
+.swiper-slide {
+  background-position: center;
+  background-size: cover;
+  border: solid 1px lightgrey;
+  overflow: hidden;
+  display: flex;
+  border-radius: 30px;
+  width: 600px;
+  height: auto;
+}
+
+.swiper-slide img {
+  display: block;
+  width: 100%;
+  background-color: lightgrey;
+  object-fit: cover;
+}
+
+.swiper-pagination-fraction {
+  bottom: 0;
+}
+
+.swiper-pagination-bullet {
+  width: 25px;
+  height: 5px;
+  border-radius: 5px;
+  background-color: orange;
+}
+
+@media (max-width: 768px) {
+  .swiper-slide {
+    width: 250px;
+    height: 400px;
+  }
+}
