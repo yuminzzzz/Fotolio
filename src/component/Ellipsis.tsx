@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
@@ -111,10 +112,9 @@ const Ellipsis = ({
   const [editOrDelete, setEditOrDelete] = useState(false);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const storage = getStorage();
+  const postId = useParams().id;
   const deleteComment = async () => {
-    await deleteDoc(
-      doc(db, `/posts/SCaXBHGLZjkLeqhc32Kt/messages/${commentId}`)
-    );
+    await deleteDoc(doc(db, `/posts/${postId}/messages/${commentId}`));
     setEditOrDelete(false);
   };
   const downloadImg = async () => {
