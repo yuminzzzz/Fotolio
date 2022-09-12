@@ -1,6 +1,6 @@
 import React, { Dispatch, SetStateAction } from "react";
 import styled from "styled-components";
-import EditTextButton from "../pages/Post/EditTextButton";
+import EditTextButton from "./EditTextButton";
 
 const Wrapper = styled.div`
   width: 100vw;

@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { Dispatch, SetStateAction, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
+import Header from "./component/Header/Header";
 
 const GlobalStyle = createGlobalStyle`
 * {
@@ -27,14 +28,26 @@ export const GlobalContext = React.createContext(null);
 
 function App() {
   const [isSaved, setIsSaved] = useState(false);
-  const initialState: any = {
-    isSaved,
-    setIsSaved,
-  };
+  const [login, setLogin] = useState(false);
+
+  const initialState: any =
+    // : {
+    //   isSaved: boolean;
+    //   setIsSaved: Dispatch<SetStateAction<boolean>>;
+    //   login: boolean;
+    //   setLogin: Dispatch<SetStateAction<boolean>>;
+    // }
+    {
+      isSaved,
+      setIsSaved,
+      login,
+      setLogin,
+    };
 
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />
+      <Header />
       <Outlet />
     </GlobalContext.Provider>
   );

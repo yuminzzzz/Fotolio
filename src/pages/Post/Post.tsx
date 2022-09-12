@@ -13,7 +13,7 @@ import { Wrapper } from "../Upload/Upload";
 import styled from "styled-components";
 import Comment from "./Comment";
 import MyComment from "./MyComment";
-import EditTextButton from "./EditTextButton";
+import EditTextButton from "../../component/EditTextButton";
 import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
 import LastPageButton from "./LastPageButton";
@@ -164,7 +164,6 @@ const Post = () => {
             <Ellipsis
               roundSize={"48px"}
               deleteTag={deleteTag}
-              setModifyCheck={setModifyCheck}
               modifyCheck={modifyCheck}
             />
             <Collect postId={postId!} />
