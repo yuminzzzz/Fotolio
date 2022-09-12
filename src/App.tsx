@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
+import Header from "./component/Header/Header";
 
 const GlobalStyle = createGlobalStyle`
 * {
@@ -35,6 +36,7 @@ function App() {
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />
+      <Header />
       <Outlet />
     </GlobalContext.Provider>
   );

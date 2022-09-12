@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { db } from "../../utils/firebase";
+import { db } from "../utils/firebase";
 import {
   collection,
   setDoc,
@@ -14,9 +14,9 @@ import {
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
-  margin-top: 10px;
   display: flex;
   justify-content: flex-end;
+  margin-top: 10px;
 `;
 
 interface Props {
@@ -35,7 +35,7 @@ const Button = styled.button<Props>`
   cursor: pointer;
 `;
 
-const CompleteButton = styled(Button)`
+const ActiveButton = styled(Button)`
   background-color: orange;
   color: #ffffff;
 `;
@@ -118,7 +118,7 @@ const EditTextButton = ({
               >
                 取消
               </Button>
-              <CompleteButton
+              <ActiveButton
                 cancel={false}
                 onClick={() => {
                   setModifyCheck && setModifyCheck(false);
@@ -126,7 +126,7 @@ const EditTextButton = ({
                 }}
               >
                 捨棄變更
-              </CompleteButton>
+              </ActiveButton>
             </>
           )}
           {promptButton === "確定要刪除貼文？" && (
@@ -139,7 +139,7 @@ const EditTextButton = ({
               >
                 取消
               </Button>
-              <CompleteButton
+              <ActiveButton
                 cancel={false}
                 onClick={() => {
                   deletePost();
@@ -149,7 +149,7 @@ const EditTextButton = ({
                 }}
               >
                 刪除
-              </CompleteButton>
+              </ActiveButton>
             </>
           )}
         </>
@@ -168,9 +168,9 @@ const EditTextButton = ({
             取消
           </Button>
           {rawComment !== comment && rawComment !== "" ? (
-            <CompleteButton cancel={false} onClick={updateComment}>
+            <ActiveButton cancel={false} onClick={updateComment}>
               儲存
-            </CompleteButton>
+            </ActiveButton>
           ) : (
             <Button cancel={false}>儲存</Button>
           )}
@@ -187,12 +187,26 @@ const EditTextButton = ({
             取消
           </Button>
           {response !== "" ? (
-            <CompleteButton cancel={false} onClick={postComment}>
+            <ActiveButton cancel={false} onClick={postComment}>
               完成
-            </CompleteButton>
+            </ActiveButton>
           ) : (
             <Button cancel={false}>完成</Button>
           )}
+        </>
+      ) : buttonTag === "login" ? (
+        <>
+          <ActiveButton cancel={false}>登入</ActiveButton>
+          <Button cancel={true}>註冊</Button>
+        </>
+      ) : buttonTag === "logged" ? (
+        <>
+          <ActiveButton cancel={false} onClick={() => navigate("/")}>
+            首頁
+          </ActiveButton>
+          <Button cancel={true} onClick={() => navigate("/upload")}>
+            建立
+          </Button>
         </>
       ) : null}
     </ButtonContainer>
