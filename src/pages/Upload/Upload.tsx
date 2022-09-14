@@ -50,18 +50,14 @@ const Upload = () => {
             author_id: "RuJg8C2CyHSbGMUwxrMr",
             url,
           };
+          const postDocRef = doc(
+            db,
+            `/users/RuJg8C2CyHSbGMUwxrMr/user_posts/${docRef.id}`
+          );
           setDoc(docRef, data);
+          setDoc(postDocRef, data);
         });
-        // set post_id into users post array, record how many posts user post
-        const setPost = async () => {
-          const setPostDocRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-          const docSnap: DocumentData = await getDoc(setPostDocRef);
-          let rawUserPost = docSnap.data().user_post;
-          let updateUserPost = [...rawUserPost, docRef.id];
-          await updateDoc(setPostDocRef, { user_post: updateUserPost });
-        };
 
-        setPost();
         alert("上傳成功");
         setFile("");
         setTitle("");

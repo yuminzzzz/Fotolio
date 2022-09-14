@@ -1,6 +1,13 @@
 import styled from "styled-components";
 import { db } from "../utils/firebase";
-import { doc, updateDoc, getDoc, DocumentData } from "firebase/firestore";
+import {
+  doc,
+  updateDoc,
+  getDoc,
+  DocumentData,
+  setDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { useContext, useEffect } from "react";
 import { GlobalContext } from "../App";
 
@@ -35,20 +42,17 @@ const Collect = ({ postId }: { postId: string }) => {
 
   // const userId = take users doc.id (which user will get when successfully sign up or sign in, doc.id also equals to user.id)
   const modifyCollect = async () => {
-    const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap: DocumentData = await getDoc(docRef);
-    let rawUserCollection = docSnap.data().user_collection;
-    let updateUserPost;
-
+    const collectionRef = doc(
+      db,
+      `/users/RuJg8C2CyHSbGMUwxrMr/user_collections/${postId}`
+    );
+    const postRef = doc(db, `/users/RuJg8C2CyHSbGMUwxrMr/user_posts/${postId}`);
     if (st.isSaved) {
-      updateUserPost = rawUserCollection.filter(
-        (item: string) => item !== postId
-      );
-      await updateDoc(docRef, { user_collection: updateUserPost });
+      deleteDoc(collectionRef);
       st.setIsSaved(false);
     } else {
-      updateUserPost = [...rawUserCollection, postId];
-      await updateDoc(docRef, { user_collection: updateUserPost });
+      const docSnap: DocumentData = await getDoc(postRef);
+      setDoc(collectionRef, docSnap.data());
       st.setIsSaved(true);
     }
   };

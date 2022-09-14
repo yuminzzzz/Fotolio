@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+import { GlobalContext } from "../App";
+
 import Pin from "./Pin";
 import { db } from "../utils/firebase";
 import {
@@ -7,6 +9,7 @@ import {
   getDoc,
   doc,
   DocumentData,
+  collectionGroup,
 } from "firebase/firestore";
 import styled from "styled-components";
 
@@ -24,49 +27,48 @@ const PinContainer = styled.div`
 `;
 
 const PinterestLayout = ({ location }: { location: string }) => {
-  interface DocData {
-    created_time: {
-      seconds: number;
-      nanoseconds: number;
-    };
+  interface Post {
+    author_id: string;
+    created_time: { seconds: number; nanoseconds: number };
     description: string;
     post_id: string;
     title: string;
     url: string;
   }
-  const [post, setPost] = useState<DocData[]>([]);
+  const [post, setPost] = useState<Post[]>([]);
+  const st: any = useContext(GlobalContext);
 
   useEffect(() => {
     setPost([]);
     const getPost = async () => {
-      const userData: DocumentData = await getDoc(
-        doc(db, "users/RuJg8C2CyHSbGMUwxrMr")
-      );
       if (location === "home") {
-        const querySnapshot = await getDocs(collection(db, "posts"));
-        const arr: any[] = [];
-        querySnapshot.forEach((doc) => {
+        const userPost = collectionGroup(db, "user_posts");
+        const querySnapshot = await getDocs(userPost);
+        let arr: Post[] = [];
+        querySnapshot.forEach((doc: DocumentData) => {
           arr.push(doc.data());
         });
         arr.sort(() => Math.random() - 0.5);
-        setPost(arr);
+        setPost((prev) => {
+          return [...prev, ...arr];
+        });
       } else if (location === "build") {
-        const userPost = userData.data().user_post;
-        let arr: any[] = [];
-        for (let i = 0; i < userPost.length; i++) {
-          const docRef = await getDoc(doc(db, `posts/${userPost[i]}`));
-          arr.push(docRef.data());
-        }
+        const userPost = await getDocs(
+          collection(db, "/users/RuJg8C2CyHSbGMUwxrMr/user_posts")
+        );
+        let arr: Post[] = [];
+        userPost.forEach((item: DocumentData) => {
+          arr.push(item.data());
+        });
         setPost(arr);
       } else if (location === "saved") {
-        const userCollection = userData.data().user_collection;
-        let arr: any[] = [];
-        for (let i = 0; i < userCollection.length; i++) {
-          const docRef = await getDoc(doc(db, `posts/${userCollection[i]}`));
-          if (docRef.data()) {
-            arr.push(docRef.data());
-          }
-        }
+        const userPost = await getDocs(
+          collection(db, "/users/RuJg8C2CyHSbGMUwxrMr/user_collections")
+        );
+        let arr: Post[] = [];
+        userPost.forEach((item: DocumentData) => {
+          arr.push(item.data());
+        });
         setPost(arr);
       }
     };

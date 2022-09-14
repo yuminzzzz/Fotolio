@@ -15,7 +15,14 @@ import {
   signInWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { collection, setDoc, doc, DocumentReference } from "firebase/firestore";
+import {
+  collection,
+  setDoc,
+  doc,
+  DocumentReference,
+  getDoc,
+  DocumentData,
+} from "firebase/firestore";
 
 const Wrapper = styled.div`
   position: fixed;
@@ -165,7 +172,6 @@ const Header = () => {
         };
         setDoc(docRef, data);
         navigate("/home");
-        setIsLogged(true);
         setEmail("");
         setPassword("");
         setName("");
@@ -208,8 +214,19 @@ const Header = () => {
   };
 
   useEffect(() => {
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (user) {
+        // get user data and store it into state
+        const docSnap: DocumentData = await getDoc(
+          doc(db, `users/${user.uid}`)
+        );
+        const data = docSnap.data();
+        st.setUserData({
+          user_avatar: data.user_avatar,
+          user_email: data.user_email,
+          user_id: data.user_id,
+          user_name: data.user_name,
+        });
         setIsLogged(true);
         navigate("/home");
       } else {
