@@ -202,13 +202,19 @@ const EditTextButton = ({
           <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
             登入
           </ActiveButton>
-          <Button cancel={true} onClick={() => st.setLogin(true)}>
+          <Button
+            cancel={true}
+            onClick={() => {
+              st.setLogin(true);
+              st.setRegister(true)
+            }}
+          >
             註冊
           </Button>
         </>
       ) : buttonTag === "logged" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => navigate("/")}>
+          <ActiveButton cancel={false} onClick={() => navigate("/home")}>
             首頁
           </ActiveButton>
           <Button cancel={true} onClick={() => navigate("/upload")}>

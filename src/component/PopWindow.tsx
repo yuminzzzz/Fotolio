@@ -1,10 +1,12 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useContext } from "react";
+import { GlobalContext } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
-import { db } from "../utils/firebase";
+import { auth, db } from "../utils/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
 
 interface Props {
   userInfo: boolean;
@@ -71,6 +73,7 @@ const PopWindow = ({
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
 }) => {
+  const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
@@ -110,6 +113,16 @@ const PopWindow = ({
           case "storage/unknown":
             break;
         }
+      });
+  };
+  const logout = () => {
+    signOut(auth)
+      .then(() => {
+        st.setToggle(false);
+        navigate("/");
+      })
+      .catch((error) => {
+        // An error happened.
       });
   };
   if (location === "post") {
@@ -178,13 +191,18 @@ const PopWindow = ({
           e.stopPropagation();
         }}
       >
-        <EditButton onClick={() => navigate("/profile")}>
+        <EditButton
+          onClick={() => {
+            st.setToggle(false);
+            navigate("/profile");
+          }}
+        >
           <UserAccountWrapper>
             <UserAccountAvatar></UserAccountAvatar>
             <UserAccountName>王小明</UserAccountName>
           </UserAccountWrapper>
         </EditButton>
-        <EditButton>登出</EditButton>
+        <EditButton onClick={logout}>登出</EditButton>
       </EditWrapper>
     );
   } else {

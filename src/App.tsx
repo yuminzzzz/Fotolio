@@ -29,6 +29,9 @@ export const GlobalContext = React.createContext(null);
 function App() {
   const [isSaved, setIsSaved] = useState(false);
   const [login, setLogin] = useState(false);
+  const [register, setRegister] = useState(false);
+  const [toggle, setToggle] = useState(false);
+  
 
   const initialState: any =
     // : {
@@ -42,6 +45,10 @@ function App() {
       setIsSaved,
       login,
       setLogin,
+      register,
+      setRegister,
+      toggle,
+      setToggle,
     };
 
   return (
