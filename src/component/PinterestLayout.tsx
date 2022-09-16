@@ -6,8 +6,6 @@ import { db } from "../utils/firebase";
 import {
   getDocs,
   collection,
-  getDoc,
-  doc,
   DocumentData,
   collectionGroup,
 } from "firebase/firestore";
@@ -25,7 +23,9 @@ const PinContainer = styled.div`
   grid-auto-rows: 10px;
   justify-content: center;
 `;
-
+let isMounted = true;
+let arr: string[];
+let random: number;
 const PinterestLayout = ({ location }: { location: string }) => {
   interface Post {
     author_id: string;
@@ -39,6 +39,7 @@ const PinterestLayout = ({ location }: { location: string }) => {
   const st: any = useContext(GlobalContext);
   useEffect(() => {
     setPost([]);
+    isMounted = true;;
     const getPost = async () => {
       if (location === "home") {
         const userPost = collectionGroup(db, "user_posts");
@@ -72,14 +73,23 @@ const PinterestLayout = ({ location }: { location: string }) => {
       }
     };
     getPost();
-  }, [location, st.userData.user_id]);
+  }, [location]);
+
   return (
     <PinContainer>
       {post.map((item) => {
-        let arr = ["small", "medium", "large"];
-        let random = Math.floor(Math.random() * 3);
+        if (isMounted) {
+          arr = ["small", "medium", "large"];
+          random = Math.floor(Math.random() * 3);
+          isMounted = false;
+        }
         return (
-          <Pin size={arr[random]} postId={item.post_id} postSrc={item.url} />
+          <Pin
+            size={arr[random]}
+            key={item.post_id}
+            postId={item.post_id}
+            postSrc={item.url}
+          />
         );
       })}
     </PinContainer>
