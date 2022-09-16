@@ -8,6 +8,7 @@ import {
   collection,
   DocumentData,
   collectionGroup,
+  onSnapshot,
 } from "firebase/firestore";
 import styled from "styled-components";
 
@@ -28,7 +29,9 @@ let arr: string[];
 let random: number;
 const PinterestLayout = ({ location }: { location: string }) => {
   interface Post {
+    author_avatar: string;
     author_id: string;
+    author_name: string;
     created_time: { seconds: number; nanoseconds: number };
     description: string;
     post_id: string;
@@ -39,7 +42,7 @@ const PinterestLayout = ({ location }: { location: string }) => {
   const st: any = useContext(GlobalContext);
   useEffect(() => {
     setPost([]);
-    isMounted = true;;
+    isMounted = true;
     const getPost = async () => {
       if (location === "home") {
         const userPost = collectionGroup(db, "user_posts");
@@ -62,14 +65,17 @@ const PinterestLayout = ({ location }: { location: string }) => {
         });
         setPost(arr);
       } else if (location === "saved") {
-        const userPost = await getDocs(
-          collection(db, `/users/${st.userData.user_id}/user_collections`)
+        const q = collection(
+          db,
+          `/users/${st.userData.user_id}/user_collections`
         );
-        let arr: Post[] = [];
-        userPost.forEach((item: DocumentData) => {
-          arr.push(item.data());
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
+          let arr: Post[] = [];
+          querySnapshot.forEach((doc: DocumentData) => {
+            arr.push(doc.data());
+          });
+          setPost(arr);
         });
-        setPost(arr);
       }
     };
     getPost();
