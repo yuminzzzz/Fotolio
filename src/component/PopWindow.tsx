@@ -16,7 +16,7 @@ const EditWrapper = styled.div<Props>`
   position: absolute;
   background-color: #ffffff;
   z-index: 2;
-  width: 182px;
+  min-width: 182px;
   top: ${(props) => (props.userInfo ? "30px" : "50px")};
   left: ${(props) => (props.userInfo ? "" : "-80px")};
   right: ${(props) => (props.userInfo ? "-18px" : "")};
@@ -51,7 +51,6 @@ const UserAccountWrapper = styled.div`
 const UserAccountAvatar = styled.img`
   width: 60px;
   height: 60px;
-  background-color: grey;
   border-radius: 50%;
 `;
 
@@ -60,18 +59,24 @@ const UserAccountName = styled.p`
   font-weight: bold;
 `;
 
+const UserAccountEmail = styled.p`
+  font-size: 10px;
+`;
+
 const PopWindow = ({
   location,
   commentId,
   setEditOrDelete,
   deleteTag,
   setTargetComment,
+  authorId,
 }: {
   location: string;
   commentId?: string;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
+  authorId?: string;
 }) => {
   const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
@@ -79,13 +84,15 @@ const PopWindow = ({
   const storage = getStorage();
   const postId = useParams().id;
   const deleteComment = async () => {
-    await deleteDoc(doc(db, `/posts/${postId}/messages/${commentId}`));
+    await deleteDoc(
+      doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
+    );
     setEditOrDelete && setEditOrDelete(false);
   };
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
-      "gs://fotolio-799f4.appspot.com/post-image/SCaXBHGLZjkLeqhc32Kt"
+      `gs://fotolio-799f4.appspot.com/post-image/${postId}`
     );
     getDownloadURL(gsReference)
       .then((url) => {
@@ -198,8 +205,15 @@ const PopWindow = ({
           }}
         >
           <UserAccountWrapper>
-            <UserAccountAvatar></UserAccountAvatar>
-            <UserAccountName>王小明</UserAccountName>
+            <UserAccountAvatar
+              src={st.userData.user_avatar}
+            ></UserAccountAvatar>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <UserAccountName>{st.userData.user_name}</UserAccountName>
+              <UserAccountEmail style={{ fontSize: "10px" }}>
+                {st.userData.user_email}
+              </UserAccountEmail>
+            </div>
           </UserAccountWrapper>
         </EditButton>
         <EditButton onClick={logout}>登出</EditButton>

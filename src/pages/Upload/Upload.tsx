@@ -1,7 +1,7 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
-
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { GlobalContext } from "../../App";
 import {
   collection,
   setDoc,
@@ -31,10 +31,13 @@ const Upload = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<any>("");
+  const st: any = useContext(GlobalContext);
 
   const post = async () => {
     try {
-      const docRef = doc(collection(db, "posts"));
+      const docRef = doc(
+        collection(db, `users/${st.userData.user_id}/user_posts`)
+      );
       const fileRef = ref(storage, `post-image/${docRef.id}`);
       if (!(title && description && file)) {
         alert("請確實輸入資訊");
@@ -47,14 +50,15 @@ const Upload = () => {
             title,
             description,
             created_time: serverTimestamp(),
-            author_id: "RuJg8C2CyHSbGMUwxrMr",
+            author_id: st.userData.user_id,
+            author_name: st.userData.user_name,
+            author_avatar: st.userData.user_avatar,
             url,
           };
           const postDocRef = doc(
             db,
-            `/users/RuJg8C2CyHSbGMUwxrMr/user_posts/${docRef.id}`
+            `/users/${st.userData.user_id}/user_posts/${docRef.id}`
           );
-          setDoc(docRef, data);
           setDoc(postDocRef, data);
         });
 
@@ -131,14 +135,16 @@ const Upload = () => {
         />
       </div>
 
-      <div
+      <img
         style={{
           width: "40px",
           height: "40px",
-          backgroundColor: "red",
           borderRadius: "50%",
+          cursor: "pointer",
         }}
-      ></div>
+        src={st.userData.user_avatar}
+        alt="user avatar"
+      ></img>
       <input
         type="text"
         placeholder="請輸入標題"
@@ -148,7 +154,7 @@ const Upload = () => {
           setTitle(target.value);
         }}
       />
-      <h1>王小明</h1>
+      <h1>{st.userData.user_name}</h1>
       <input
         type="text"
         placeholder="請輸入描述"

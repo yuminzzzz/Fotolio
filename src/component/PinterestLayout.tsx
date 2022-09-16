@@ -37,7 +37,6 @@ const PinterestLayout = ({ location }: { location: string }) => {
   }
   const [post, setPost] = useState<Post[]>([]);
   const st: any = useContext(GlobalContext);
-
   useEffect(() => {
     setPost([]);
     const getPost = async () => {
@@ -54,7 +53,7 @@ const PinterestLayout = ({ location }: { location: string }) => {
         });
       } else if (location === "build") {
         const userPost = await getDocs(
-          collection(db, "/users/RuJg8C2CyHSbGMUwxrMr/user_posts")
+          collection(db, `/users/${st.userData.user_id}/user_posts`)
         );
         let arr: Post[] = [];
         userPost.forEach((item: DocumentData) => {
@@ -63,7 +62,7 @@ const PinterestLayout = ({ location }: { location: string }) => {
         setPost(arr);
       } else if (location === "saved") {
         const userPost = await getDocs(
-          collection(db, "/users/RuJg8C2CyHSbGMUwxrMr/user_collections")
+          collection(db, `/users/${st.userData.user_id}/user_collections`)
         );
         let arr: Post[] = [];
         userPost.forEach((item: DocumentData) => {

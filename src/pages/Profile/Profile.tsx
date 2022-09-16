@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import styled from "styled-components";
+import { GlobalContext } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const Wrapper = styled.div`
@@ -18,7 +19,6 @@ const UserInfoWrapper = styled.div`
 const UserAvatar = styled.img`
   width: 120px;
   height: 120px;
-  border: solid 1px red;
   border-radius: 50%;
   margin-top: 10px;
   display: inline-block;
@@ -60,6 +60,7 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
+  const st: any = useContext(GlobalContext);
   const isActive = () => {
     if (status) {
       setStatus(false);
@@ -71,8 +72,8 @@ const Profile = () => {
   return (
     <Wrapper>
       <UserInfoWrapper>
-        <UserAvatar></UserAvatar>
-        <UserName>王小明</UserName>
+        <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+        <UserName>{st.userData.user_name}</UserName>
       </UserInfoWrapper>
       <ButtonWrapper>
         <Button active={!status} onClick={isActive}>

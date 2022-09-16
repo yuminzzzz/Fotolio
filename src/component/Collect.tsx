@@ -2,11 +2,13 @@ import styled from "styled-components";
 import { db } from "../utils/firebase";
 import {
   doc,
-  updateDoc,
   getDoc,
   DocumentData,
   setDoc,
   deleteDoc,
+  collection,
+  getDocs,
+  collectionGroup,
 } from "firebase/firestore";
 import { useContext, useEffect } from "react";
 import { GlobalContext } from "../App";
@@ -39,30 +41,44 @@ const CollectedButton = styled(CollectButton)`
 
 const Collect = ({ postId }: { postId: string }) => {
   const st: any = useContext(GlobalContext);
-
-  // const userId = take users doc.id (which user will get when successfully sign up or sign in, doc.id also equals to user.id)
   const modifyCollect = async () => {
     const collectionRef = doc(
       db,
-      `/users/RuJg8C2CyHSbGMUwxrMr/user_collections/${postId}`
+      `/users/${st.userData.user_id}/user_collections/${postId}`
     );
-    const postRef = doc(db, `/users/RuJg8C2CyHSbGMUwxrMr/user_posts/${postId}`);
     if (st.isSaved) {
       deleteDoc(collectionRef);
       st.setIsSaved(false);
     } else {
-      const docSnap: DocumentData = await getDoc(postRef);
-      setDoc(collectionRef, docSnap.data());
+      const userPost = collectionGroup(db, "user_posts");
+      const querySnapshot = await getDocs(userPost);
+      let postData;
+      querySnapshot.forEach((doc: DocumentData) => {
+        if (doc.data().post_id === postId) {
+          postData = doc.data();
+        }
+      });
+      setDoc(collectionRef, postData);
       st.setIsSaved(true);
     }
   };
 
   useEffect(() => {
     const getData = async () => {
-      const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
-      const docSnap: DocumentData = await getDoc(docRef);
-      const userCollection = docSnap.data().user_collection;
-      if (userCollection.includes(postId)) {
+      const userCollection: DocumentData = await getDocs(
+        collection(db, `users/${st.userData.user_id}/user_collections`)
+      );
+      if (!userCollection) return;
+      let isPostCollected = false;
+      // const isPostCollected = userCollection.some(
+      //   (item: DocumentData) => item.data().postId === postId
+      // );
+      userCollection.forEach((doc: DocumentData) => {
+        if (doc.data().postId === postId) {
+          isPostCollected = true;
+        }
+      });
+      if (isPostCollected) {
         st.setIsSaved(true);
       } else {
         st.setIsSaved(false);

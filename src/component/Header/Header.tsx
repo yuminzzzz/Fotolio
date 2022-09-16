@@ -74,7 +74,6 @@ const UserAvatar = styled.img`
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background-color: grey;
   object-fit: cover;
   z-index: 998;
 `;
@@ -179,6 +178,7 @@ const Header = () => {
       .catch((error) => {
         //FIXBUG
         const errorCode = error.code;
+        console.log(errorCode);
         switch (error.code) {
           case "auth/email-already-in-use":
             break;
@@ -200,6 +200,7 @@ const Header = () => {
       })
       .catch((error) => {
         const errorCode = error.code;
+        console.log(errorCode);
         //FIXBUG
         switch (error.code) {
           case "auth/invalid-email":
@@ -335,7 +336,7 @@ const Header = () => {
       {isLogged && (
         <UserIconWrapper>
           <UserAvatarWrapper onClick={() => navigate("/profile")}>
-            <UserAvatar src=""></UserAvatar>
+            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
           </UserAvatarWrapper>
           <UserInfoWrapper onClick={toggleSwitch}>
             <FontAwesomeIcon
