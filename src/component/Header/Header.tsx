@@ -13,13 +13,10 @@ import {
   createUserWithEmailAndPassword,
   onAuthStateChanged,
   signInWithEmailAndPassword,
-  signOut,
 } from "firebase/auth";
 import {
-  collection,
   setDoc,
   doc,
-  DocumentReference,
   getDoc,
   DocumentData,
 } from "firebase/firestore";

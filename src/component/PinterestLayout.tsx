@@ -72,7 +72,7 @@ const PinterestLayout = ({ location }: { location: string }) => {
       }
     };
     getPost();
-  }, [location]);
+  }, [location, st.userData.user_id]);
   return (
     <PinContainer>
       {post.map((item) => {

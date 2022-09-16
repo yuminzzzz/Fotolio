@@ -7,9 +7,6 @@ import {
   setDoc,
   serverTimestamp,
   doc,
-  getDoc,
-  updateDoc,
-  DocumentData,
 } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";

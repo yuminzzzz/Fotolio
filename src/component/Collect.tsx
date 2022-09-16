@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { db } from "../utils/firebase";
 import {
   doc,
-  getDoc,
   DocumentData,
   setDoc,
   deleteDoc,
@@ -68,21 +67,11 @@ const Collect = ({ postId }: { postId: string }) => {
       const userCollection: DocumentData = await getDocs(
         collection(db, `users/${st.userData.user_id}/user_collections`)
       );
-      if (!userCollection) return;
-      let isPostCollected = false;
-      // const isPostCollected = userCollection.some(
-      //   (item: DocumentData) => item.data().postId === postId
-      // );
       userCollection.forEach((doc: DocumentData) => {
         if (doc.data().postId === postId) {
-          isPostCollected = true;
+          st.setIsSaved(true);
         }
       });
-      if (isPostCollected) {
-        st.setIsSaved(true);
-      } else {
-        st.setIsSaved(false);
-      }
     };
     getData();
   }, []);
