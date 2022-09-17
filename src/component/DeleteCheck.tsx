@@ -47,7 +47,6 @@ const DeleteCheck = ({
   setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  console.log(promptTitle);
   return (
     <Wrapper>
       <Prompt>

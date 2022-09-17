@@ -10,6 +10,10 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  collectionGroup,
+  getDocs,
+  getDoc,
+  DocumentData,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
@@ -50,7 +54,6 @@ const EditTextButton = ({
   promptButton,
   buttonTag,
   authorId,
-  test,
   setDeleteModifyCheck,
   setEditOrDelete,
 }: {
@@ -61,7 +64,6 @@ const EditTextButton = ({
   promptButton?: string;
   buttonTag: string;
   authorId?: string;
-  test?: string;
   setResponse?: Dispatch<SetStateAction<string>>;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
@@ -77,10 +79,7 @@ const EditTextButton = ({
     if (!authorId) return;
     try {
       const docRef = doc(
-        collection(
-          db,
-          `/users/${authorId}/user_posts/${postId}/messages`
-        )
+        collection(db, `/users/${authorId}/user_posts/${postId}/messages`)
       );
       const data = {
         post_id: postId,
@@ -118,7 +117,18 @@ const EditTextButton = ({
       db,
       `/users/${st.userData.user_id}/user_posts/${postId}`
     );
-    await deleteDoc(docRef);
+    const querySnapshot = await getDocs(
+      collectionGroup(db, "user_collections")
+    );
+    let deletePromise: any[] = [deleteDoc(docRef)];
+    querySnapshot.forEach((item) => {
+      const postDocRef = doc(db, item.ref.path);
+      if (postId && item.ref.path.includes(postId)) {
+        deletePromise.push(deleteDoc(postDocRef));
+      }
+    });
+    Promise.all(deletePromise);
+    navigate("/home");
   };
 
   return (
@@ -162,7 +172,6 @@ const EditTextButton = ({
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
                   setEditOrDelete && setEditOrDelete(false);
-                  navigate("/");
                 }}
               >
                 刪除

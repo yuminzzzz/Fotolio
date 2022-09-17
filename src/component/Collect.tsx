@@ -64,6 +64,7 @@ const Collect = ({ postId }: { postId: string }) => {
 
   useEffect(() => {
     const getData = async () => {
+      if (!st.userData.user_id) return;
       const userCollection: DocumentData = await getDocs(
         collection(db, `users/${st.userData.user_id}/user_collections`)
       );
