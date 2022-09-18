@@ -1,7 +1,20 @@
 import styled from "styled-components";
 import { db } from "../utils/firebase";
-import { doc, updateDoc, getDoc, DocumentData } from "firebase/firestore";
-import { useContext, useEffect } from "react";
+import {
+  doc,
+  DocumentData,
+  setDoc,
+  deleteDoc,
+  getDocs,
+  collectionGroup,
+} from "firebase/firestore";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { GlobalContext } from "../App";
 
 const CollectButton = styled.div`
@@ -30,44 +43,43 @@ const CollectedButton = styled(CollectButton)`
   }
 `;
 
-const Collect = ({ postId }: { postId: string }) => {
+const Collect = ({
+  postId,
+  initStatus,
+  setInitStatus,
+}: {
+  postId: string;
+  initStatus: boolean;
+  setInitStatus: Dispatch<SetStateAction<boolean>>;
+}) => {
   const st: any = useContext(GlobalContext);
+  const [isSaved, setIsSaved] = useState(initStatus);
 
-  // const userId = take users doc.id (which user will get when successfully sign up or sign in, doc.id also equals to user.id)
   const modifyCollect = async () => {
-    const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap: DocumentData = await getDoc(docRef);
-    let rawUserCollection = docSnap.data().user_collection;
-    let updateUserPost;
-
-    if (st.isSaved) {
-      updateUserPost = rawUserCollection.filter(
-        (item: string) => item !== postId
-      );
-      await updateDoc(docRef, { user_collection: updateUserPost });
-      st.setIsSaved(false);
+    const collectionRef = doc(
+      db,
+      `/users/${st.userData.user_id}/user_collections/${postId}`
+    );
+    if (isSaved) {
+      deleteDoc(collectionRef);
+      setIsSaved(false);
+      setInitStatus(false);
     } else {
-      updateUserPost = [...rawUserCollection, postId];
-      await updateDoc(docRef, { user_collection: updateUserPost });
-      st.setIsSaved(true);
+      const userPost = collectionGroup(db, "user_posts");
+      const querySnapshot = await getDocs(userPost);
+      let postData;
+      querySnapshot.forEach((doc: DocumentData) => {
+        if (doc.ref.path.includes(postId)) {
+          postData = doc.data();
+        }
+      });
+      setDoc(collectionRef, postData);
+      setIsSaved(true);
+      setInitStatus(true);
     }
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
-      const docSnap: DocumentData = await getDoc(docRef);
-      const userCollection = docSnap.data().user_collection;
-      if (userCollection.includes(postId)) {
-        st.setIsSaved(true);
-      } else {
-        st.setIsSaved(false);
-      }
-    };
-    getData();
-  }, []);
-
-  return st.isSaved ? (
+  return isSaved ? (
     <CollectedButton
       onClick={(e) => {
         e.stopPropagation();

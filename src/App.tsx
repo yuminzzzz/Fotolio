@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -29,6 +29,14 @@ export const GlobalContext = React.createContext(null);
 function App() {
   const [isSaved, setIsSaved] = useState(false);
   const [login, setLogin] = useState(false);
+  const [register, setRegister] = useState(false);
+  const [toggle, setToggle] = useState(false);
+  const [userData, setUserData] = useState({
+    user_avatar: "",
+    user_email: "",
+    user_id: "",
+    user_name: "",
+  });
 
   const initialState: any =
     // : {
@@ -42,6 +50,12 @@ function App() {
       setIsSaved,
       login,
       setLogin,
+      register,
+      setRegister,
+      toggle,
+      setToggle,
+      userData,
+      setUserData,
     };
 
   return (

@@ -9,16 +9,23 @@ import { EffectCoverflow, Pagination, Autoplay } from "swiper";
 import "./styles.css";
 
 import { db } from "../../utils/firebase";
-import { getDocs, collection } from "firebase/firestore";
+import {
+  getDocs,
+  collectionGroup,
+  DocumentData,
+} from "firebase/firestore";
 
 const Home = () => {
   const [imgUrlArr, setImgUrlArr] = useState([]);
-  const st = useContext(GlobalContext);
+  const st: any = useContext(GlobalContext);
+
   useEffect(() => {
-    let arr = [];
+    let arr: any = [];
     const getPost = async () => {
-      const querySnapshot = await getDocs(collection(db, "posts"));
-      querySnapshot.forEach((doc) => {
+      const userPost = collectionGroup(db, "user_posts");
+      const querySnapshot = await getDocs(userPost);
+
+      querySnapshot.forEach((doc: DocumentData) => {
         if (arr.length < 10) {
           arr.push(doc.data().url);
         }

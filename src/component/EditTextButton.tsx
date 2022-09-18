@@ -9,8 +9,10 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
-  getDoc,
   deleteDoc,
+  collectionGroup,
+  getDocs,
+  getDoc,
   DocumentData,
 } from "firebase/firestore";
 
@@ -19,7 +21,6 @@ const ButtonContainer = styled.div`
   justify-content: flex-end;
   margin-top: 10px;
 `;
-
 interface Props {
   cancel: boolean;
 }
@@ -52,6 +53,7 @@ const EditTextButton = ({
   setModifyCheck,
   promptButton,
   buttonTag,
+  authorId,
   setDeleteModifyCheck,
   setEditOrDelete,
 }: {
@@ -61,6 +63,7 @@ const EditTextButton = ({
   commentId?: string;
   promptButton?: string;
   buttonTag: string;
+  authorId?: string;
   setResponse?: Dispatch<SetStateAction<string>>;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
@@ -71,40 +74,61 @@ const EditTextButton = ({
   const navigate = useNavigate();
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
-
   const postComment = () => {
     if (!response) return;
+    if (!authorId) return;
     try {
-      const docRef = doc(collection(db, `/posts/${postId}/messages`));
+      const docRef = doc(
+        collection(db, `/users/${authorId}/user_posts/${postId}/messages`)
+      );
       const data = {
+        post_id: postId,
         comment_id: docRef.id,
-        user_id: "dfsdafds",
-        user_name: "王小明",
-        user_avatar: "image url",
+        user_id: st.userData.user_id,
+        user_name: st.userData.user_name,
+        user_avatar: st.userData.user_avatar,
         message: response,
         uploaded_time: serverTimestamp(),
       };
-      setDoc(docRef, data);
+      setDoc(
+        doc(
+          db,
+          `/users/${authorId}/user_posts/${postId}/messages/${docRef.id}`
+        ),
+        data
+      );
       setResponse && setResponse("");
       setTyping && setTyping(false);
     } catch (e) {
       console.error("Error adding document:", e);
     }
   };
-
   const updateComment = async () => {
-    const docRef = doc(db, `/posts/${postId}/messages/${commentId}`);
+    if (!authorId) return;
+    const docRef = doc(
+      db,
+      `/users/${authorId}/user_posts/${postId}/messages/${commentId}`
+    );
     await updateDoc(docRef, { message: rawComment });
     setTargetComment && setTargetComment("");
   };
-
   const deletePost = async () => {
-    const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap: DocumentData = await getDoc(docRef);
-    let rawUserPost = docSnap.data().user_post;
-    let updateUserPost = rawUserPost.filter((item: string) => item !== postId);
-    await updateDoc(docRef, { user_post: updateUserPost });
-    await deleteDoc(doc(db, `posts/${postId}`));
+    const docRef = doc(
+      db,
+      `/users/${st.userData.user_id}/user_posts/${postId}`
+    );
+    const querySnapshot = await getDocs(
+      collectionGroup(db, "user_collections")
+    );
+    let deletePromise: any[] = [deleteDoc(docRef)];
+    querySnapshot.forEach((item) => {
+      const postDocRef = doc(db, item.ref.path);
+      if (postId && item.ref.path.includes(postId)) {
+        deletePromise.push(deleteDoc(postDocRef));
+      }
+    });
+    Promise.all(deletePromise);
+    navigate("/home");
   };
 
   return (
@@ -148,7 +172,6 @@ const EditTextButton = ({
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
                   setEditOrDelete && setEditOrDelete(false);
-                  navigate("/");
                 }}
               >
                 刪除
@@ -202,13 +225,19 @@ const EditTextButton = ({
           <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
             登入
           </ActiveButton>
-          <Button cancel={true} onClick={() => st.setLogin(true)}>
+          <Button
+            cancel={true}
+            onClick={() => {
+              st.setLogin(true);
+              st.setRegister(true);
+            }}
+          >
             註冊
           </Button>
         </>
       ) : buttonTag === "logged" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => navigate("/")}>
+          <ActiveButton cancel={false} onClick={() => navigate("/home")}>
             首頁
           </ActiveButton>
           <Button cancel={true} onClick={() => navigate("/upload")}>
