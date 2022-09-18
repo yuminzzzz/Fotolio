@@ -1,6 +1,14 @@
-import { useState } from "react";
+import {
+  collection,
+  DocumentData,
+  getDocs,
+  onSnapshot,
+} from "firebase/firestore";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { GlobalContext } from "../App";
+import { db } from "../utils/firebase";
 import Collect from "./Collect";
 import Ellipsis from "./Ellipsis";
 
@@ -63,7 +71,17 @@ const Pin = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
+  const st: any = useContext(GlobalContext);
+  const [initStatus, setInitStatus] = useState(false);
 
+  const q = collection(db, `users/${st.userData.user_id}/user_collections`);
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.forEach((doc: DocumentData) => {
+      if (doc.ref.path.includes(postId)) {
+        setInitStatus(true);
+      }
+    });
+  });
   return (
     <PinCard
       card={size}
@@ -77,7 +95,11 @@ const Pin = ({
       {isHover && (
         <HoverBackground>
           <CollectPosition>
-            <Collect postId={postId} />
+            <Collect
+              postId={postId}
+              initStatus={initStatus}
+              setInitStatus={setInitStatus}
+            />
           </CollectPosition>
           <EllipsisPosition>
             <Ellipsis roundSize={"32px"} />

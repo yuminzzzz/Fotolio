@@ -5,11 +5,16 @@ import {
   DocumentData,
   setDoc,
   deleteDoc,
-  collection,
   getDocs,
   collectionGroup,
 } from "firebase/firestore";
-import { useContext, useEffect } from "react";
+import {
+  Dispatch,
+  SetStateAction,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
 import { GlobalContext } from "../App";
 
 const CollectButton = styled.div`
@@ -38,46 +43,43 @@ const CollectedButton = styled(CollectButton)`
   }
 `;
 
-const Collect = ({ postId }: { postId: string }) => {
+const Collect = ({
+  postId,
+  initStatus,
+  setInitStatus,
+}: {
+  postId: string;
+  initStatus: boolean;
+  setInitStatus: Dispatch<SetStateAction<boolean>>;
+}) => {
   const st: any = useContext(GlobalContext);
+  const [isSaved, setIsSaved] = useState(initStatus);
+
   const modifyCollect = async () => {
     const collectionRef = doc(
       db,
       `/users/${st.userData.user_id}/user_collections/${postId}`
     );
-    if (st.isSaved) {
+    if (isSaved) {
       deleteDoc(collectionRef);
-      st.setIsSaved(false);
+      setIsSaved(false);
+      setInitStatus(false);
     } else {
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
       let postData;
       querySnapshot.forEach((doc: DocumentData) => {
-        if (doc.data().post_id === postId) {
+        if (doc.ref.path.includes(postId)) {
           postData = doc.data();
         }
       });
       setDoc(collectionRef, postData);
-      st.setIsSaved(true);
+      setIsSaved(true);
+      setInitStatus(true);
     }
   };
 
-  useEffect(() => {
-    const getData = async () => {
-      if (!st.userData.user_id) return;
-      const userCollection: DocumentData = await getDocs(
-        collection(db, `users/${st.userData.user_id}/user_collections`)
-      );
-      userCollection.forEach((doc: DocumentData) => {
-        if (doc.data().postId === postId) {
-          st.setIsSaved(true);
-        }
-      });
-    };
-    getData();
-  }, []);
-
-  return st.isSaved ? (
+  return isSaved ? (
     <CollectedButton
       onClick={(e) => {
         e.stopPropagation();

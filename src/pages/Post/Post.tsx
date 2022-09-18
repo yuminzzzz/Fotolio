@@ -113,9 +113,19 @@ const Post = () => {
     author_id: "",
     author_name: "",
   });
+  const [initStatus, setInitStatus] = useState(false);
 
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
+
+  const q = collection(db, `users/${st.userData.user_id}/user_collections`);
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.forEach((doc: DocumentData) => {
+      if (doc.ref.path.includes(postId)) {
+        setInitStatus(true);
+      }
+    });
+  });
 
   useEffect(() => {
     const checkAuthor = async () => {
@@ -204,7 +214,11 @@ const Post = () => {
         <CommentSection>
           <ButtonWrapper>
             <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
-            <Collect postId={postId!} />
+            <Collect
+              postId={postId!}
+              initStatus={initStatus}
+              setInitStatus={setInitStatus}
+            />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>
