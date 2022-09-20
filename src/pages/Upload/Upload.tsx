@@ -1,15 +1,12 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
-
-import { useState } from "react";
+import { useState, useContext } from "react";
+import { GlobalContext } from "../../App";
 import {
   collection,
   setDoc,
   serverTimestamp,
   doc,
-  getDoc,
-  updateDoc,
-  DocumentData,
 } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -31,10 +28,13 @@ const Upload = () => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [file, setFile] = useState<any>("");
+  const st: any = useContext(GlobalContext);
 
   const post = async () => {
     try {
-      const docRef = doc(collection(db, "posts"));
+      const docRef = doc(
+        collection(db, `users/${st.userData.user_id}/user_posts`)
+      );
       const fileRef = ref(storage, `post-image/${docRef.id}`);
       if (!(title && description && file)) {
         alert("請確實輸入資訊");
@@ -47,21 +47,18 @@ const Upload = () => {
             title,
             description,
             created_time: serverTimestamp(),
-            author_id: "RuJg8C2CyHSbGMUwxrMr",
+            author_id: st.userData.user_id,
+            author_name: st.userData.user_name,
+            author_avatar: st.userData.user_avatar,
             url,
           };
-          setDoc(docRef, data);
+          const postDocRef = doc(
+            db,
+            `/users/${st.userData.user_id}/user_posts/${docRef.id}`
+          );
+          setDoc(postDocRef, data);
         });
-        // set post_id into users post array, record how many posts user post
-        const setPost = async () => {
-          const setPostDocRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-          const docSnap: DocumentData = await getDoc(setPostDocRef);
-          let rawUserPost = docSnap.data().user_post;
-          let updateUserPost = [...rawUserPost, docRef.id];
-          await updateDoc(setPostDocRef, { user_post: updateUserPost });
-        };
 
-        setPost();
         alert("上傳成功");
         setFile("");
         setTitle("");
@@ -135,14 +132,16 @@ const Upload = () => {
         />
       </div>
 
-      <div
+      <img
         style={{
           width: "40px",
           height: "40px",
-          backgroundColor: "red",
           borderRadius: "50%",
+          cursor: "pointer",
         }}
-      ></div>
+        src={st.userData.user_avatar}
+        alt="user avatar"
+      ></img>
       <input
         type="text"
         placeholder="請輸入標題"
@@ -152,7 +151,7 @@ const Upload = () => {
           setTitle(target.value);
         }}
       />
-      <h1>王小明</h1>
+      <h1>{st.userData.user_name}</h1>
       <input
         type="text"
         placeholder="請輸入描述"

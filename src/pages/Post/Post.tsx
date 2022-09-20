@@ -6,8 +6,10 @@ import {
   doc,
   DocumentData,
   getDoc,
-  onSnapshot,
+  collectionGroup,
+  getDocs,
   collection,
+  onSnapshot,
 } from "firebase/firestore";
 import { Wrapper } from "../Upload/Upload";
 import styled from "styled-components";
@@ -20,7 +22,9 @@ import LastPageButton from "./LastPageButton";
 import Ellipsis from "../../component/Ellipsis";
 
 interface PostData {
+  author_avatar: string;
   author_id: string;
+  author_name: string;
   created_time: { seconds: number; nanoseconds: number };
   description: string;
   post_id: string;
@@ -46,6 +50,7 @@ const CommentSection = styled.div`
   flex-direction: column;
   position: relative;
   padding: 32px 32px 108px;
+  z-index: 20;
 `;
 
 const ButtonWrapper = styled.div`
@@ -63,7 +68,7 @@ const AuthorAvatar = styled.img`
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background-color: lightgrey;
+  background-color: #fff;
 `;
 
 const AuthorName = styled.p``;
@@ -86,10 +91,10 @@ const MyCommentWrapper = styled.div`
   margin-top: 51px;
 `;
 
-const UserAvatar = styled.div`
+const UserAvatar = styled.img`
   width: 48px;
   height: 48px;
-  background-color: #efefef;
+  background-color: #fff;
   border-radius: 50%;
 `;
 
@@ -103,44 +108,92 @@ const Post = () => {
   const [response, setResponse] = useState("");
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
-  const [deleteTag, setDeleteTag] = useState(true);
+  const [deleteTag, setDeleteTag] = useState(false);
+  const [authorData, setAuthorData] = useState({
+    author_avatar: "",
+    author_id: "",
+    author_name: "",
+  });
+  const [initStatus, setInitStatus] = useState(false);
+
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
 
-  useEffect(() => {
-    const q = collection(db, `/posts/${postId}/messages`);
-    const unsub = onSnapshot(q, (querySnapshot) => {
-      const fake: object[] = [];
-      querySnapshot.forEach((doc: { data: () => any }) => {
-        fake.push(doc.data());
-      });
-      setMessage(fake);
+  const q = collection(db, `users/${st.userData.user_id}/user_collections`);
+  const unsubscribe = onSnapshot(q, (querySnapshot) => {
+    querySnapshot.forEach((doc: DocumentData) => {
+      if (doc.ref.path.includes(postId)) {
+        setInitStatus(true);
+      }
     });
-  }, []);
+  });
 
   useEffect(() => {
-    const getData = async () => {
-      const docRef = doc(db, `posts/${postId}`);
-      const docSnap = await getDoc(docRef);
-      setPost(docSnap.data());
-    };
-    getData();
-  }, []);
-
-  useEffect(() => {
-    const getData = async () => {
-      const docRef = doc(db, "users/RuJg8C2CyHSbGMUwxrMr");
-      const docSnap: DocumentData = await getDoc(docRef);
-      const userCollection = docSnap.data().user_collection;
-      if (userCollection.includes(postId)) {
-        st.setIsSaved(true);
+    const checkAuthor = async () => {
+      if (!st.userData.user_id) return;
+      const userPost: DocumentData = await getDoc(
+        doc(db, `users/${st.userData.user_id}/user_posts/${postId}`)
+      );
+      if (userPost.data()) {
         setDeleteTag(true);
-      } else {
-        st.setIsSaved(false);
       }
     };
-    getData();
-  }, []);
+    const getPost = async () => {
+      const userPost = collectionGroup(db, "user_posts");
+      const querySnapshot = await getDocs(userPost);
+      let postData;
+      // let authorDATA: {
+      //   author_avatar: string;
+      //   author_id: string;
+      //   author_name: string;
+      // };
+      let authorDATA: any;
+
+      querySnapshot.forEach((doc: DocumentData) => {
+        if (doc.data().post_id === postId) {
+          postData = doc.data();
+          authorDATA = {
+            author_avatar: doc.data().author_avatar,
+            author_id: doc.data().author_id,
+            author_name: doc.data().author_name,
+          };
+        }
+      });
+      setPost(postData);
+      setAuthorData(authorDATA);
+    };
+    const getMessage = async () => {
+      const userMessageRef = collectionGroup(db, "messages");
+      const querySnapshot = await getDocs(userMessageRef);
+      let arr: DocumentData[] = [];
+      querySnapshot.forEach((doc) => {
+        if (doc.data().post_id === postId) {
+          arr.push(doc.data());
+        }
+      });
+      setMessage(arr);
+    };
+    checkAuthor();
+    getPost();
+    getMessage();
+  }, [postId]);
+
+  useEffect(() => {
+    if (authorData.author_id) {
+      const q = collection(
+        db,
+        `users/${authorData.author_id}/user_posts/${postId}/messages`
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        let arr: DocumentData[] = [];
+        querySnapshot.forEach((doc) => {
+          arr.push(doc.data());
+        });
+        setMessage(arr);
+      });
+    }
+  }, [message]);
+
   return (
     <>
       <LastPageButton />
@@ -161,29 +214,32 @@ const Post = () => {
 
         <CommentSection>
           <ButtonWrapper>
-            <Ellipsis
-              roundSize={"48px"}
-              deleteTag={deleteTag}
-              modifyCheck={modifyCheck}
+            <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
+            <Collect
+              postId={postId!}
+              initStatus={initStatus}
+              setInitStatus={setInitStatus}
             />
-            <Collect postId={postId!} />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>
           <PostDescription>{post?.description}</PostDescription>
           <AuthorWrapper>
-            <AuthorAvatar></AuthorAvatar>
-            <AuthorName>{post?.author_id}</AuthorName>
+            <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
+            <AuthorName>{post?.author_name}</AuthorName>
           </AuthorWrapper>
 
           <CommentWrapper>
             {message.map(
               (
                 item: {
-                  author_name: string;
-                  message: string;
-                  author_id: string;
                   comment_id: string;
+                  message: string;
+                  post_id: string;
+                  uploaded_time: { seconds: number; nanoseconds: number };
+                  user_avatar: string;
+                  user_id: string;
+                  user_name: string;
                 },
                 index: number
               ) => {
@@ -201,6 +257,7 @@ const Post = () => {
                         rawComment={rawComment}
                         comment={item.message}
                         commentId={item.comment_id}
+                        authorId={authorData.author_id}
                         setModifyCheck={setModifyCheck}
                       />
                     </div>
@@ -209,11 +266,12 @@ const Post = () => {
                   return (
                     <Comment
                       key={index}
-                      userName={item.author_name}
+                      userName={item.user_name}
                       message={item.message}
-                      authorId={item.author_id}
+                      isAuthor={item.user_id === st.userData.user_id}
                       commentId={item.comment_id}
                       setTargetComment={setTargetComment}
+                      authorId={authorData.author_id}
                     />
                   );
                 }
@@ -221,8 +279,7 @@ const Post = () => {
             )}
           </CommentWrapper>
           <MyCommentWrapper>
-            <UserAvatar></UserAvatar>
-
+            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
             <MyComment
               response={response}
               setResponse={setResponse}
@@ -236,6 +293,7 @@ const Post = () => {
               response={response}
               setResponse={setResponse}
               setTyping={setTyping}
+              authorId={authorData.author_id}
             />
           )}
         </CommentSection>

@@ -12,6 +12,7 @@ const Wrapper = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 20;
 `;
 
 const Prompt = styled.div`
@@ -47,7 +48,6 @@ const DeleteCheck = ({
   setDeleteModifyCheck?: Dispatch<SetStateAction<boolean>>;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  console.log(promptTitle);
   return (
     <Wrapper>
       <Prompt>

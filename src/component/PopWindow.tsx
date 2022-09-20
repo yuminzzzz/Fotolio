@@ -1,10 +1,12 @@
-import React, { Dispatch, SetStateAction, useState } from "react";
+import React, { Dispatch, SetStateAction, useState, useContext } from "react";
+import { GlobalContext } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
-import { db } from "../utils/firebase";
+import { auth, db } from "../utils/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
+import { signOut } from "firebase/auth";
 
 interface Props {
   userInfo: boolean;
@@ -14,7 +16,7 @@ const EditWrapper = styled.div<Props>`
   position: absolute;
   background-color: #ffffff;
   z-index: 2;
-  width: 182px;
+  min-width: 182px;
   top: ${(props) => (props.userInfo ? "30px" : "50px")};
   left: ${(props) => (props.userInfo ? "" : "-80px")};
   right: ${(props) => (props.userInfo ? "-18px" : "")};
@@ -26,7 +28,7 @@ const EditWrapper = styled.div<Props>`
 const EditButton = styled.button`
   width: 100%;
   min-height: 36px;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 18px;
   background-color: #ffffff;
   background-color: white;
@@ -34,28 +36,33 @@ const EditButton = styled.button`
   border-style: none;
   text-align: left;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 8px;
   &:hover {
-    background-color: lightgrey;
+    background-color: #e9e9e9;
   }
 `;
 
 const UserAccountWrapper = styled.div`
   display: flex;
-  padding: 8px;
   align-items: center;
 `;
 
 const UserAccountAvatar = styled.img`
   width: 60px;
   height: 60px;
-  background-color: grey;
   border-radius: 50%;
 `;
 
 const UserAccountName = styled.p`
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 700;
+  margin-bottom: 5px;
+`;
+
+const UserAccountEmail = styled.p`
+  font-size: 12px;
+  font-weight: 300;
+  color: #767676;
 `;
 
 const PopWindow = ({
@@ -64,25 +71,30 @@ const PopWindow = ({
   setEditOrDelete,
   deleteTag,
   setTargetComment,
+  authorId,
 }: {
   location: string;
   commentId?: string;
   setEditOrDelete?: Dispatch<SetStateAction<boolean>>;
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
+  authorId?: string;
 }) => {
+  const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
   const deleteComment = async () => {
-    await deleteDoc(doc(db, `/posts/${postId}/messages/${commentId}`));
+    await deleteDoc(
+      doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
+    );
     setEditOrDelete && setEditOrDelete(false);
   };
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
-      "gs://fotolio-799f4.appspot.com/post-image/SCaXBHGLZjkLeqhc32Kt"
+      `gs://fotolio-799f4.appspot.com/post-image/${postId}`
     );
     getDownloadURL(gsReference)
       .then((url) => {
@@ -110,6 +122,16 @@ const PopWindow = ({
           case "storage/unknown":
             break;
         }
+      });
+  };
+  const logout = () => {
+    signOut(auth)
+      .then(() => {
+        st.setToggle(false);
+        navigate("/");
+      })
+      .catch((error) => {
+        // An error happened.
       });
   };
   if (location === "post") {
@@ -178,13 +200,29 @@ const PopWindow = ({
           e.stopPropagation();
         }}
       >
-        <EditButton onClick={() => navigate("/profile")}>
+        <EditButton
+          onClick={() => {
+            st.setToggle(false);
+            navigate("/profile");
+          }}
+        >
           <UserAccountWrapper>
-            <UserAccountAvatar></UserAccountAvatar>
-            <UserAccountName>王小明</UserAccountName>
+            <UserAccountAvatar
+              src={st.userData.user_avatar}
+            ></UserAccountAvatar>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginLeft: "5px",
+              }}
+            >
+              <UserAccountName>{st.userData.user_name}</UserAccountName>
+              <UserAccountEmail>{st.userData.user_email}</UserAccountEmail>
+            </div>
           </UserAccountWrapper>
         </EditButton>
-        <EditButton>登出</EditButton>
+        <EditButton onClick={logout}>登出</EditButton>
       </EditWrapper>
     );
   } else {

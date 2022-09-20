@@ -68,13 +68,13 @@ const Ellipsis = ({
   setTargetComment,
   roundSize,
   deleteTag,
-  modifyCheck,
+  authorId,
 }: {
   commentId?: string;
   setTargetComment?: Dispatch<SetStateAction<string>>;
   roundSize: string;
   deleteTag?: boolean;
-  modifyCheck?: boolean;
+  authorId?: string;
 }) => {
   const [editOrDelete, setEditOrDelete] = useState(false);
   return (
@@ -114,6 +114,7 @@ const Ellipsis = ({
             commentId={commentId}
             setTargetComment={setTargetComment}
             setEditOrDelete={setEditOrDelete}
+            authorId={authorId}
           />
         ) : (
           ""

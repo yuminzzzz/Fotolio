@@ -1,5 +1,6 @@
-import React, { Dispatch, SetStateAction } from "react";
+import React, { Dispatch, SetStateAction, useContext } from "react";
 import styled from "styled-components";
+import { GlobalContext } from "../../App";
 import Ellipsis from "../../component/Ellipsis";
 
 const Wrapper = styled.div`
@@ -12,7 +13,6 @@ const Wrapper = styled.div`
 const Avatar = styled.img`
   width: 32px;
   height: 32px;
-  border: solid 1px lightgrey;
   border-radius: 50%;
 `;
 
@@ -25,29 +25,35 @@ const UserName = styled.p``;
 const Comment = ({
   userName,
   message,
-  authorId,
   commentId,
   setTargetComment,
+  isAuthor,
+  authorId,
 }: {
   userName: string;
   message: string;
-  authorId: string;
   commentId: string;
+  isAuthor: boolean;
+  authorId: string;
   setTargetComment: Dispatch<SetStateAction<string>>;
 }) => {
-
+  const st: any = useContext(GlobalContext);
   return (
     <Wrapper>
       <>
-        <Avatar></Avatar>
+        <Avatar src={st.userData.user_avatar}></Avatar>
         <UserName>{userName}</UserName>
         <Message>{message}</Message>
-        {/* authorId === userId ? <Ellipsis></Ellipsis>:"" */}
-        <Ellipsis
-          commentId={commentId}
-          setTargetComment={setTargetComment}
-          roundSize={"24px"}
-        />
+        {isAuthor ? (
+          <Ellipsis
+            commentId={commentId}
+            setTargetComment={setTargetComment}
+            roundSize={"24px"}
+            authorId={authorId}
+          />
+        ) : (
+          ""
+        )}
       </>
     </Wrapper>
   );

@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useContext } from "react";
 import { GlobalContext } from "../App";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
 import {
@@ -9,9 +9,9 @@ import {
   serverTimestamp,
   doc,
   updateDoc,
-  getDoc,
   deleteDoc,
-  DocumentData,
+  collectionGroup,
+  getDocs,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
@@ -19,26 +19,49 @@ const ButtonContainer = styled.div`
   justify-content: flex-end;
   margin-top: 10px;
 `;
-
 interface Props {
-  cancel: boolean;
+  cancel?: boolean;
+  currentPage?: string;
 }
 
 const Button = styled.button<Props>`
   min-width: 60px;
+  min-width: ${(props) => (props.currentPage ? "64px" : "60px")};
   height: 40px;
+  height: ${(props) => (props.currentPage ? "48px" : "40px")};
   color: ${(props) => (props.cancel ? "black" : "lightgrey")};
+  background-color: ${(props) => (props.currentPage ? "#fff" : "")};
   padding: 8px 12px;
   border-style: none;
   border-radius: 24px;
   font-size: 16px;
-  margin-left: 5px;
+  margin-left: 8px;
   cursor: pointer;
 `;
 
 const ActiveButton = styled(Button)`
-  background-color: orange;
-  color: #ffffff;
+  background-color: ${(props) => {
+    if (props.currentPage) {
+      if (props.currentPage !== "/home") {
+        return "";
+      } else {
+        return "black";
+      }
+    } else {
+      return "orange";
+    }
+  }};
+  color: ${(props) => {
+    if (props.currentPage) {
+      if (props.currentPage !== "/home") {
+        return "black";
+      } else {
+        return "#fff";
+      }
+    } else {
+      return "#fff";
+    }
+  }};
 `;
 
 const EditTextButton = ({
@@ -52,6 +75,7 @@ const EditTextButton = ({
   setModifyCheck,
   promptButton,
   buttonTag,
+  authorId,
   setDeleteModifyCheck,
   setEditOrDelete,
 }: {
@@ -61,6 +85,7 @@ const EditTextButton = ({
   commentId?: string;
   promptButton?: string;
   buttonTag: string;
+  authorId?: string;
   setResponse?: Dispatch<SetStateAction<string>>;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   setTargetComment?: Dispatch<SetStateAction<string>>;
@@ -71,40 +96,63 @@ const EditTextButton = ({
   const navigate = useNavigate();
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
+  let currentPage = useLocation().pathname;
 
   const postComment = () => {
     if (!response) return;
+    if (!authorId) return;
     try {
-      const docRef = doc(collection(db, `/posts/${postId}/messages`));
+      const docRef = doc(
+        collection(db, `/users/${authorId}/user_posts/${postId}/messages`)
+      );
       const data = {
+        post_id: postId,
         comment_id: docRef.id,
-        user_id: "dfsdafds",
-        user_name: "王小明",
-        user_avatar: "image url",
+        user_id: st.userData.user_id,
+        user_name: st.userData.user_name,
+        user_avatar: st.userData.user_avatar,
         message: response,
         uploaded_time: serverTimestamp(),
       };
-      setDoc(docRef, data);
+      setDoc(
+        doc(
+          db,
+          `/users/${authorId}/user_posts/${postId}/messages/${docRef.id}`
+        ),
+        data
+      );
       setResponse && setResponse("");
       setTyping && setTyping(false);
     } catch (e) {
       console.error("Error adding document:", e);
     }
   };
-
   const updateComment = async () => {
-    const docRef = doc(db, `/posts/${postId}/messages/${commentId}`);
+    if (!authorId) return;
+    const docRef = doc(
+      db,
+      `/users/${authorId}/user_posts/${postId}/messages/${commentId}`
+    );
     await updateDoc(docRef, { message: rawComment });
     setTargetComment && setTargetComment("");
   };
-
   const deletePost = async () => {
-    const docRef = doc(db, "/users/RuJg8C2CyHSbGMUwxrMr");
-    const docSnap: DocumentData = await getDoc(docRef);
-    let rawUserPost = docSnap.data().user_post;
-    let updateUserPost = rawUserPost.filter((item: string) => item !== postId);
-    await updateDoc(docRef, { user_post: updateUserPost });
-    await deleteDoc(doc(db, `posts/${postId}`));
+    const docRef = doc(
+      db,
+      `/users/${st.userData.user_id}/user_posts/${postId}`
+    );
+    const querySnapshot = await getDocs(
+      collectionGroup(db, "user_collections")
+    );
+    let deletePromise: any[] = [deleteDoc(docRef)];
+    querySnapshot.forEach((item) => {
+      const postDocRef = doc(db, item.ref.path);
+      if (postId && item.ref.path.includes(postId)) {
+        deletePromise.push(deleteDoc(postDocRef));
+      }
+    });
+    Promise.all(deletePromise);
+    navigate("/home");
   };
 
   return (
@@ -122,7 +170,6 @@ const EditTextButton = ({
                 取消
               </Button>
               <ActiveButton
-                cancel={false}
                 onClick={() => {
                   setModifyCheck && setModifyCheck(false);
                   setTargetComment && setTargetComment("");
@@ -143,12 +190,10 @@ const EditTextButton = ({
                 取消
               </Button>
               <ActiveButton
-                cancel={false}
                 onClick={() => {
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
                   setEditOrDelete && setEditOrDelete(false);
-                  navigate("/");
                 }}
               >
                 刪除
@@ -171,11 +216,9 @@ const EditTextButton = ({
             取消
           </Button>
           {rawComment !== comment && rawComment !== "" ? (
-            <ActiveButton cancel={false} onClick={updateComment}>
-              儲存
-            </ActiveButton>
+            <ActiveButton onClick={updateComment}>儲存</ActiveButton>
           ) : (
-            <Button cancel={false}>儲存</Button>
+            <Button>儲存</Button>
           )}
         </>
       ) : buttonTag === "message" ? (
@@ -190,28 +233,37 @@ const EditTextButton = ({
             取消
           </Button>
           {response !== "" ? (
-            <ActiveButton cancel={false} onClick={postComment}>
-              完成
-            </ActiveButton>
+            <ActiveButton onClick={postComment}>完成</ActiveButton>
           ) : (
-            <Button cancel={false}>完成</Button>
+            <Button>完成</Button>
           )}
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
-            登入
-          </ActiveButton>
-          <Button cancel={true} onClick={() => st.setLogin(true)}>
+          <ActiveButton onClick={() => st.setLogin(true)}>登入</ActiveButton>
+          <Button
+            cancel={true}
+            onClick={() => {
+              st.setLogin(true);
+              st.setRegister(true);
+            }}
+          >
             註冊
           </Button>
         </>
       ) : buttonTag === "logged" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => navigate("/")}>
+          <ActiveButton
+            currentPage={currentPage}
+            onClick={() => navigate("/home")}
+          >
             首頁
           </ActiveButton>
-          <Button cancel={true} onClick={() => navigate("/upload")}>
+          <Button
+            cancel={true}
+            currentPage={currentPage}
+            onClick={() => navigate("/upload")}
+          >
             建立
           </Button>
         </>
