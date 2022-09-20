@@ -2,12 +2,46 @@ import React, { useState } from "react";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
+import NotoSansTCLight from "./fonts/NotoSansTC-Light.otf";
+import NotoSansTCRegular from "./fonts/NotoSansTC-Regular.otf";
+import NotoSansTCMedium from "./fonts/NotoSansTC-Medium.otf";
+import NotoSansTCBold from "./fonts/NotoSansTC-Bold.otf";
 
 const GlobalStyle = createGlobalStyle`
+
+ @font-face {
+    font-family: NotoSansTC;
+    src: url(${NotoSansTCLight}) format('opentype');
+    font-weight: 300;
+  }
+
+  @font-face {
+    font-family: NotoSansTC;
+    src: url(${NotoSansTCRegular}) format('opentype');
+    font-weight: 400;
+  }
+
+   @font-face {
+    font-family: NotoSansTC;
+    src: url(${NotoSansTCMedium}) format('opentype');
+    font-weight: 500;
+  }
+
+   @font-face {
+    font-family: NotoSansTC;
+    src: url(${NotoSansTCBold}) format('opentype');
+    font-weight: 700;
+  }
+
+
 * {
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+  }
+
+  body {
+    font-family: NotoSansTC;
   }
 
   #root {
@@ -37,7 +71,6 @@ function App() {
     user_id: "",
     user_name: "",
   });
-
   const initialState: any =
     // : {
     //   isSaved: boolean;

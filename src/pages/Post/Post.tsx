@@ -50,6 +50,7 @@ const CommentSection = styled.div`
   flex-direction: column;
   position: relative;
   padding: 32px 32px 108px;
+  z-index: 20;
 `;
 
 const ButtonWrapper = styled.div`

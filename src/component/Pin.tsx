@@ -23,9 +23,10 @@ const PinCard = styled.div<Props>`
   border-radius: 16px;
   background-color: lightgrey;
   background-image: url(${(props) => props.postSrc});
-  background-size: contain;
-  background-position: center;
-  background-repeat: no-repeat;
+  background-size: cover;
+  // background-position: center;
+  // background-repeat: no-repeat;
+
   position: relative;
   overflow: hidden;
   cursor: pointer;

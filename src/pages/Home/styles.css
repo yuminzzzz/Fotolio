@@ -11,8 +11,8 @@
   overflow: hidden;
   display: flex;
   border-radius: 30px;
-  width: 600px;
-  height: auto;
+  width: 500px;
+  height: 500px;
 }
 
 .swiper-slide img {
