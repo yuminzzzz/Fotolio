@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useContext } from "react";
 import { GlobalContext } from "../App";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
 import {
@@ -12,8 +12,6 @@ import {
   deleteDoc,
   collectionGroup,
   getDocs,
-  getDoc,
-  DocumentData,
 } from "firebase/firestore";
 
 const ButtonContainer = styled.div`
@@ -22,24 +20,48 @@ const ButtonContainer = styled.div`
   margin-top: 10px;
 `;
 interface Props {
-  cancel: boolean;
+  cancel?: boolean;
+  currentPage?: string;
 }
 
 const Button = styled.button<Props>`
   min-width: 60px;
+  min-width: ${(props) => (props.currentPage ? "64px" : "60px")};
   height: 40px;
+  height: ${(props) => (props.currentPage ? "48px" : "40px")};
   color: ${(props) => (props.cancel ? "black" : "lightgrey")};
+  background-color: ${(props) => (props.currentPage ? "#fff" : "")};
   padding: 8px 12px;
   border-style: none;
   border-radius: 24px;
   font-size: 16px;
-  margin-left: 5px;
+  margin-left: 8px;
   cursor: pointer;
 `;
 
 const ActiveButton = styled(Button)`
-  background-color: orange;
-  color: #ffffff;
+  background-color: ${(props) => {
+    if (props.currentPage) {
+      if (props.currentPage !== "/home") {
+        return "";
+      } else {
+        return "black";
+      }
+    } else {
+      return "orange";
+    }
+  }};
+  color: ${(props) => {
+    if (props.currentPage) {
+      if (props.currentPage !== "/home") {
+        return "black";
+      } else {
+        return "#fff";
+      }
+    } else {
+      return "#fff";
+    }
+  }};
 `;
 
 const EditTextButton = ({
@@ -74,6 +96,8 @@ const EditTextButton = ({
   const navigate = useNavigate();
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
+  let currentPage = useLocation().pathname;
+
   const postComment = () => {
     if (!response) return;
     if (!authorId) return;
@@ -146,7 +170,6 @@ const EditTextButton = ({
                 取消
               </Button>
               <ActiveButton
-                cancel={false}
                 onClick={() => {
                   setModifyCheck && setModifyCheck(false);
                   setTargetComment && setTargetComment("");
@@ -167,7 +190,6 @@ const EditTextButton = ({
                 取消
               </Button>
               <ActiveButton
-                cancel={false}
                 onClick={() => {
                   deletePost();
                   setDeleteModifyCheck && setDeleteModifyCheck(false);
@@ -194,11 +216,9 @@ const EditTextButton = ({
             取消
           </Button>
           {rawComment !== comment && rawComment !== "" ? (
-            <ActiveButton cancel={false} onClick={updateComment}>
-              儲存
-            </ActiveButton>
+            <ActiveButton onClick={updateComment}>儲存</ActiveButton>
           ) : (
-            <Button cancel={false}>儲存</Button>
+            <Button>儲存</Button>
           )}
         </>
       ) : buttonTag === "message" ? (
@@ -213,18 +233,14 @@ const EditTextButton = ({
             取消
           </Button>
           {response !== "" ? (
-            <ActiveButton cancel={false} onClick={postComment}>
-              完成
-            </ActiveButton>
+            <ActiveButton onClick={postComment}>完成</ActiveButton>
           ) : (
-            <Button cancel={false}>完成</Button>
+            <Button>完成</Button>
           )}
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => st.setLogin(true)}>
-            登入
-          </ActiveButton>
+          <ActiveButton onClick={() => st.setLogin(true)}>登入</ActiveButton>
           <Button
             cancel={true}
             onClick={() => {
@@ -237,10 +253,17 @@ const EditTextButton = ({
         </>
       ) : buttonTag === "logged" ? (
         <>
-          <ActiveButton cancel={false} onClick={() => navigate("/home")}>
+          <ActiveButton
+            currentPage={currentPage}
+            onClick={() => navigate("/home")}
+          >
             首頁
           </ActiveButton>
-          <Button cancel={true} onClick={() => navigate("/upload")}>
+          <Button
+            cancel={true}
+            currentPage={currentPage}
+            onClick={() => navigate("/upload")}
+          >
             建立
           </Button>
         </>

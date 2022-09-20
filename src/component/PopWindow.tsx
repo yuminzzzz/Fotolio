@@ -28,7 +28,7 @@ const EditWrapper = styled.div<Props>`
 const EditButton = styled.button`
   width: 100%;
   min-height: 36px;
-  font-weight: bold;
+  font-weight: 700;
   font-size: 18px;
   background-color: #ffffff;
   background-color: white;
@@ -36,15 +36,14 @@ const EditButton = styled.button`
   border-style: none;
   text-align: left;
   cursor: pointer;
-  border-radius: 12px;
+  border-radius: 8px;
   &:hover {
-    background-color: lightgrey;
+    background-color: #e9e9e9;
   }
 `;
 
 const UserAccountWrapper = styled.div`
   display: flex;
-  padding: 8px;
   align-items: center;
 `;
 
@@ -56,11 +55,14 @@ const UserAccountAvatar = styled.img`
 
 const UserAccountName = styled.p`
   font-size: 18px;
-  font-weight: bold;
+  font-weight: 700;
+  margin-bottom: 5px;
 `;
 
 const UserAccountEmail = styled.p`
-  font-size: 10px;
+  font-size: 12px;
+  font-weight: 300;
+  color: #767676;
 `;
 
 const PopWindow = ({
@@ -208,11 +210,15 @@ const PopWindow = ({
             <UserAccountAvatar
               src={st.userData.user_avatar}
             ></UserAccountAvatar>
-            <div style={{ display: "flex", flexDirection: "column" }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                marginLeft: "5px",
+              }}
+            >
               <UserAccountName>{st.userData.user_name}</UserAccountName>
-              <UserAccountEmail style={{ fontSize: "10px" }}>
-                {st.userData.user_email}
-              </UserAccountEmail>
+              <UserAccountEmail>{st.userData.user_email}</UserAccountEmail>
             </div>
           </UserAccountWrapper>
         </EditButton>

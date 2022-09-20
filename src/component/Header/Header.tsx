@@ -1,4 +1,5 @@
 import { useState, useContext, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { GlobalContext } from "../../App";
 import styled from "styled-components";
 import EditTextButton from "../EditTextButton";
@@ -14,12 +15,11 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import {
-  setDoc,
-  doc,
-  getDoc,
-  DocumentData,
-} from "firebase/firestore";
+import { setDoc, doc, getDoc, DocumentData } from "firebase/firestore";
+
+interface Props {
+  isProfile: boolean;
+}
 
 const Wrapper = styled.div`
   position: fixed;
@@ -41,12 +41,21 @@ const LogoWrapper = styled.div`
 `;
 
 const Logo = styled.img`
-  width: 32px;
-  height: 32px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 12px;
+  &:hover {
+    background-color: #efefef;
+  }
 `;
 
 const LogoName = styled.h1`
+  line-height: 24px;
   font-size: 24px;
+  font-weight: 500;
+  margin-left: 8px;
+  color: orange;
 `;
 
 const UserIconWrapper = styled.div`
@@ -63,15 +72,27 @@ const UserAvatarWrapper = styled.div`
   justify-content: center;
   cursor: pointer;
   &:hover {
-    background-color: lightgrey;
+    background-color: #efefef;
   }
 `;
 
+const UserAvatarActive = styled.div<Props>`
+  width: 30px;
+  height: 30px;
+  border: ${(props) => (props.isProfile ? "solid 2px black" : "")};
+  border-radius: 50%;
+  position: relative;
+`;
+
 const UserAvatar = styled.img`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  object-fit: cover;
+  // object-fit: cover;
   z-index: 998;
 `;
 
@@ -85,7 +106,7 @@ const UserInfoWrapper = styled.div`
   justify-content: center;
   cursor: pointer;
   &:hover {
-    background-color: lightgrey;
+    background-color: #efefef;
   }
 `;
 
@@ -109,17 +130,48 @@ const LoginContainer = styled.div`
   display: flex;
   align-items: center;
   flex-direction: column;
+  border-radius: 24px;
+`;
+
+const LoginLogo = styled(Logo)`
+  margin: 8px auto 6px;
 `;
 
 const LoginTitle = styled.h1`
-  line-height: 48px;
+  line-height: 38px;
+  font-size: 32px;
+  font-weight: 300;
+  margin: 0 auto 22px;
+`;
+
+const LoginForm = styled.form`
+  display: flex;
+  flex-direction: column;
+  width: 268px;
+`;
+
+const LoginInput = styled.input`
+  height: 48px;
+  padding: 8px 16px;
+  border-radius: 16px;
+  border-style: solid;
+  margin-bottom: 10px;
+  border: solid 1px #c0c0c0;
+  ::placeholder {
+    color: #c0c0c0;
+  }
+`;
+
+const LoginLabel = styled.label`
+  font-size: 12px;
+  font-weight: 300;
+  margin: 0 0 4px 8px;
 `;
 
 const CloseIconWrapper = styled.div`
   width: 40px;
   height: 40px;
   position: absolute;
-  border: solid 1px red;
   border-radius: 50%;
   top: 10px;
   right: 10px;
@@ -127,14 +179,27 @@ const CloseIconWrapper = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  &:hover {
+    background-color: #efefef;
+  }
 `;
 
 const LoginButton = styled.button`
   cursor: pointer;
+  height: 40px;
+  background-color: orange;
+  border-style: none;
+  border-radius: 20px;
+  color: #fff;
+  margin-top: 16px;
 `;
 
 const RegisterPrompt = styled.p`
   cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  text-align: center;
+  margin-top: 10px;
 `;
 
 const Header = () => {
@@ -142,6 +207,7 @@ const Header = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mouseDown, setMouseDown] = useState(false);
   const toggleSwitch = () => {
     if (st.toggle) {
       st.setToggle(false);
@@ -151,6 +217,10 @@ const Header = () => {
   };
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
+  let isProfile = false;
+  if (useLocation().pathname === "/profile") {
+    isProfile = true;
+  }
 
   const register = () => {
     createUserWithEmailAndPassword(auth, email, password)
@@ -164,7 +234,7 @@ const Header = () => {
           user_name: name,
           user_email: email,
           user_avatar:
-            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pushed-brands.png?alt=media&token=a4dc7827-4de6-4d08-84a6-dc4952a92133",
+            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pexels-magda-ehlers-1345814.jpg?alt=media&token=b389054f-0e1a-4840-85e2-3a534d62a978",
         };
         setDoc(docRef, data);
         navigate("/home");
@@ -248,16 +318,21 @@ const Header = () => {
 
         {isLogged && (
           <>
-            <Logo src={logo} onClick={() => navigate("/home")}></Logo>
+            <Logo
+              src={logo}
+              onClick={() => navigate("/home")}
+            ></Logo>
             <div style={{ marginTop: "-10px" }}>
               <EditTextButton buttonTag={"logged"} />
             </div>
           </>
         )}
       </LogoWrapper>
-      {!isLogged && (
+      {!isLogged ? (
         <>
-          <EditTextButton buttonTag={"login"} />
+          <div style={{ marginTop: "-10px" }}>
+            <EditTextButton buttonTag={"login"} />
+          </div>
           {st.login && (
             <LoginWrapper>
               <LoginContainer>
@@ -270,70 +345,81 @@ const Header = () => {
                   <FontAwesomeIcon
                     icon={faXmark}
                     style={{
-                      position: "absolute",
                       width: "18px",
                       height: "18px",
                       pointerEvents: "none",
                     }}
                   />
                 </CloseIconWrapper>
-                <Logo src={logo}></Logo>
-                <LoginTitle>歡迎使用 Fotolio</LoginTitle>
-                <label htmlFor="email">電子郵件</label>
-                <input
-                  id="email"
-                  placeholder="電子郵件"
-                  value={email}
-                  onChange={(e) => {
-                    setEmail(e.target.value);
+                <LoginLogo src={logo}></LoginLogo>
+                <LoginTitle>
+                  歡迎使用<span style={{ fontWeight: "500" }}>Fotolio</span>
+                </LoginTitle>
+                <LoginForm
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (st.login) {
+                      login();
+                    } else {
+                      register();
+                    }
                   }}
-                />
-                <label htmlFor="password">密碼</label>
-                <input
-                  type="password"
-                  id="password"
-                  placeholder="密碼"
-                  value={password}
-                  onChange={(e) => {
-                    setPassword(e.target.value);
-                  }}
-                />
-                {st.register && (
-                  <>
-                    <label htmlFor="name">名字</label>
-                    <input
-                      id="name"
-                      placeholder="名字"
-                      value={name}
-                      onChange={(e) => {
-                        setName(e.target.value);
-                      }}
-                    />
-                  </>
-                )}
-                {st.register ? (
-                  <LoginButton onClick={register}>繼續</LoginButton>
-                ) : (
-                  <LoginButton onClick={login}>登入</LoginButton>
-                )}
-                {st.register ? (
-                  <RegisterPrompt onClick={() => st.setRegister(false)}>
-                    已經有帳號了？登入
-                  </RegisterPrompt>
-                ) : (
-                  <RegisterPrompt onClick={() => st.setRegister(true)}>
-                    還未加入Fotolio? 註冊
-                  </RegisterPrompt>
-                )}
+                >
+                  <LoginLabel htmlFor="email">電子郵件</LoginLabel>
+                  <LoginInput
+                    id="email"
+                    placeholder="電子郵件"
+                    value={email}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                    }}
+                    autoFocus
+                  />
+                  <LoginLabel htmlFor="password">密碼</LoginLabel>
+                  <LoginInput
+                    type="password"
+                    id="password"
+                    placeholder="密碼"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                    }}
+                  />
+                  {st.register ? (
+                    <>
+                      <LoginLabel htmlFor="name">名字</LoginLabel>
+                      <LoginInput
+                        id="name"
+                        placeholder="名字"
+                        value={name}
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                      />
+                      <LoginButton onClick={register}>繼續</LoginButton>
+                      <RegisterPrompt onClick={() => st.setRegister(false)}>
+                        已經有帳號了? 登入
+                      </RegisterPrompt>
+                    </>
+                  ) : (
+                    <>
+                      <LoginButton onClick={login}>登入</LoginButton>
+                      <RegisterPrompt onClick={() => st.setRegister(true)}>
+                        還未加入Fotolio? 註冊
+                      </RegisterPrompt>
+                    </>
+                  )}
+                </LoginForm>
               </LoginContainer>
             </LoginWrapper>
           )}
         </>
-      )}
-      {isLogged && (
+      ) : (
         <UserIconWrapper>
           <UserAvatarWrapper onClick={() => navigate("/profile")}>
-            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+            <UserAvatarActive isProfile={isProfile}>
+              <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+            </UserAvatarActive>
           </UserAvatarWrapper>
           <UserInfoWrapper onClick={toggleSwitch}>
             <FontAwesomeIcon
