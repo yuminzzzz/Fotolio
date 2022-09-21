@@ -296,7 +296,6 @@ const Header = () => {
           user_name: data.user_name,
         });
         setIsLogged(true);
-        navigate("/home");
       } else {
         st.setLogin(false);
         st.setRegister(false);
@@ -318,10 +317,7 @@ const Header = () => {
 
         {isLogged && (
           <>
-            <Logo
-              src={logo}
-              onClick={() => navigate("/home")}
-            ></Logo>
+            <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
               <EditTextButton buttonTag={"logged"} />
             </div>

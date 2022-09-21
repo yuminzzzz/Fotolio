@@ -12,7 +12,6 @@ import {
   Dispatch,
   SetStateAction,
   useContext,
-  useEffect,
   useState,
 } from "react";
 import { GlobalContext } from "../App";
