@@ -120,7 +120,6 @@ const DeletePreview = styled.div`
 
 const ContentSection = styled.div`
   width: 380px;
-  height: 380px;
   display: flex;
   flex-direction: column;
   margin-left: 40px;
@@ -129,6 +128,7 @@ const ContentSection = styled.div`
     margin-top: 20px;
     margin-left: 0;
     padding: 0 16px;
+    height: 380px;
   }
 `;
 
@@ -229,6 +229,17 @@ const Upload = () => {
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
 
+  interface Post {
+    author_avatar: string;
+    author_id: string;
+    author_name: string;
+    created_time: { seconds: number; nanoseconds: number };
+    description: string;
+    post_id: string;
+    title: string;
+    url: string;
+  }
+
   const post = async () => {
     try {
       const docRef = doc(
@@ -247,6 +258,12 @@ const Upload = () => {
             author_avatar: st.userData.user_avatar,
             url,
           };
+          st.setAllPost((pre: Post[]) => {
+            return [...pre, data];
+          });
+          st.setUserPost((pre: Post[]) => {
+            return [...pre, data];
+          });
           const postDocRef = doc(
             db,
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`

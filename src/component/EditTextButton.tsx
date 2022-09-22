@@ -97,7 +97,6 @@ const EditTextButton = ({
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   let currentPage = useLocation().pathname;
-
   const postComment = () => {
     if (!response) return;
     if (!authorId) return;
@@ -137,6 +136,10 @@ const EditTextButton = ({
     setTargetComment && setTargetComment("");
   };
   const deletePost = async () => {
+    st.setAllPost(st.updateState(st.allPost, postId));
+    st.setUserPost(st.updateState(st.userPost, postId));
+    st.setUserCollections(st.updateState(st.userCollections, postId));
+
     const docRef = doc(
       db,
       `/users/${st.userData.user_id}/user_posts/${postId}`
@@ -154,7 +157,6 @@ const EditTextButton = ({
     Promise.all(deletePromise);
     navigate("/home");
   };
-
   return (
     <ButtonContainer>
       {buttonTag === "deleteCheck" ? (
