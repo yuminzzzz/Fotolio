@@ -207,7 +207,6 @@ const Header = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mouseDown, setMouseDown] = useState(false);
   const toggleSwitch = () => {
     if (st.toggle) {
       st.setToggle(false);
@@ -262,6 +261,7 @@ const Header = () => {
     if (email === "" && password === "") return;
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+        navigate("/home");
         setEmail("");
         setPassword("");
       })

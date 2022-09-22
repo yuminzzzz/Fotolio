@@ -5,7 +5,7 @@ const CommentInput = styled.div`
   width: 100%;
   border-radius: 26px;
   border: solid 1px lightgrey;
-  padding: 15px 12px 12px;
+  padding: 15px 12px;
   height: 48px;
 `;
 

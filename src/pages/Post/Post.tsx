@@ -11,7 +11,7 @@ import {
   collection,
   onSnapshot,
 } from "firebase/firestore";
-import { Wrapper } from "../Upload/Upload";
+import { Wrapper, OutsideWrapper } from "../Upload/Upload";
 import styled from "styled-components";
 import Comment from "./Comment";
 import MyComment from "./MyComment";
@@ -43,13 +43,28 @@ interface PostData {
 //     nanoseconds: number;
 //   };
 // }
+const CoverImgWrapper = styled.div`
+  background-color: lightgrey;
+  width: 508px;
+  height: 640px;
+`;
+
+const CoverImg = styled.img`
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  color: lightgrey;
+  background-color: lightgrey;
+  border-topleft-radius: 30px;
+  border-bottomleft-radius: 30px;
+`;
 
 const CommentSection = styled.div`
   width: 508px;
   display: flex;
   flex-direction: column;
   position: relative;
-  padding: 32px 32px 108px;
+  padding: 32px;
   z-index: 20;
 `;
 
@@ -60,26 +75,33 @@ const ButtonWrapper = styled.div`
 
 const PostTitle = styled.h1`
   fontsize: 32px;
+  margin-top: 16px;
 `;
 
 const PostDescription = styled.p``;
 
+const AuthorWrapper = styled.div`
+  display: flex;
+  margin: 30px 0;
+`;
+
 const AuthorAvatar = styled.img`
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   background-color: #fff;
 `;
 
-const AuthorName = styled.p``;
-
-const AuthorWrapper = styled.div`
-  display: flex;
+const AuthorName = styled.p`
+  font-weight: 500;
+  margin-left: 8px;
 `;
 
 const CommentWrapper = styled.div`
   width: 100%;
-  margin-top: 40px;
+  height: 132px;
+  margin-top: 24px;
+  overflow: scroll;
 `;
 
 const MyCommentWrapper = styled.div`
@@ -115,18 +137,19 @@ const Post = () => {
     author_name: "",
   });
   const [initStatus, setInitStatus] = useState(false);
+  const [comment, setComment] = useState(0);
 
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
 
-  const q = collection(db, `users/${st.userData.user_id}/user_collections`);
-  const unsubscribe = onSnapshot(q, (querySnapshot) => {
-    querySnapshot.forEach((doc: DocumentData) => {
-      if (doc.ref.path.includes(postId)) {
-        setInitStatus(true);
-      }
-    });
-  });
+  // const q = collection(db, `users/${st.userData.user_id}/user_collections`);
+  // const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //   querySnapshot.forEach((doc: DocumentData) => {
+  //     if (doc.ref.path.includes(postId)) {
+  //       setInitStatus(true);
+  //     }
+  //   });
+  // });
 
   useEffect(() => {
     const checkAuthor = async () => {
@@ -171,7 +194,11 @@ const Post = () => {
           arr.push(doc.data());
         }
       });
-      setMessage(arr);
+
+      let sortArr = arr.sort(function (arrA, arrB) {
+        return arrA.uploaded_time.seconds - arrB.uploaded_time.seconds;
+      });
+      setMessage(sortArr);
     };
     checkAuthor();
     getPost();
@@ -179,39 +206,35 @@ const Post = () => {
   }, [postId]);
 
   useEffect(() => {
-    if (authorData.author_id) {
-      const q = collection(
-        db,
-        `users/${authorData.author_id}/user_posts/${postId}/messages`
-      );
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        let arr: DocumentData[] = [];
-        querySnapshot.forEach((doc) => {
-          arr.push(doc.data());
-        });
-        setMessage(arr);
-      });
-    }
+    setComment(message.length);
   }, [message]);
 
+  // useEffect(() => {
+  //   if (authorData.author_id) {
+  //     const q = collection(
+  //       db,
+  //       `users/${authorData.author_id}/user_posts/${postId}/messages`
+  //     );
+  //     const unsubscribe = onSnapshot(q, (querySnapshot) => {
+  //       let arr: DocumentData[] = [];
+  //       querySnapshot.forEach((doc) => {
+  //         arr.push(doc.data());
+  //       });
+  //       let sortArr = arr.sort(function (arrA, arrB) {
+  //         return arrA.uploaded_time.seconds - arrB.uploaded_time.seconds;
+  //       });
+  //       setMessage(sortArr);
+  //     });
+  //   }
+  // }, [message]);
+
   return (
-    <>
+    <OutsideWrapper>
       <LastPageButton />
       <Wrapper>
-        <img
-          src={post?.url}
-          alt="post"
-          style={{
-            width: "508px",
-            height: "604px",
-            objectFit: "cover",
-            color: "lightgrey",
-            backgroundColor: "lightgrey",
-            borderTopLeftRadius: "30px",
-            borderBottomLeftRadius: "30px",
-          }}
-        ></img>
-
+        <CoverImgWrapper>
+          <CoverImg src={post?.url} alt="post"></CoverImg>
+        </CoverImgWrapper>
         <CommentSection>
           <ButtonWrapper>
             <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
@@ -228,7 +251,7 @@ const Post = () => {
             <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
             <AuthorName>{post?.author_name}</AuthorName>
           </AuthorWrapper>
-
+          <p style={{ fontSize: "20px", fontWeight: "500" }}>{comment}則回應</p>
           <CommentWrapper>
             {message.map(
               (
@@ -267,7 +290,9 @@ const Post = () => {
                     <Comment
                       key={index}
                       userName={item.user_name}
+                      userAvatar={item.user_avatar}
                       message={item.message}
+                      uploadedTime={item.uploaded_time}
                       isAuthor={item.user_id === st.userData.user_id}
                       commentId={item.comment_id}
                       setTargetComment={setTargetComment}
@@ -305,7 +330,7 @@ const Post = () => {
           promptTitle={"確定要捨棄變更?"}
         />
       )}
-    </>
+    </OutsideWrapper>
   );
 };
 

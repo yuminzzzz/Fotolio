@@ -17,8 +17,8 @@ const EditWrapper = styled.div<Props>`
   background-color: #ffffff;
   z-index: 2;
   min-width: 182px;
-  top: ${(props) => (props.userInfo ? "30px" : "50px")};
-  left: ${(props) => (props.userInfo ? "" : "-80px")};
+  top: ${(props) => (props.userInfo ? "30px" : "0px")};
+  left: ${(props) => (props.userInfo ? "" : "70px")};
   right: ${(props) => (props.userInfo ? "-18px" : "")};
   border: solid 1px lightgrey;
   border-radius: 20px;

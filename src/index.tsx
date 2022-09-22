@@ -16,12 +16,12 @@ root.render(
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<App />}>
-        {/* <Route index element={<Home />} /> */}
+        <Route index element={<Home />} />
         <Route path="home" element={<HomeLogged />} />
         <Route path="upload" element={<Upload />} />
         <Route path="posts/:id" element={<Post />} />
         <Route path="profile" element={<Profile />} />
-        {/* <Route path="*" element={<Navigate to="/upload" replace />} /> */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
   </BrowserRouter>
