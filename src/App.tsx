@@ -41,7 +41,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: NotoSansTC;
+    font-family: "NotoSansTC";
   }
 
   #root {
@@ -57,6 +57,10 @@ const GlobalStyle = createGlobalStyle`
     text-decoration: none;
   }
 
+  textarea {
+    font-family: "NotoSansTC";
+  }
+
 `;
 export const GlobalContext = React.createContext(null);
 
@@ -65,6 +69,7 @@ function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
   const [toggle, setToggle] = useState(false);
+  
   const [userData, setUserData] = useState({
     user_avatar: "",
     user_email: "",

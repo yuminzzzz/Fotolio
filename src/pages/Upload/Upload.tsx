@@ -12,23 +12,26 @@ interface Props {
   isUploadPage?: boolean;
 }
 
-const OutsideWrapper = styled.div`
+const OutsideWrapper = styled.div<Props>`
   display: flex;
   justify-content: center;
   height: calc(100vh - 80px);
   align-items: center;
-  background-color: #e9e9e9;
+  background-color: ${(props) => (props.isUploadPage ? "#e9e9e9" : "#fff")};
+  @media (max-width: 768px) {
+    align-items: flex-start;
+  }
 `;
 
 const Wrapper = styled.div<Props>`
   display: flex;
-  border-radius: ${(props) => (props.isUploadPage ? "16px" : "30px")};
+  border-radius: ${(props) => (props.isUploadPage ? "16px" : "32px")};
+  box-shadow: rgb(0 0 0 / 10%) 0px 1px 20px 0px;
   overflow: hidden;
   background-color: #fff;
   padding: ${(props) => (props.isUploadPage ? "60px" : "")};
   @media (max-width: 768px) {
-    flex-direction: ${(props) => (props.isUploadPage ? "column" : "")};
-    height: ${(props) => (props.isUploadPage ? "700px" : "")};
+    flex-direction: column;
     padding: ${(props) => (props.isUploadPage ? "0" : "")};
   }
 `;
@@ -117,6 +120,7 @@ const DeletePreview = styled.div`
 
 const ContentSection = styled.div`
   width: 380px;
+  height: 380px;
   display: flex;
   flex-direction: column;
   margin-left: 40px;
@@ -125,7 +129,6 @@ const ContentSection = styled.div`
     margin-top: 20px;
     margin-left: 0;
     padding: 0 16px;
-    height: 500px;
   }
 `;
 
@@ -213,9 +216,6 @@ const ActiveUploadButton = styled(UploadButton)`
 `;
 
 const Upload = () => {
-  // const [title, setTitle] = useState("");
-  // const [description, setDescription] = useState("");
-  // const [file, setFile] = useState<any>("");
   const [uploadData, setUploadData] = useState<{
     title: string;
     description: string;
@@ -226,7 +226,6 @@ const Upload = () => {
     file: "",
   });
   const isValid = Object.values(uploadData).every((item) => item !== "");
-  console.log(uploadData);
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
 
@@ -382,4 +381,4 @@ const Upload = () => {
   );
 };
 export default Upload;
-export { Wrapper };
+export { Wrapper, OutsideWrapper };

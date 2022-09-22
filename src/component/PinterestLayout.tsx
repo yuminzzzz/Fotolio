@@ -46,14 +46,16 @@ const PinterestLayout = ({ location }: { location: string }) => {
     const getPost = async () => {
       if (location === "home") {
         const userPost = collectionGroup(db, "user_posts");
-        const unsubscirbe = onSnapshot(userPost, (querySnapshot) => {
-          let arr: Post[] = [];
-          querySnapshot.forEach((doc: DocumentData) => {
-            arr.push(doc.data());
-          });
-          arr.sort(() => Math.random() - 0.5);
-          setPost(arr);
-        });
+        getDocs(userPost)
+        
+        // const unsubscirbe = onSnapshot(userPost, (querySnapshot) => {
+        //   let arr: Post[] = [];
+        //   querySnapshot.forEach((doc: DocumentData) => {
+        //     arr.push(doc.data());
+        //   });
+        //   arr.sort(() => Math.random() - 0.5);
+        //   setPost(arr);
+        // });
       } else if (location === "build") {
         const userPost = await getDocs(
           collection(db, `/users/${st.userData.user_id}/user_posts`)

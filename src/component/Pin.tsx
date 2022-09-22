@@ -74,7 +74,7 @@ const Pin = ({
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
   const [initStatus, setInitStatus] = useState(false);
-
+  
   const q = collection(db, `users/${st.userData.user_id}/user_collections`);
   const unsubscribe = onSnapshot(q, (querySnapshot) => {
     querySnapshot.forEach((doc: DocumentData) => {
