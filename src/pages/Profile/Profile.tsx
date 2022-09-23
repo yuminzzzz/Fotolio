@@ -84,9 +84,9 @@ const Profile = () => {
         </Button>
       </ButtonWrapper>
       {!status ? (
-        <PinterestLayout location="build" />
+        <PinterestLayout post={st.userPost} />
       ) : (
-        <PinterestLayout location="saved" />
+        <PinterestLayout post={st.userCollections} />
       )}
     </Wrapper>
   );

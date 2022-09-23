@@ -203,7 +203,6 @@ const RegisterPrompt = styled.p`
 `;
 
 const Header = () => {
-  const [isLogged, setIsLogged] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -281,41 +280,19 @@ const Header = () => {
       });
   };
 
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // get user data and store it into state
-        const docSnap: DocumentData = await getDoc(
-          doc(db, `users/${user.uid}`)
-        );
-        const data = docSnap.data();
-        st.setUserData({
-          user_avatar: data.user_avatar,
-          user_email: data.user_email,
-          user_id: data.user_id,
-          user_name: data.user_name,
-        });
-        setIsLogged(true);
-      } else {
-        st.setLogin(false);
-        st.setRegister(false);
-        setIsLogged(false);
-        navigate("/");
-      }
-    });
-  }, [isLogged]);
+ 
 
   return (
     <Wrapper>
       <LogoWrapper>
-        {!isLogged && (
+        {!st.isLogged && (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
         )}
 
-        {isLogged && (
+        {st.isLogged && (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
@@ -324,7 +301,7 @@ const Header = () => {
           </>
         )}
       </LogoWrapper>
-      {!isLogged ? (
+      {!st.isLogged ? (
         <>
           <div style={{ marginTop: "-10px" }}>
             <EditTextButton buttonTag={"login"} />

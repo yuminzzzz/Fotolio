@@ -1,7 +1,7 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext } from "../../App";
+import { GlobalContext, Post } from "../../App";
 import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -120,7 +120,6 @@ const DeletePreview = styled.div`
 
 const ContentSection = styled.div`
   width: 380px;
-  height: 380px;
   display: flex;
   flex-direction: column;
   margin-left: 40px;
@@ -129,6 +128,7 @@ const ContentSection = styled.div`
     margin-top: 20px;
     margin-left: 0;
     padding: 0 16px;
+    height: 380px;
   }
 `;
 
@@ -228,7 +228,6 @@ const Upload = () => {
   const isValid = Object.values(uploadData).every((item) => item !== "");
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
-
   const post = async () => {
     try {
       const docRef = doc(
@@ -247,6 +246,12 @@ const Upload = () => {
             author_avatar: st.userData.user_avatar,
             url,
           };
+          st.setAllPost((pre: Post[]) => {
+            return [...pre, data];
+          });
+          st.setUserPost((pre: Post[]) => {
+            return [...pre, data];
+          });
           const postDocRef = doc(
             db,
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`
