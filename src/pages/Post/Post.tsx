@@ -2,11 +2,7 @@ import { useState, useEffect, useContext } from "react";
 import { GlobalContext } from "../../App";
 import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
-import {
-  DocumentData,
-  collectionGroup,
-  getDocs,
-} from "firebase/firestore";
+import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
 import { Wrapper, OutsideWrapper } from "../Upload/Upload";
 import styled from "styled-components";
 import Comment from "./Comment";
@@ -120,7 +116,7 @@ const Post = () => {
   const [post, setPost] = useState<DocumentData | PostData | undefined>(
     undefined
   );
-  const [message, setMessage] = useState<any>([]);
+  // const [message, setMessage] = useState<any>([]);
   const [targetComment, setTargetComment] = useState("");
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");
@@ -154,16 +150,15 @@ const Post = () => {
       if (isAuthor) setDeleteTag(true);
     };
     const getPost = async () => {
-      const postData = st.allPost.filter(
+      const postData = await st.allPost.find(
         (item: Post) => item.post_id === postId
-      )[0];
-      const authorDATA = {
+      );
+      setAuthorData({
         author_avatar: postData.author_avatar,
         author_id: postData.author_id,
         author_name: postData.author_name,
-      };
+      });
       setPost(postData);
-      setAuthorData(authorDATA);
     };
     const getMessage = async () => {
       const userMessageRef = collectionGroup(db, "messages");
@@ -174,20 +169,19 @@ const Post = () => {
           arr.push(doc.data());
         }
       });
-
       let sortArr = arr.sort(function (arrA, arrB) {
         return arrA.uploaded_time.seconds - arrB.uploaded_time.seconds;
       });
-      setMessage(sortArr);
+      st.setMessage(sortArr);
     };
     checkAuthor();
     getPost();
     getMessage();
-  }, [postId]);
+  }, []);
 
   useEffect(() => {
-    setComment(message.length);
-  }, [message]);
+    setComment(st.message.length);
+  }, [st.message]);
 
   const initStatus = st.userCollections.some(
     (item: Post) => item.post_id === postId
@@ -203,10 +197,7 @@ const Post = () => {
         <CommentSection>
           <ButtonWrapper>
             <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
-            <Collect
-              postId={postId!}
-              initStatus={initStatus}
-            />
+            <Collect postId={postId!} initStatus={initStatus} />
           </ButtonWrapper>
 
           <PostTitle>{post?.title}</PostTitle>
@@ -217,7 +208,7 @@ const Post = () => {
           </AuthorWrapper>
           <p style={{ fontSize: "20px", fontWeight: "500" }}>{comment}則回應</p>
           <CommentWrapper>
-            {message.map(
+            {st.message.map(
               (
                 item: {
                   comment_id: string;

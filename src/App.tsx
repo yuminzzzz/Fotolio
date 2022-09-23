@@ -73,6 +73,25 @@ const GlobalStyle = createGlobalStyle`
 
 `;
 export const GlobalContext = React.createContext(null);
+export interface Post {
+  author_avatar: string;
+  author_id: string;
+  author_name: string;
+  created_time: { seconds: number; nanoseconds: number };
+  description: string;
+  post_id: string;
+  title: string;
+  url: string;
+}
+export interface Message {
+  comment_id: string;
+  message: string;
+  post_id: string;
+  uploaded_time: { seconds: number; nanoseconds: number };
+  user_avatar: string;
+  user_id: string;
+  user_name: string;
+}
 
 function App() {
   const [login, setLogin] = useState(false);
@@ -88,6 +107,7 @@ function App() {
     user_id: "",
     user_name: "",
   });
+  const [message, setMessage] = useState<Message[] | []>([]);
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
   };
@@ -111,18 +131,9 @@ function App() {
     userCollections,
     setUserCollections,
     updateState,
+    message,
+    setMessage,
   };
-
-  interface Post {
-    author_avatar: string;
-    author_id: string;
-    author_name: string;
-    created_time: { seconds: number; nanoseconds: number };
-    description: string;
-    post_id: string;
-    title: string;
-    url: string;
-  }
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -169,6 +180,7 @@ function App() {
   useEffect(() => {
     const getPost = async () => {
       console.log("shouldn't be here");
+      if (!userData.user_id) return;
       const userPost = await getDocs(
         collection(db, `/users/${userData.user_id}/user_posts`)
       );
@@ -180,6 +192,7 @@ function App() {
     };
     const getCollect = async () => {
       console.log("shouldn't be here");
+      if (!userData.user_id) return;
       const userPost = await getDocs(
         collection(db, `/users/${userData.user_id}/user_collections`)
       );

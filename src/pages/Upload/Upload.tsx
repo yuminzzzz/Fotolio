@@ -1,7 +1,7 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext } from "../../App";
+import { GlobalContext, Post } from "../../App";
 import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -228,18 +228,6 @@ const Upload = () => {
   const isValid = Object.values(uploadData).every((item) => item !== "");
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
-
-  interface Post {
-    author_avatar: string;
-    author_id: string;
-    author_name: string;
-    created_time: { seconds: number; nanoseconds: number };
-    description: string;
-    post_id: string;
-    title: string;
-    url: string;
-  }
-
   const post = async () => {
     try {
       const docRef = doc(

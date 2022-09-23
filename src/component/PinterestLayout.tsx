@@ -1,5 +1,5 @@
-import { useEffect, useState, useContext } from "react";
-import { GlobalContext } from "../App";
+import { useContext } from "react";
+import { GlobalContext, Post } from "../App";
 import Pin from "./Pin";
 import styled from "styled-components";
 
@@ -18,35 +18,9 @@ const PinContainer = styled.div`
 let isMounted = true;
 let arr: string[];
 let random: number;
-interface Post {
-  author_avatar: string;
-  author_id: string;
-  author_name: string;
-  created_time: { seconds: number; nanoseconds: number };
-  description: string;
-  post_id: string;
-  title: string;
-  url: string;
-}
-const PinterestLayout = ({ post }: { post: Post[] }) => {
-  // const [post, setPost] = useState<Post[]>([]);
-  const st: any = useContext(GlobalContext);
-  // useEffect(() => {
-  //   isMounted = true;
-  //   switch (location) {
-  //     case "home":
-  //       setPost(st.allPost);
-  //       break;
-  //     case "build":
-  //       setPost(st.userPost);
-  //       break;
-  //     case "saved":
-  //       setPost(st.userCollections);
-  //       break;
-  //     default:
-  //   }
-  // }, [location]);
 
+const PinterestLayout = ({ post }: { post: Post[] }) => {
+  const st: any = useContext(GlobalContext);
   return (
     <PinContainer>
       {post.map((item) => {

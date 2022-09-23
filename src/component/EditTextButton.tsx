@@ -2,6 +2,7 @@ import { Dispatch, SetStateAction, useContext } from "react";
 import { GlobalContext } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
+import { Message } from "../App";
 import { db } from "../utils/firebase";
 import {
   collection,
@@ -97,6 +98,7 @@ const EditTextButton = ({
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   let currentPage = useLocation().pathname;
+
   const postComment = () => {
     if (!response) return;
     if (!authorId) return;
@@ -113,6 +115,9 @@ const EditTextButton = ({
         message: response,
         uploaded_time: serverTimestamp(),
       };
+      st.setMessage((pre: Message[]) => {
+        return [...pre, data];
+      });
       setDoc(
         doc(
           db,
@@ -127,14 +132,22 @@ const EditTextButton = ({
     }
   };
   const updateComment = async () => {
+    setTargetComment && setTargetComment("");
+    const updatedMessage = st.message.map((item: any) => {
+      if (item.comment_id === commentId) {
+        item.message = rawComment;
+      }
+      return item;
+    });
+    st.setMessage(updatedMessage);
     if (!authorId) return;
     const docRef = doc(
       db,
       `/users/${authorId}/user_posts/${postId}/messages/${commentId}`
     );
     await updateDoc(docRef, { message: rawComment });
-    setTargetComment && setTargetComment("");
   };
+
   const deletePost = async () => {
     st.setAllPost(st.updateState(st.allPost, postId));
     st.setUserPost(st.updateState(st.userPost, postId));

@@ -1,5 +1,5 @@
 import React, { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext } from "../App";
+import { GlobalContext, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -85,12 +85,18 @@ const PopWindow = ({
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
+
   const deleteComment = async () => {
+    setEditOrDelete && setEditOrDelete(false);
+    const updatedComment = st.message.filter(
+      (item: Message) => item.comment_id !== commentId
+    );
+    st.setMessage(updatedComment);
     await deleteDoc(
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
-    setEditOrDelete && setEditOrDelete(false);
   };
+
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
