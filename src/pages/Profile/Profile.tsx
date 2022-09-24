@@ -1,4 +1,5 @@
 import { useContext, useState } from "react";
+import { Navigate } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
@@ -67,7 +68,10 @@ const Profile = () => {
     }
   };
 
-  return (
+  if (!st.isLogged) {
+    return <Navigate to="/" />;
+  } else {
+    return (
       <Wrapper>
         <UserInfoWrapper>
           <UserAvatar src={st.userData.user_avatar}></UserAvatar>
@@ -87,7 +91,8 @@ const Profile = () => {
           <PinterestLayout post={st.userCollections} />
         )}
       </Wrapper>
-  );
+    );
+  }
 };
 
 export default Profile;

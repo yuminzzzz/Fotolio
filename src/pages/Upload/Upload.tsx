@@ -9,6 +9,7 @@ import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import Input from "./Input";
+import { Navigate } from "react-router-dom";
 interface Props {
   isUploadPage?: boolean;
 }
@@ -267,104 +268,107 @@ const Upload = () => {
   const previewUrl = uploadData.file
     ? URL.createObjectURL(uploadData.file)
     : "";
+  if (!st.isLogged) {
+    return <Navigate to="/" />;
+  } else {
+    return (
+      <OutsideWrapper>
+        <Wrapper isUploadPage={true}>
+          <PreviewWrapper>
+            <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
+            {!uploadData.file && (
+              <PreviewContainer>
+                <PreviewLabel htmlFor="uploader"></PreviewLabel>
+                <PreviewOutline>
+                  <PreviewPromptContainer>
+                    <FontAwesomeIcon
+                      icon={faCircleUp}
+                      style={{
+                        fontSize: "30px",
+                        color: "#767676",
+                        marginBottom: "20px",
+                      }}
+                    />
+                    <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
+                  </PreviewPromptContainer>
+                </PreviewOutline>
+              </PreviewContainer>
+            )}
+            {uploadData.file && (
+              <DeletePreview
+                onClick={() => {
+                  setUploadData((pre) => {
+                    return {
+                      ...pre,
+                      file: "",
+                    };
+                  });
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faTrash}
+                  style={{
+                    pointerEvents: "none",
+                  }}
+                />
+              </DeletePreview>
+            )}
 
-  return (
-    <OutsideWrapper>
-      <Wrapper isUploadPage={true}>
-        <PreviewWrapper>
-          <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
-          {!uploadData.file && (
-            <PreviewContainer>
-              <PreviewLabel htmlFor="uploader"></PreviewLabel>
-              <PreviewOutline>
-                <PreviewPromptContainer>
-                  <FontAwesomeIcon
-                    icon={faCircleUp}
-                    style={{
-                      fontSize: "30px",
-                      color: "#767676",
-                      marginBottom: "20px",
-                    }}
-                  />
-                  <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
-                </PreviewPromptContainer>
-              </PreviewOutline>
-            </PreviewContainer>
-          )}
-          {uploadData.file && (
-            <DeletePreview
-              onClick={() => {
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/gif"
+              id="uploader"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const target = e.target as HTMLInputElement;
+                const file = (target.files as FileList)[0];
                 setUploadData((pre) => {
                   return {
                     ...pre,
-                    file: "",
+                    file: file,
                   };
                 });
               }}
-            >
-              <FontAwesomeIcon
-                icon={faTrash}
-                style={{
-                  pointerEvents: "none",
-                }}
-              />
-            </DeletePreview>
-          )}
-
-          <input
-            type="file"
-            accept="image/png, image/jpeg, image/gif"
-            id="uploader"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              const file = (target.files as FileList)[0];
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  file: file,
-                };
-              });
-            }}
-          />
-        </PreviewWrapper>
-        <ContentSection>
-          <Input
-            tag="title"
-            placeholder="新增標題"
-            value={uploadData.title}
-            onChange={titleOnChange}
-          />
-          <AuthorWrapper>
-            <AuthorAvatar
-              src={st.userData.user_avatar}
-              alt="user avatar"
-            ></AuthorAvatar>
-            <AuthorName>{st.userData.user_name}</AuthorName>
-          </AuthorWrapper>
-          <Input
-            tag="description"
-            placeholder="請輸入描述"
-            value={uploadData.description}
-            onChange={descriptionOnChange}
-          />
-          <Input
-            tag="tags"
-            placeholder="按下enter以建立標籤"
-            localTags={localTags}
-            setLocalTags={setLocalTags}
-          />
-          <ButtonWrapper>
-            {isValid ? (
-              <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
-            ) : (
-              <UploadButton>發佈</UploadButton>
-            )}
-          </ButtonWrapper>
-        </ContentSection>
-      </Wrapper>
-    </OutsideWrapper>
-  );
+            />
+          </PreviewWrapper>
+          <ContentSection>
+            <Input
+              tag="title"
+              placeholder="新增標題"
+              value={uploadData.title}
+              onChange={titleOnChange}
+            />
+            <AuthorWrapper>
+              <AuthorAvatar
+                src={st.userData.user_avatar}
+                alt="user avatar"
+              ></AuthorAvatar>
+              <AuthorName>{st.userData.user_name}</AuthorName>
+            </AuthorWrapper>
+            <Input
+              tag="description"
+              placeholder="請輸入描述"
+              value={uploadData.description}
+              onChange={descriptionOnChange}
+            />
+            <Input
+              tag="tags"
+              placeholder="按下enter以建立標籤"
+              localTags={localTags}
+              setLocalTags={setLocalTags}
+            />
+            <ButtonWrapper>
+              {isValid ? (
+                <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
+              ) : (
+                <UploadButton>發佈</UploadButton>
+              )}
+            </ButtonWrapper>
+          </ContentSection>
+        </Wrapper>
+      </OutsideWrapper>
+    );
+  }
 };
 export default Upload;
 export { Wrapper, OutsideWrapper };

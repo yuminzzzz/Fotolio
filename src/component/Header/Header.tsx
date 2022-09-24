@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { GlobalContext } from "../../App";
 import styled from "styled-components";
@@ -454,7 +454,8 @@ const Header = () => {
               />
             )}
             <SearchInputForm
-              onSubmit={() => {
+              onSubmit={(e) => {
+                e.preventDefault();
                 navigate(`/search/${search}`);
               }}
             >
