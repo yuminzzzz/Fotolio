@@ -16,7 +16,6 @@ import {
   getDoc,
   getDocs,
 } from "firebase/firestore";
-import { takeCoverage } from "v8";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -113,7 +112,9 @@ function App() {
     user_name: "",
   });
   const [message, setMessage] = useState<Message[]>([]);
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<{ tag: string[]; postId: string }[]>(
+    []
+  );
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
   };
@@ -142,19 +143,21 @@ function App() {
     allTags,
     setAllTags,
   };
+
   useEffect(() => {
     const getTags = async () => {
       const tags = await getDocs(collectionGroup(db, "user_posts"));
-      let arr: string[] = [];
-      tags.forEach((item) => {
-        if (item.data().tags === undefined) return;
-        arr = [...arr, ...item.data().tags];
+      let arr: { tag: string[]; postId: string }[] = [];
+      tags.forEach((item: DocumentData) => {
+        if (item.data().tags !== undefined) {
+          arr.push(...item.data().tags);
+        }
       });
       setAllTags(arr);
     };
     getTags();
   }, []);
-  
+
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {

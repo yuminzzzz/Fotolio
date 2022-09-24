@@ -210,19 +210,24 @@ const Upload = () => {
             author_name: st.userData.user_name,
             author_avatar: st.userData.user_avatar,
             url,
-            tags: localTags,
+            tags: localTags.map((item: string) => {
+              return { tag: item, post_id: docRef.id };
+            }),
           };
+
           st.setAllPost((pre: Post[]) => {
             return [...pre, data];
           });
           st.setUserPost((pre: Post[]) => {
             return [...pre, data];
           });
-          st.setAllTags((pre: string[]) => {
-            if (localTags.length > 0) {
-              return [...pre, ...localTags];
-            }
-          });
+          if (localTags.length > 0) {
+            localTags.forEach((item) => {
+              st.setAllTags((pre: { tag: string; postId: string }[]) => {
+                return [...pre, { tag: item, postId: docRef.id }];
+              });
+            });
+          }
           const postDocRef = doc(
             db,
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`

@@ -12,6 +12,7 @@ import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
 import LastPageButton from "./LastPageButton";
 import Ellipsis from "../../component/Ellipsis";
+import { Tag, TagWrapper } from "../Upload/Input";
 
 interface PostData {
   author_avatar: string;
@@ -75,6 +76,7 @@ const PostDescription = styled.p``;
 const AuthorWrapper = styled.div`
   display: flex;
   margin: 30px 0;
+  justify-content: space-between;
 `;
 
 const AuthorAvatar = styled.img`
@@ -87,6 +89,13 @@ const AuthorAvatar = styled.img`
 const AuthorName = styled.p`
   font-weight: 500;
   margin-left: 8px;
+`;
+
+const TagContainer = styled.div`
+  overflow-x: scroll;
+  display: flex;
+  align-items: center;
+  max-width: 200px;
 `;
 
 const CommentWrapper = styled.div`
@@ -186,6 +195,13 @@ const Post = () => {
     (item: Post) => item.post_id === postId
   );
 
+  let postTags: string[] = [];
+  st.allTags.forEach((item: { tag: string; post_id: string }) => {
+    if (item.post_id === postId) {
+      postTags = [...postTags, item.tag];
+    }
+  });
+
   return (
     <OutsideWrapper>
       <LastPageButton />
@@ -202,8 +218,18 @@ const Post = () => {
           <PostTitle>{post?.title}</PostTitle>
           <PostDescription>{post?.description}</PostDescription>
           <AuthorWrapper>
-            <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
-            <AuthorName>{post?.author_name}</AuthorName>
+            <div style={{ display: "flex" }}>
+              <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
+              <AuthorName>{post?.author_name}</AuthorName>
+            </div>
+            <TagContainer>
+              <TagWrapper>
+                {postTags !== undefined &&
+                  postTags.map((item: string) => {
+                    return <Tag>{item}</Tag>;
+                  })}
+              </TagWrapper>
+            </TagContainer>
           </AuthorWrapper>
           <p style={{ fontSize: "20px", fontWeight: "500" }}>{comment}則回應</p>
           <CommentWrapper>

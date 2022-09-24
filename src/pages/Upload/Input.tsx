@@ -39,6 +39,11 @@ const TagsWrapper = styled.div`
   overflow-x: scroll;
 `;
 
+const TagWrapper = styled.ul`
+  display: flex;
+  align-items: center;
+`;
+
 const Tag = styled.li`
   height: 36px;
   padding: 8px;
@@ -88,7 +93,7 @@ const Input = ({
   if (tag === "tags") {
     return (
       <TagsWrapper>
-        <ul style={{ display: "flex", alignItems: "center" }}>
+        <TagWrapper>
           {localTags &&
             localTags.map((item: string, index: number) => {
               return (
@@ -107,7 +112,7 @@ const Input = ({
                 </Tag>
               );
             })}
-        </ul>
+        </TagWrapper>
         <TitleInput
           tag={tag}
           placeholder={placeholder}
@@ -129,3 +134,4 @@ const Input = ({
 };
 
 export default Input;
+export { TagWrapper, Tag, CloseIcon };
