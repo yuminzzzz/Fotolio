@@ -8,17 +8,20 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 import PopWindow from "../PopWindow";
 import { auth, db } from "../../utils/firebase";
 import {
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { setDoc, doc, getDoc, DocumentData } from "firebase/firestore";
+
+import { setDoc, doc } from "firebase/firestore";
 
 interface Props {
-  isProfile: boolean;
+  isProfile?: boolean;
+  isFocus?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -88,11 +91,10 @@ const UserAvatar = styled.img`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-51%, -51%);
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  // object-fit: cover;
   z-index: 998;
 `;
 
@@ -107,6 +109,64 @@ const UserInfoWrapper = styled.div`
   cursor: pointer;
   &:hover {
     background-color: #efefef;
+  }
+`;
+
+const SearchWrapper = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: #e9e9e9;
+  border: none;
+  border-radius: 24px;
+  margin: 0 8px;
+  padding-left: 16px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  &:hover {
+    background-color: rgb(225, 225, 225);
+  }
+`;
+
+const SearchInputForm = styled.form`
+  width: 100%;
+  height: 100%;
+`;
+
+const SearchInput = styled.input<Props>`
+  position: ${(props) => (props.isFocus ? "absolute" : "")};
+  padding-left: ${(props) => (props.isFocus ? "16px" : "0")};
+  left: 0;
+  top: 0;
+  border-radius: 24px;
+  background-color: inherit;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-weight: 300;
+  ::placeholder {
+    font-weight: 300;
+    height: 100%;
+    line-height: 100%;
+  }
+`;
+
+const DeleteSearchIcon = styled.div`
+  position: absolute;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  cursor: pointer;
+  &:hover {
+    background-color: lightgrey;
   }
 `;
 
@@ -206,6 +266,8 @@ const Header = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [focus, setFocus] = useState(false);
+  const [search, setSearch] = useState("");
   const toggleSwitch = () => {
     if (st.toggle) {
       st.setToggle(false);
@@ -223,7 +285,6 @@ const Header = () => {
   const register = () => {
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in
         const user = userCredential.user;
         const userId = user.uid;
         const docRef = doc(db, `users/${userId}`);
@@ -241,7 +302,6 @@ const Header = () => {
         setName("");
       })
       .catch((error) => {
-        //FIXBUG
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
@@ -280,8 +340,6 @@ const Header = () => {
       });
   };
 
- 
-
   return (
     <Wrapper>
       <LogoWrapper>
@@ -291,7 +349,6 @@ const Header = () => {
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
         )}
-
         {st.isLogged && (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
@@ -388,20 +445,62 @@ const Header = () => {
           )}
         </>
       ) : (
-        <UserIconWrapper>
-          <UserAvatarWrapper onClick={() => navigate("/profile")}>
-            <UserAvatarActive isProfile={isProfile}>
-              <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-            </UserAvatarActive>
-          </UserAvatarWrapper>
-          <UserInfoWrapper onClick={toggleSwitch}>
-            <FontAwesomeIcon
-              icon={faAngleDown}
-              style={{ pointerEvents: "none" }}
-            />
-            {st.toggle && <PopWindow location="userInfo" />}
-          </UserInfoWrapper>
-        </UserIconWrapper>
+        <>
+          <SearchWrapper>
+            {!focus && (
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                style={{ color: "767676", zIndex: "1", marginRight: "8px" }}
+              />
+            )}
+            <SearchInputForm
+              onSubmit={() => {
+                navigate(`/search/${search}`);
+              }}
+            >
+              <SearchInput
+                placeholder="搜尋"
+                isFocus={focus}
+                onFocus={() => {
+                  setFocus(true);
+                }}
+                onBlur={(e) => {
+                  setFocus(false);
+                  e.target.value = "";
+                }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+              ></SearchInput>
+            </SearchInputForm>
+            {focus && (
+              <DeleteSearchIcon>
+                <FontAwesomeIcon
+                  icon={faCircleXmark}
+                  style={{
+                    pointerEvents: "none",
+                    zIndex: "3",
+                    fontSize: "20px",
+                  }}
+                />
+              </DeleteSearchIcon>
+            )}
+          </SearchWrapper>
+          <UserIconWrapper>
+            <UserAvatarWrapper onClick={() => navigate("/profile")}>
+              <UserAvatarActive isProfile={isProfile}>
+                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+              </UserAvatarActive>
+            </UserAvatarWrapper>
+            <UserInfoWrapper onClick={toggleSwitch}>
+              <FontAwesomeIcon
+                icon={faAngleDown}
+                style={{ pointerEvents: "none" }}
+              />
+              {st.toggle && <PopWindow location="userInfo" />}
+            </UserInfoWrapper>
+          </UserIconWrapper>
+        </>
       )}
     </Wrapper>
   );

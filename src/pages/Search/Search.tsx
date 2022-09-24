@@ -1,10 +1,12 @@
 import { useContext, useState } from "react";
+import { useParams } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const Search = () => {
-  return <div>Search</div>;
+  const keyword = useParams().search;
+  return <div>{keyword}</div>;
 };
 
 export default Search;

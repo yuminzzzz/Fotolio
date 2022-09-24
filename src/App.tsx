@@ -115,6 +115,7 @@ function App() {
   const [allTags, setAllTags] = useState<{ tag: string[]; postId: string }[]>(
     []
   );
+  console.log(allTags);
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
   };
