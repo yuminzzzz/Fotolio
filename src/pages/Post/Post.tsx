@@ -116,7 +116,6 @@ const Post = () => {
   const [post, setPost] = useState<DocumentData | PostData | undefined>(
     undefined
   );
-  // const [message, setMessage] = useState<any>([]);
   const [targetComment, setTargetComment] = useState("");
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");

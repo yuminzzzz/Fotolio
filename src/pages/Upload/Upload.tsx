@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
+import Input from "./Input";
 interface Props {
   isUploadPage?: boolean;
 }
@@ -128,24 +129,7 @@ const ContentSection = styled.div`
     margin-top: 20px;
     margin-left: 0;
     padding: 0 16px;
-    height: 380px;
-  }
-`;
-
-const TitleInput = styled.input`
-  height: 54px;
-  font-size: 40px;
-  line-height: normal;
-  padding-bottom: 10px;
-  border-bottom: solid 1px #c8c8c8;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
-  outline: medium;
-  outline-color: orange;
-  ::placeholder {
-    font-size: 35px;
-    letter-spacing: 2px;
+    height: 400px;
   }
 `;
 
@@ -158,31 +142,11 @@ const AuthorAvatar = styled.img`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  cursor: pointer;
 `;
 
 const AuthorName = styled.p`
   font-weight: 700;
   margin-left: 8px;
-`;
-
-const DescriptionTitle = styled.input`
-  height: 54px;
-  font-size: 20px;
-  line-height: normal;
-  padding-bottom: 10px;
-  border-bottom: solid 1px #c8c8c8;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
-  outline: medium;
-  outline-color: orange;
-  ::placeholder {
-    font-size: 20px;
-    font-weight: 300;
-    color: #9197a3;
-    padding-left: 4px;
-  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -225,6 +189,7 @@ const Upload = () => {
     description: "",
     file: "",
   });
+  const [localTags, setLocalTags] = useState<string[]>([]);
   const isValid = Object.values(uploadData).every((item) => item !== "");
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
@@ -245,6 +210,7 @@ const Upload = () => {
             author_name: st.userData.user_name,
             author_avatar: st.userData.user_avatar,
             url,
+            tags: localTags,
           };
           st.setAllPost((pre: Post[]) => {
             return [...pre, data];
@@ -272,6 +238,22 @@ const Upload = () => {
     }
   };
 
+  const titleOnChange = (e: { target: HTMLInputElement }) => {
+    setUploadData((pre) => {
+      return {
+        ...pre,
+        title: e.target.value,
+      };
+    });
+  };
+  const descriptionOnChange = (e: { target: HTMLInputElement }) => {
+    setUploadData((pre) => {
+      return {
+        ...pre,
+        description: e.target.value,
+      };
+    });
+  };
   const previewUrl = uploadData.file
     ? URL.createObjectURL(uploadData.file)
     : "";
@@ -337,19 +319,11 @@ const Upload = () => {
           />
         </PreviewWrapper>
         <ContentSection>
-          <TitleInput
-            type="text"
+          <Input
+            tag="title"
             placeholder="新增標題"
             value={uploadData.title}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  title: target.value,
-                };
-              });
-            }}
+            onChange={titleOnChange}
           />
           <AuthorWrapper>
             <AuthorAvatar
@@ -358,20 +332,17 @@ const Upload = () => {
             ></AuthorAvatar>
             <AuthorName>{st.userData.user_name}</AuthorName>
           </AuthorWrapper>
-
-          <DescriptionTitle
-            type="text"
+          <Input
+            tag="description"
             placeholder="請輸入描述"
             value={uploadData.description}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  description: target.value,
-                };
-              });
-            }}
+            onChange={descriptionOnChange}
+          />
+          <Input
+            tag="tags"
+            placeholder="按下enter以建立標籤"
+            localTags={localTags}
+            setLocalTags={setLocalTags}
           />
           <ButtonWrapper>
             {isValid ? (

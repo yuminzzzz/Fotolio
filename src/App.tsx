@@ -71,6 +71,10 @@ const GlobalStyle = createGlobalStyle`
     font-family: "NotoSansTC";
   }
 
+  li {
+    list-style: none;
+  }
+
 `;
 export const GlobalContext = React.createContext(null);
 export interface Post {
