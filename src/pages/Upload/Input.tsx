@@ -50,6 +50,7 @@ const Tag = styled.li`
   color: orange;
   font-weight: 300;
   display: flex;
+  white-space: nowrap;
 `;
 
 const CloseIcon = styled.span`

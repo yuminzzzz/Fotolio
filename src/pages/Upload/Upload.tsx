@@ -218,6 +218,11 @@ const Upload = () => {
           st.setUserPost((pre: Post[]) => {
             return [...pre, data];
           });
+          st.setAllTags((pre: string[]) => {
+            if (localTags.length > 0) {
+              return [...pre, ...localTags];
+            }
+          });
           const postDocRef = doc(
             db,
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`
@@ -232,12 +237,12 @@ const Upload = () => {
           title: "",
           description: "",
         });
+        setLocalTags([]);
       });
     } catch (e) {
       console.error("Error adding document: ", e);
     }
   };
-
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
       return {
