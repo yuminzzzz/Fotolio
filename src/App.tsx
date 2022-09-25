@@ -71,6 +71,10 @@ const GlobalStyle = createGlobalStyle`
     font-family: "NotoSansTC";
   }
 
+  li {
+    list-style: none;
+  }
+
 `;
 export const GlobalContext = React.createContext(null);
 export interface Post {
@@ -82,6 +86,7 @@ export interface Post {
   post_id: string;
   title: string;
   url: string;
+  tags: { post_id: string; tag: string }[];
 }
 export interface Message {
   comment_id: string;
@@ -107,7 +112,9 @@ function App() {
     user_id: "",
     user_name: "",
   });
-  const [message, setMessage] = useState<Message[] | []>([]);
+  const [message, setMessage] = useState<Message[]>([]);
+  const [allTags, setAllTags] = useState<{ tag: string; postId: string }[]>([]);
+
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
   };
@@ -133,7 +140,23 @@ function App() {
     updateState,
     message,
     setMessage,
+    allTags,
+    setAllTags,
   };
+
+  useEffect(() => {
+    const getTags = async () => {
+      const tags = await getDocs(collectionGroup(db, "user_posts"));
+      let arr: { tag: string; postId: string }[] = [];
+      tags.forEach((item: DocumentData) => {
+        if (item.data().tags !== undefined) {
+          arr.push(...item.data().tags);
+        }
+      });
+      setAllTags(arr);
+    };
+    getTags();
+  }, [isLogged]);
 
   useEffect(() => {
     onAuthStateChanged(auth, async (user) => {
@@ -205,6 +228,7 @@ function App() {
     getPost();
     getCollect();
   }, [userData]);
+
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />

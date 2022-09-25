@@ -1,6 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { GlobalContext } from "../../App";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
 import { Wrapper, OutsideWrapper } from "../Upload/Upload";
@@ -12,6 +12,7 @@ import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
 import LastPageButton from "./LastPageButton";
 import Ellipsis from "../../component/Ellipsis";
+import { Tag, TagWrapper } from "../Upload/Input";
 
 interface PostData {
   author_avatar: string;
@@ -75,6 +76,7 @@ const PostDescription = styled.p``;
 const AuthorWrapper = styled.div`
   display: flex;
   margin: 30px 0;
+  justify-content: space-between;
 `;
 
 const AuthorAvatar = styled.img`
@@ -87,6 +89,13 @@ const AuthorAvatar = styled.img`
 const AuthorName = styled.p`
   font-weight: 500;
   margin-left: 8px;
+`;
+
+const TagContainer = styled.div`
+  overflow-x: scroll;
+  display: flex;
+  align-items: center;
+  max-width: 200px;
 `;
 
 const CommentWrapper = styled.div`
@@ -116,7 +125,6 @@ const Post = () => {
   const [post, setPost] = useState<DocumentData | PostData | undefined>(
     undefined
   );
-  // const [message, setMessage] = useState<any>([]);
   const [targetComment, setTargetComment] = useState("");
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");
@@ -129,6 +137,7 @@ const Post = () => {
     author_name: "",
   });
   const [comment, setComment] = useState(0);
+  const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   interface Post {
@@ -178,115 +187,140 @@ const Post = () => {
     getPost();
     getMessage();
   }, []);
-
   useEffect(() => {
     setComment(st.message.length);
   }, [st.message]);
+
+  useEffect(() => {
+    let arr: string[] = [];
+    st.allTags.forEach((item: { tag: string; post_id: string }) => {
+      if (item.post_id === postId) {
+        arr = [...arr, item.tag];
+      }
+      setPostTags(arr);
+    });
+  }, []);
 
   const initStatus = st.userCollections.some(
     (item: Post) => item.post_id === postId
   );
 
-  return (
-    <OutsideWrapper>
-      <LastPageButton />
-      <Wrapper>
-        <CoverImgWrapper>
-          <CoverImg src={post?.url} alt="post"></CoverImg>
-        </CoverImgWrapper>
-        <CommentSection>
-          <ButtonWrapper>
-            <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
-            <Collect postId={postId!} initStatus={initStatus} />
-          </ButtonWrapper>
+  if (!st.isLogged) {
+    return <Navigate to="/" />;
+  } else {
+    return (
+      <OutsideWrapper>
+        <LastPageButton />
+        <Wrapper>
+          <CoverImgWrapper>
+            <CoverImg src={post?.url} alt="post"></CoverImg>
+          </CoverImgWrapper>
+          <CommentSection>
+            <ButtonWrapper>
+              <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
+              <Collect postId={postId!} initStatus={initStatus} />
+            </ButtonWrapper>
 
-          <PostTitle>{post?.title}</PostTitle>
-          <PostDescription>{post?.description}</PostDescription>
-          <AuthorWrapper>
-            <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
-            <AuthorName>{post?.author_name}</AuthorName>
-          </AuthorWrapper>
-          <p style={{ fontSize: "20px", fontWeight: "500" }}>{comment}則回應</p>
-          <CommentWrapper>
-            {st.message.map(
-              (
-                item: {
-                  comment_id: string;
-                  message: string;
-                  post_id: string;
-                  uploaded_time: { seconds: number; nanoseconds: number };
-                  user_avatar: string;
-                  user_id: string;
-                  user_name: string;
-                },
-                index: number
-              ) => {
-                if (targetComment === item.comment_id) {
-                  return (
-                    <div key={item.comment_id}>
-                      <MyComment
-                        comment={item.message}
-                        rawComment={rawComment}
-                        setRawComment={setRawComment}
-                      />
-                      <EditTextButton
-                        buttonTag="comment"
-                        setTargetComment={setTargetComment}
-                        rawComment={rawComment}
-                        comment={item.message}
+            <PostTitle>{post?.title}</PostTitle>
+            <PostDescription>{post?.description}</PostDescription>
+            <AuthorWrapper>
+              <div style={{ display: "flex" }}>
+                <AuthorAvatar src={post?.author_avatar}></AuthorAvatar>
+                <AuthorName>{post?.author_name}</AuthorName>
+              </div>
+              <TagContainer>
+                <TagWrapper>
+                  {postTags !== undefined &&
+                    postTags.map((item: string, index: number) => {
+                      return <Tag key={index}>{item}</Tag>;
+                    })}
+                </TagWrapper>
+              </TagContainer>
+            </AuthorWrapper>
+            <p style={{ fontSize: "20px", fontWeight: "500" }}>
+              {comment}則回應
+            </p>
+            <CommentWrapper>
+              {st.message.map(
+                (
+                  item: {
+                    comment_id: string;
+                    message: string;
+                    post_id: string;
+                    uploaded_time: { seconds: number; nanoseconds: number };
+                    user_avatar: string;
+                    user_id: string;
+                    user_name: string;
+                  },
+                  index: number
+                ) => {
+                  if (targetComment === item.comment_id) {
+                    return (
+                      <div key={item.comment_id}>
+                        <MyComment
+                          comment={item.message}
+                          rawComment={rawComment}
+                          setRawComment={setRawComment}
+                        />
+                        <EditTextButton
+                          buttonTag="comment"
+                          setTargetComment={setTargetComment}
+                          rawComment={rawComment}
+                          comment={item.message}
+                          commentId={item.comment_id}
+                          authorId={authorData.author_id}
+                          setModifyCheck={setModifyCheck}
+                        />
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <Comment
+                        key={index}
+                        userName={item.user_name}
+                        userAvatar={item.user_avatar}
+                        message={item.message}
+                        uploadedTime={item.uploaded_time}
+                        isAuthor={item.user_id === st.userData.user_id}
                         commentId={item.comment_id}
+                        setTargetComment={setTargetComment}
                         authorId={authorData.author_id}
-                        setModifyCheck={setModifyCheck}
                       />
-                    </div>
-                  );
-                } else {
-                  return (
-                    <Comment
-                      key={index}
-                      userName={item.user_name}
-                      userAvatar={item.user_avatar}
-                      message={item.message}
-                      uploadedTime={item.uploaded_time}
-                      isAuthor={item.user_id === st.userData.user_id}
-                      commentId={item.comment_id}
-                      setTargetComment={setTargetComment}
-                      authorId={authorData.author_id}
-                    />
-                  );
+                    );
+                  }
                 }
-              }
+              )}
+            </CommentWrapper>
+            <MyCommentWrapper>
+              <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+              <MyComment
+                response={response}
+                setResponse={setResponse}
+                typing={typing}
+                setTyping={setTyping}
+              />
+            </MyCommentWrapper>
+            {typing && (
+              <EditTextButton
+                buttonTag="message"
+                response={response}
+                setResponse={setResponse}
+                setTyping={setTyping}
+                authorId={authorData.author_id}
+              />
             )}
-          </CommentWrapper>
-          <MyCommentWrapper>
-            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-            <MyComment
-              response={response}
-              setResponse={setResponse}
-              typing={typing}
-              setTyping={setTyping}
-            />
-          </MyCommentWrapper>
-          {typing && (
-            <EditTextButton
-              buttonTag="message"
-              response={response}
-              setResponse={setResponse}
-              setTyping={setTyping}
-              authorId={authorData.author_id}
-            />
-          )}
-        </CommentSection>
-      </Wrapper>
-      {modifyCheck && (
-        <DeleteCheck
-          setModifyCheck={setModifyCheck}
-          setTargetComment={setTargetComment}
-          promptTitle={"確定要捨棄變更?"}
-        />
-      )}
-    </OutsideWrapper>
-  );
+          </CommentSection>
+        </Wrapper>
+        {modifyCheck && (
+          <DeleteCheck
+            setModifyCheck={setModifyCheck}
+            setTargetComment={setTargetComment}
+            promptTitle={"確定要捨棄變更?"}
+          />
+        )}
+      </OutsideWrapper>
+    );
+  }
 };
 
 export default Post;

@@ -1,16 +1,15 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
+import { Navigate } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const Wrapper = styled.div`
   padding: 0 27px;
-  // border: solid 1px red;
 `;
 
 const UserInfoWrapper = styled.div`
   margin: 0 auto;
-  width: 488px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -69,27 +68,31 @@ const Profile = () => {
     }
   };
 
-  return (
-    <Wrapper>
-      <UserInfoWrapper>
-        <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-        <UserName>{st.userData.user_name}</UserName>
-      </UserInfoWrapper>
-      <ButtonWrapper>
-        <Button active={!status} onClick={isActive}>
-          已建立
-        </Button>
-        <Button active={status} onClick={isActive}>
-          已儲存
-        </Button>
-      </ButtonWrapper>
-      {!status ? (
-        <PinterestLayout post={st.userPost} />
-      ) : (
-        <PinterestLayout post={st.userCollections} />
-      )}
-    </Wrapper>
-  );
+  if (!st.isLogged) {
+    return <Navigate to="/" />;
+  } else {
+    return (
+      <Wrapper>
+        <UserInfoWrapper>
+          <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+          <UserName>{st.userData.user_name}</UserName>
+        </UserInfoWrapper>
+        <ButtonWrapper>
+          <Button active={!status} onClick={isActive}>
+            已建立
+          </Button>
+          <Button active={status} onClick={isActive}>
+            已儲存
+          </Button>
+        </ButtonWrapper>
+        {!status ? (
+          <PinterestLayout post={st.userPost} />
+        ) : (
+          <PinterestLayout post={st.userCollections} />
+        )}
+      </Wrapper>
+    );
+  }
 };
 
 export default Profile;

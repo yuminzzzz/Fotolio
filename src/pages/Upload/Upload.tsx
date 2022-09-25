@@ -8,6 +8,9 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
+import Input from "./Input";
+import { Navigate } from "react-router-dom";
+import { getAllJSDocTags } from "typescript";
 interface Props {
   isUploadPage?: boolean;
 }
@@ -128,24 +131,7 @@ const ContentSection = styled.div`
     margin-top: 20px;
     margin-left: 0;
     padding: 0 16px;
-    height: 380px;
-  }
-`;
-
-const TitleInput = styled.input`
-  height: 54px;
-  font-size: 40px;
-  line-height: normal;
-  padding-bottom: 10px;
-  border-bottom: solid 1px #c8c8c8;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
-  outline: medium;
-  outline-color: orange;
-  ::placeholder {
-    font-size: 35px;
-    letter-spacing: 2px;
+    height: 400px;
   }
 `;
 
@@ -158,31 +144,11 @@ const AuthorAvatar = styled.img`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  cursor: pointer;
 `;
 
 const AuthorName = styled.p`
   font-weight: 700;
   margin-left: 8px;
-`;
-
-const DescriptionTitle = styled.input`
-  height: 54px;
-  font-size: 20px;
-  line-height: normal;
-  padding-bottom: 10px;
-  border-bottom: solid 1px #c8c8c8;
-  border-top: 0;
-  border-right: 0;
-  border-left: 0;
-  outline: medium;
-  outline-color: orange;
-  ::placeholder {
-    font-size: 20px;
-    font-weight: 300;
-    color: #9197a3;
-    padding-left: 4px;
-  }
 `;
 
 const ButtonWrapper = styled.div`
@@ -225,6 +191,7 @@ const Upload = () => {
     description: "",
     file: "",
   });
+  const [localTags, setLocalTags] = useState<string[]>([]);
   const isValid = Object.values(uploadData).every((item) => item !== "");
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
@@ -245,13 +212,25 @@ const Upload = () => {
             author_name: st.userData.user_name,
             author_avatar: st.userData.user_avatar,
             url,
+            tags: localTags.map((item: string) => {
+              return { tag: item, post_id: docRef.id };
+            }),
           };
+
           st.setAllPost((pre: Post[]) => {
             return [...pre, data];
           });
           st.setUserPost((pre: Post[]) => {
             return [...pre, data];
           });
+
+          if (localTags.length > 0) {
+            localTags.forEach((item) => {
+              st.setAllTags((pre: { tag: string; postId: string }[]) => {
+                return [...pre, { tag: item, postId: docRef.id }];
+              });
+            });
+          }
           const postDocRef = doc(
             db,
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`
@@ -266,124 +245,134 @@ const Upload = () => {
           title: "",
           description: "",
         });
+        setLocalTags([]);
       });
     } catch (e) {
       console.error("Error adding document: ", e);
     }
   };
 
+  const titleOnChange = (e: { target: HTMLInputElement }) => {
+    setUploadData((pre) => {
+      return {
+        ...pre,
+        title: e.target.value,
+      };
+    });
+  };
+  const descriptionOnChange = (e: { target: HTMLInputElement }) => {
+    setUploadData((pre) => {
+      return {
+        ...pre,
+        description: e.target.value,
+      };
+    });
+  };
   const previewUrl = uploadData.file
     ? URL.createObjectURL(uploadData.file)
     : "";
 
-  return (
-    <OutsideWrapper>
-      <Wrapper isUploadPage={true}>
-        <PreviewWrapper>
-          <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
-          {!uploadData.file && (
-            <PreviewContainer>
-              <PreviewLabel htmlFor="uploader"></PreviewLabel>
-              <PreviewOutline>
-                <PreviewPromptContainer>
-                  <FontAwesomeIcon
-                    icon={faCircleUp}
-                    style={{
-                      fontSize: "30px",
-                      color: "#767676",
-                      marginBottom: "20px",
-                    }}
-                  />
-                  <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
-                </PreviewPromptContainer>
-              </PreviewOutline>
-            </PreviewContainer>
-          )}
-          {uploadData.file && (
-            <DeletePreview
-              onClick={() => {
+  if (!st.isLogged) {
+    return <Navigate to="/" />;
+  } else {
+    return (
+      <OutsideWrapper>
+        <Wrapper isUploadPage={true}>
+          <PreviewWrapper>
+            <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
+            {!uploadData.file && (
+              <PreviewContainer>
+                <PreviewLabel htmlFor="uploader"></PreviewLabel>
+                <PreviewOutline>
+                  <PreviewPromptContainer>
+                    <FontAwesomeIcon
+                      icon={faCircleUp}
+                      style={{
+                        fontSize: "30px",
+                        color: "#767676",
+                        marginBottom: "20px",
+                      }}
+                    />
+                    <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
+                  </PreviewPromptContainer>
+                </PreviewOutline>
+              </PreviewContainer>
+            )}
+            {uploadData.file && (
+              <DeletePreview
+                onClick={() => {
+                  setUploadData((pre) => {
+                    return {
+                      ...pre,
+                      file: "",
+                    };
+                  });
+                }}
+              >
+                <FontAwesomeIcon
+                  icon={faTrash}
+                  style={{
+                    pointerEvents: "none",
+                  }}
+                />
+              </DeletePreview>
+            )}
+
+            <input
+              type="file"
+              accept="image/png, image/jpeg, image/gif"
+              id="uploader"
+              style={{ display: "none" }}
+              onChange={(e) => {
+                const target = e.target as HTMLInputElement;
+                const file = (target.files as FileList)[0];
                 setUploadData((pre) => {
                   return {
                     ...pre,
-                    file: "",
+                    file: file,
                   };
                 });
               }}
-            >
-              <FontAwesomeIcon
-                icon={faTrash}
-                style={{
-                  pointerEvents: "none",
-                }}
-              />
-            </DeletePreview>
-          )}
-
-          <input
-            type="file"
-            accept="image/png, image/jpeg, image/gif"
-            id="uploader"
-            style={{ display: "none" }}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              const file = (target.files as FileList)[0];
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  file: file,
-                };
-              });
-            }}
-          />
-        </PreviewWrapper>
-        <ContentSection>
-          <TitleInput
-            type="text"
-            placeholder="新增標題"
-            value={uploadData.title}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  title: target.value,
-                };
-              });
-            }}
-          />
-          <AuthorWrapper>
-            <AuthorAvatar
-              src={st.userData.user_avatar}
-              alt="user avatar"
-            ></AuthorAvatar>
-            <AuthorName>{st.userData.user_name}</AuthorName>
-          </AuthorWrapper>
-
-          <DescriptionTitle
-            type="text"
-            placeholder="請輸入描述"
-            value={uploadData.description}
-            onChange={(e) => {
-              const target = e.target as HTMLInputElement;
-              setUploadData((pre) => {
-                return {
-                  ...pre,
-                  description: target.value,
-                };
-              });
-            }}
-          />
-          <ButtonWrapper>
-            {isValid ? (
-              <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
-            ) : (
-              <UploadButton>發佈</UploadButton>
-            )}
-          </ButtonWrapper>
-        </ContentSection>
-      </Wrapper>
-    </OutsideWrapper>
-  );
+            />
+          </PreviewWrapper>
+          <ContentSection>
+            <Input
+              tag="title"
+              placeholder="新增標題"
+              value={uploadData.title}
+              onChange={titleOnChange}
+            />
+            <AuthorWrapper>
+              <AuthorAvatar
+                src={st.userData.user_avatar}
+                alt="user avatar"
+              ></AuthorAvatar>
+              <AuthorName>{st.userData.user_name}</AuthorName>
+            </AuthorWrapper>
+            <Input
+              tag="description"
+              placeholder="請輸入描述"
+              value={uploadData.description}
+              onChange={descriptionOnChange}
+            />
+            <Input
+              tag="tags"
+              placeholder="按下enter以建立標籤"
+              localTags={localTags}
+              setLocalTags={setLocalTags}
+            />
+            <ButtonWrapper>
+              {isValid ? (
+                <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
+              ) : (
+                <UploadButton>發佈</UploadButton>
+              )}
+            </ButtonWrapper>
+          </ContentSection>
+        </Wrapper>
+      </OutsideWrapper>
+    );
+  }
 };
 export default Upload;
 export { Wrapper, OutsideWrapper };
