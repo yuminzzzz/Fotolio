@@ -492,7 +492,9 @@ const Header = () => {
                 icon={faAngleDown}
                 style={{ pointerEvents: "none" }}
               />
-              {toggle && <PopWindow location="userInfo" />}
+              {toggle && (
+                <PopWindow location="userInfo" setToggle={setToggle} />
+              )}
             </UserInfoWrapper>
           </UserIconWrapper>
         </>

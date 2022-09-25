@@ -72,6 +72,7 @@ const PopWindow = ({
   deleteTag,
   setTargetComment,
   authorId,
+  setToggle,
 }: {
   location: string;
   commentId?: string;
@@ -79,6 +80,7 @@ const PopWindow = ({
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
   authorId?: string;
+  setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
@@ -209,7 +211,7 @@ const PopWindow = ({
       >
         <EditButton
           onClick={() => {
-            st.setToggle(false);
+            setToggle && setToggle(false);
             navigate("/profile");
           }}
         >
@@ -229,7 +231,14 @@ const PopWindow = ({
             </div>
           </UserAccountWrapper>
         </EditButton>
-        <EditButton onClick={logout}>登出</EditButton>
+        <EditButton
+          onClick={() => {
+            setToggle && setToggle(false);
+            logout();
+          }}
+        >
+          登出
+        </EditButton>
       </EditWrapper>
     );
   } else {

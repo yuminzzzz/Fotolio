@@ -7,8 +7,6 @@ const HomeLogged = () => {
   const st: any = useContext(GlobalContext);
   const [homePost, setHomePost] = useState<Post[]>([]);
   const copyPost = st.allPost.map((item: Post) => item);
-  console.log(copyPost, homePost);
-
   useEffect(() => {
     copyPost.sort(function () {
       return Math.random() > 0.5 ? -1 : 1;
