@@ -101,7 +101,6 @@ export interface Message {
 function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
-  const [toggle, setToggle] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [allPost, setAllPost] = useState<Post[]>([]);
   const [userPost, setUserPost] = useState<Post[]>([]);
@@ -125,8 +124,6 @@ function App() {
     setLogin,
     register,
     setRegister,
-    toggle,
-    setToggle,
     userData,
     setUserData,
     isLogged,

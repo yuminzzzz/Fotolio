@@ -268,13 +268,7 @@ const Header = () => {
   const [password, setPassword] = useState("");
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
-  const toggleSwitch = () => {
-    if (st.toggle) {
-      st.setToggle(false);
-    } else {
-      st.setToggle(true);
-    }
-  };
+  const [toggle, setToggle] = useState(false);
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
   let isProfile = false;
@@ -493,12 +487,12 @@ const Header = () => {
                 <UserAvatar src={st.userData.user_avatar}></UserAvatar>
               </UserAvatarActive>
             </UserAvatarWrapper>
-            <UserInfoWrapper onClick={toggleSwitch}>
+            <UserInfoWrapper onClick={() => setToggle(!toggle)}>
               <FontAwesomeIcon
                 icon={faAngleDown}
                 style={{ pointerEvents: "none" }}
               />
-              {st.toggle && <PopWindow location="userInfo" />}
+              {toggle && <PopWindow location="userInfo" />}
             </UserInfoWrapper>
           </UserIconWrapper>
         </>

@@ -10,7 +10,6 @@ import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import Input from "./Input";
 import { Navigate } from "react-router-dom";
-import { getAllJSDocTags } from "typescript";
 interface Props {
   isUploadPage?: boolean;
 }

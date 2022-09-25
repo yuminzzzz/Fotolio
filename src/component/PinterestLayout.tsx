@@ -15,8 +15,8 @@ const PinContainer = styled.div`
   grid-auto-rows: 10px;
   justify-content: center;
 `;
-let isMounted = true;
-let arr: string[];
+
+let arr: string[] = ["small", "medium", "large"];
 let random: number;
 
 const PinterestLayout = ({ post }: { post: Post[] }) => {
@@ -24,11 +24,7 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
   return (
     <PinContainer>
       {post.map((item) => {
-        if (isMounted) {
-          arr = ["small", "medium", "large"];
-          random = Math.floor(Math.random() * 3);
-          isMounted = false;
-        }
+        random = Math.floor(Math.random() * 3);
         const initStatus = st.userCollections.some(
           (doc: Post) => doc.post_id === item.post_id
         );
