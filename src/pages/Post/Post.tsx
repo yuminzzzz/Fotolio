@@ -137,6 +137,7 @@ const Post = () => {
     author_name: "",
   });
   const [comment, setComment] = useState(0);
+  const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   interface Post {
@@ -186,21 +187,24 @@ const Post = () => {
     getPost();
     getMessage();
   }, []);
-
   useEffect(() => {
     setComment(st.message.length);
   }, [st.message]);
+
+  useEffect(() => {
+    let arr: string[] = [];
+    st.allTags.forEach((item: { tag: string; post_id: string }) => {
+      if (item.post_id === postId) {
+        arr = [...arr, item.tag];
+      }
+      setPostTags(arr);
+    });
+  }, []);
 
   const initStatus = st.userCollections.some(
     (item: Post) => item.post_id === postId
   );
 
-  let postTags: string[] = [];
-  st.allTags.forEach((item: { tag: string; post_id: string }) => {
-    if (item.post_id === postId) {
-      postTags = [...postTags, item.tag];
-    }
-  });
   if (!st.isLogged) {
     return <Navigate to="/" />;
   } else {
@@ -227,8 +231,8 @@ const Post = () => {
               <TagContainer>
                 <TagWrapper>
                   {postTags !== undefined &&
-                    postTags.map((item: string) => {
-                      return <Tag>{item}</Tag>;
+                    postTags.map((item: string, index: number) => {
+                      return <Tag key={index}>{item}</Tag>;
                     })}
                 </TagWrapper>
               </TagContainer>

@@ -97,7 +97,7 @@ const Input = ({
           {localTags &&
             localTags.map((item: string, index: number) => {
               return (
-                <Tag>
+                <Tag key={index}>
                   {item}
                   <CloseIcon
                     onClick={() => {

@@ -152,6 +152,7 @@ const EditTextButton = ({
     st.setAllPost(st.updateState(st.allPost, postId));
     st.setUserPost(st.updateState(st.userPost, postId));
     st.setUserCollections(st.updateState(st.userCollections, postId));
+    st.setAllTags(st.updateState(st.allTags, postId));
 
     const docRef = doc(
       db,

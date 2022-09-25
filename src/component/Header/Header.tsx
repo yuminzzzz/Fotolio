@@ -53,9 +53,9 @@ const Logo = styled.img`
   }
 `;
 
-const LogoName = styled.h1`
-  line-height: 24px;
-  font-size: 24px;
+const LogoName = styled.h2`
+  line-height: 23px;
+  font-size: 23px;
   font-weight: 500;
   margin-left: 8px;
   color: orange;

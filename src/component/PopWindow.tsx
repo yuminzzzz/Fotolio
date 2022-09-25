@@ -134,6 +134,7 @@ const PopWindow = ({
     signOut(auth)
       .then(() => {
         st.setToggle(false);
+        st.setAllTags([]);
         navigate("/");
       })
       .catch((error) => {

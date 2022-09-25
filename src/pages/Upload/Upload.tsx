@@ -10,6 +10,7 @@ import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled from "styled-components";
 import Input from "./Input";
 import { Navigate } from "react-router-dom";
+import { getAllJSDocTags } from "typescript";
 interface Props {
   isUploadPage?: boolean;
 }
@@ -222,6 +223,7 @@ const Upload = () => {
           st.setUserPost((pre: Post[]) => {
             return [...pre, data];
           });
+
           if (localTags.length > 0) {
             localTags.forEach((item) => {
               st.setAllTags((pre: { tag: string; postId: string }[]) => {
@@ -249,6 +251,7 @@ const Upload = () => {
       console.error("Error adding document: ", e);
     }
   };
+
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
       return {
@@ -268,6 +271,7 @@ const Upload = () => {
   const previewUrl = uploadData.file
     ? URL.createObjectURL(uploadData.file)
     : "";
+
   if (!st.isLogged) {
     return <Navigate to="/" />;
   } else {
