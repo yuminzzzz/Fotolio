@@ -1,3 +1,7 @@
+/* body {
+  background-color: rgb(255, 252, 247);
+} */
+
 .swiper {
   width: 100%;
   padding-top: 50px;
@@ -7,12 +11,12 @@
 .swiper-slide {
   background-position: center;
   background-size: cover;
-  border: solid 1px lightgrey;
   overflow: hidden;
   display: flex;
   border-radius: 30px;
   width: 500px;
   height: 500px;
+  box-shadow: rgb(0 0 0 / 10%) 0px 1px 20px 5px;
 }
 
 .swiper-slide img {

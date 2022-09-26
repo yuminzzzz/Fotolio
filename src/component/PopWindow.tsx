@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, useContext } from "react";
+import { Dispatch, SetStateAction, useState, useContext } from "react";
 import { GlobalContext, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
@@ -51,6 +51,7 @@ const UserAccountAvatar = styled.img`
   width: 60px;
   height: 60px;
   border-radius: 50%;
+  background-color: #e9e9e9;
 `;
 
 const UserAccountName = styled.p`
@@ -72,6 +73,7 @@ const PopWindow = ({
   deleteTag,
   setTargetComment,
   authorId,
+  setToggle,
 }: {
   location: string;
   commentId?: string;
@@ -79,13 +81,13 @@ const PopWindow = ({
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
   authorId?: string;
+  setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
-
   const deleteComment = async () => {
     setEditOrDelete && setEditOrDelete(false);
     const updatedComment = st.message.filter(
@@ -96,7 +98,6 @@ const PopWindow = ({
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
   };
-
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
@@ -196,7 +197,9 @@ const PopWindow = ({
           e.stopPropagation();
         }}
       >
-        <EditButton>下載圖片</EditButton>
+        <EditButton onClick={downloadImg} id="download">
+          下載圖片
+        </EditButton>
       </EditWrapper>
     );
   } else if (location === "userInfo") {
@@ -209,7 +212,7 @@ const PopWindow = ({
       >
         <EditButton
           onClick={() => {
-            st.setToggle(false);
+            setToggle && setToggle(false);
             navigate("/profile");
           }}
         >
@@ -229,7 +232,14 @@ const PopWindow = ({
             </div>
           </UserAccountWrapper>
         </EditButton>
-        <EditButton onClick={logout}>登出</EditButton>
+        <EditButton
+          onClick={() => {
+            setToggle && setToggle(false);
+            logout();
+          }}
+        >
+          登出
+        </EditButton>
       </EditWrapper>
     );
   } else {

@@ -9,7 +9,7 @@ import {
   collectionGroup,
 } from "firebase/firestore";
 import { useContext, useState } from "react";
-import { GlobalContext, Post} from "../App";
+import { GlobalContext, Post } from "../App";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -54,10 +54,12 @@ const Collect = ({
     );
     if (isSaved) {
       setIsSaved(false);
+      // st.setRandomSwitch(false);
       st.setUserCollections(st.updateState(st.userCollections, postId));
       deleteDoc(collectionRef);
     } else {
       setIsSaved(true);
+      // st.setRandomSwitch(false);
       const newCollect = st.allPost.find(
         (item: Post) => item.post_id === postId
       );

@@ -10,13 +10,13 @@ import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import ClipLoader from "react-spinners/ClipLoader";
 import PopWindow from "../PopWindow";
 import { auth, db } from "../../utils/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-
 import { setDoc, doc } from "firebase/firestore";
 
 interface Props {
@@ -96,6 +96,7 @@ const UserAvatar = styled.img`
   height: 24px;
   border-radius: 50%;
   z-index: 998;
+  background-color: #e9e9e9;
 `;
 
 const UserInfoWrapper = styled.div`
@@ -191,6 +192,19 @@ const LoginContainer = styled.div`
   align-items: center;
   flex-direction: column;
   border-radius: 24px;
+  overflow: hidden;
+`;
+
+const LoadingWrapper = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255, 252, 247, 0.4);
 `;
 
 const LoginLogo = styled(Logo)`
@@ -268,13 +282,7 @@ const Header = () => {
   const [password, setPassword] = useState("");
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
-  const toggleSwitch = () => {
-    if (st.toggle) {
-      st.setToggle(false);
-    } else {
-      st.setToggle(true);
-    }
-  };
+  const [toggle, setToggle] = useState(false);
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
   let isProfile = false;
@@ -283,6 +291,7 @@ const Header = () => {
   }
 
   const register = () => {
+    st.setLoading(true);
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -293,15 +302,17 @@ const Header = () => {
           user_name: name,
           user_email: email,
           user_avatar:
-            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pexels-magda-ehlers-1345814.jpg?alt=media&token=b389054f-0e1a-4840-85e2-3a534d62a978",
+            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pushed-brands.png?alt=media&token=a4dc7827-4de6-4d08-84a6-dc4952a92133",
         };
         setDoc(docRef, data);
         navigate("/home");
+        st.setLoading(false);
         setEmail("");
         setPassword("");
         setName("");
       })
       .catch((error) => {
+        st.setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
@@ -317,14 +328,17 @@ const Header = () => {
   };
 
   const login = () => {
+    st.setLoading(true);
     if (email === "" && password === "") return;
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+        st.setLoading(false);
         navigate("/home");
         setEmail("");
         setPassword("");
       })
       .catch((error) => {
+        st.setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         //FIXBUG
@@ -366,6 +380,11 @@ const Header = () => {
           {st.login && (
             <LoginWrapper>
               <LoginContainer>
+                {st.loading && (
+                  <LoadingWrapper>
+                    <ClipLoader color="orange" loading={st.loading} size={30} />
+                  </LoadingWrapper>
+                )}
                 <CloseIconWrapper
                   onClick={() => {
                     st.setLogin(false);
@@ -493,12 +512,16 @@ const Header = () => {
                 <UserAvatar src={st.userData.user_avatar}></UserAvatar>
               </UserAvatarActive>
             </UserAvatarWrapper>
-            <UserInfoWrapper onClick={toggleSwitch}>
+            <UserInfoWrapper
+              onClick={() => setToggle((prevToggle) => !prevToggle)}
+            >
               <FontAwesomeIcon
                 icon={faAngleDown}
                 style={{ pointerEvents: "none" }}
               />
-              {st.toggle && <PopWindow location="userInfo" />}
+              {toggle && (
+                <PopWindow location="userInfo" setToggle={setToggle} />
+              )}
             </UserInfoWrapper>
           </UserIconWrapper>
         </>
@@ -508,3 +531,5 @@ const Header = () => {
 };
 
 export default Header;
+
+export { LoadingWrapper };

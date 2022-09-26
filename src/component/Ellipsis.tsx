@@ -10,56 +10,19 @@ interface Props {
 
 const Wrapper = styled.div<Props>`
   position: relative;
-  width: ${(props) =>
-    props.roundSize === "48px"
-      ? "48px"
-      : props.roundSize === "32px"
-      ? "32px"
-      : "24px"};
-
-  height: ${(props) =>
-    props.roundSize === "48px"
-      ? "48px"
-      : props.roundSize === "32px"
-      ? "32px"
-      : "24px"};
-  padding: ${(props) =>
-    props.roundSize === "48px"
-      ? "14px"
-      : props.roundSize === "32px"
-      ? "8px"
-      : "6px"};
-
-  font-size: ${(props) =>
-    props.roundSize === "48px"
-      ? "20px"
-      : props.roundSize === "32px"
-      ? "16px"
-      : "12px"};
-  color: ${(props) =>
-    props.roundSize === "48px"
-      ? "black"
-      : props.roundSize === "32px"
-      ? "black"
-      : "grey"};
-  background-color: ${(props) =>
-    props.roundSize === "48px"
-      ? "#fff"
-      : props.roundSize === "32px"
-      ? "lightgrey"
-      : "#fff"};
+  width: ${(props) => (props.roundSize === "48px" ? "48px" : "24px")};
+  height: ${(props) => (props.roundSize === "48px" ? "48px" : "24px")};
+  padding: ${(props) => (props.roundSize === "48px" ? "14px" : "6px")};
+  font-size: ${(props) => (props.roundSize === "48px" ? "20px" : "12px")};
+  color: ${(props) => (props.roundSize === "48px" ? "black" : "grey")};
+  background-color: #fff;
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   border-radius: 50%;
   &:hover {
-    background-color: ${(props) =>
-      props.roundSize === "48px"
-        ? "lightgrey"
-        : props.roundSize === "32px"
-        ? "white"
-        : "lightgrey"};
+    background-color: #e9e9e9;
   }
 `;
 
@@ -77,15 +40,12 @@ const Ellipsis = ({
   authorId?: string;
 }) => {
   const [editOrDelete, setEditOrDelete] = useState(false);
+  console.log(editOrDelete);
   return (
     <Wrapper
       onClick={(e) => {
         e.stopPropagation();
-        if (editOrDelete) {
-          setEditOrDelete(false);
-          return;
-        }
-        setEditOrDelete(true);
+        setEditOrDelete((pre) => !pre);
       }}
       roundSize={roundSize}
     >
@@ -98,12 +58,6 @@ const Ellipsis = ({
             deleteTag={deleteTag}
             setEditOrDelete={setEditOrDelete}
           />
-        ) : (
-          ""
-        )
-      ) : roundSize === "32px" ? (
-        editOrDelete ? (
-          <PopWindow location="pin" setEditOrDelete={setEditOrDelete} />
         ) : (
           ""
         )

@@ -17,11 +17,7 @@ const PinCard = styled.div<Props>`
   background-color: lightgrey;
   background-image: url(${(props) => props.postSrc});
   background-size: cover;
-  // background-position: center;
-  // background-repeat: no-repeat;
-
   position: relative;
-  overflow: hidden;
   cursor: pointer;
   grid-row-end: ${(props) =>
     props.card === "small"
@@ -40,6 +36,7 @@ const HoverBackground = styled.div`
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.5);
+  border-radius: 16px;
 `;
 
 const CollectPosition = styled.div`
@@ -48,11 +45,6 @@ const CollectPosition = styled.div`
   top: 12px;
 `;
 
-const EllipsisPosition = styled.div`
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-`;
 
 const Pin = ({
   size,
@@ -83,9 +75,6 @@ const Pin = ({
           <CollectPosition>
             <Collect postId={postId} initStatus={initStatus} />
           </CollectPosition>
-          <EllipsisPosition>
-            <Ellipsis roundSize={"32px"} />
-          </EllipsisPosition>
         </HoverBackground>
       )}
     </PinCard>

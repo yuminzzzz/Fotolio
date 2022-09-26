@@ -83,7 +83,7 @@ const AuthorAvatar = styled.img`
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background-color: #fff;
+  background-color: #e9e9e9;
 `;
 
 const AuthorName = styled.p`
@@ -119,6 +119,7 @@ const UserAvatar = styled.img`
   height: 48px;
   background-color: #fff;
   border-radius: 50%;
+  background-color: #e9e9e9;
 `;
 
 const Post = () => {
@@ -170,6 +171,7 @@ const Post = () => {
       setPost(postData);
     };
     const getMessage = async () => {
+      st.setMessage([]);
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: DocumentData[] = [];
@@ -179,7 +181,7 @@ const Post = () => {
         }
       });
       let sortArr = arr.sort(function (arrA, arrB) {
-        return arrA.uploaded_time.seconds - arrB.uploaded_time.seconds;
+        return arrA.uploaded_time - arrB.uploaded_time;
       });
       st.setMessage(sortArr);
     };
@@ -187,6 +189,7 @@ const Post = () => {
     getPost();
     getMessage();
   }, []);
+
   useEffect(() => {
     setComment(st.message.length);
   }, [st.message]);
@@ -197,8 +200,8 @@ const Post = () => {
       if (item.post_id === postId) {
         arr = [...arr, item.tag];
       }
-      setPostTags(arr);
     });
+    setPostTags(arr);
   }, []);
 
   const initStatus = st.userCollections.some(
@@ -247,7 +250,7 @@ const Post = () => {
                     comment_id: string;
                     message: string;
                     post_id: string;
-                    uploaded_time: { seconds: number; nanoseconds: number };
+                    uploaded_time: number;
                     user_avatar: string;
                     user_id: string;
                     user_name: string;

@@ -74,13 +74,13 @@ const Comment = ({
   authorId: string;
   userAvatar: string;
   setTargetComment: Dispatch<SetStateAction<string>>;
-  uploadedTime: { seconds: number; nanoseconds: number };
+  uploadedTime: number;
 }) => {
   const st: any = useContext(GlobalContext);
   const [time, setTime] = useState("");
 
   useEffect(() => {
-    const commentTime = new Date(uploadedTime.seconds * 1000);
+    const commentTime = new Date(uploadedTime);
     const nowTime = new Date();
 
     let commentYear = commentTime.getFullYear();
@@ -105,32 +105,30 @@ const Comment = ({
               if (commentSec === sec) {
                 setTime("1s");
               } else {
-                let time = sec - commentSec;
-                setTime(`${time}s`);
+                let currentTime = sec - commentSec;
+                setTime(`${currentTime}s`);
               }
             } else {
-              let time = min - commentMin;
-              setTime(`${time}m`);
+              let currentTime = min - commentMin;
+              setTime(`${currentTime}m`);
             }
           } else {
-            let time = hour - commentHour;
-            setTime(`${time}h`);
+            let currentTime = hour - commentHour;
+            setTime(`${currentTime}h`);
           }
         } else {
-          let time = day - commentDay;
-          setTime(`${time}d`);
+          let currentTime = day - commentDay;
+          setTime(`${currentTime}d`);
         }
       } else {
-        let time = month - commentMonth;
-        setTime(`${time}mon`);
+        let currentTime = month - commentMonth;
+        setTime(`${currentTime}mon`);
       }
-  } else {
-      let time = year - commentYear;
-      setTime(`${time}y`);
+    } else {
+      let currentTime = year - commentYear;
+      setTime(`${currentTime}y`);
     }
-
   }, []);
-
 
   return (
     <Wrapper>

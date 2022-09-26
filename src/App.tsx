@@ -101,7 +101,6 @@ export interface Message {
 function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
-  const [toggle, setToggle] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [allPost, setAllPost] = useState<Post[]>([]);
   const [userPost, setUserPost] = useState<Post[]>([]);
@@ -114,6 +113,7 @@ function App() {
   });
   const [message, setMessage] = useState<Message[]>([]);
   const [allTags, setAllTags] = useState<{ tag: string; postId: string }[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
@@ -125,8 +125,6 @@ function App() {
     setLogin,
     register,
     setRegister,
-    toggle,
-    setToggle,
     userData,
     setUserData,
     isLogged,
@@ -142,6 +140,8 @@ function App() {
     setMessage,
     allTags,
     setAllTags,
+    loading,
+    setLoading,
   };
 
   useEffect(() => {
@@ -162,7 +162,6 @@ function App() {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         const getUserInfo = async () => {
-          console.log("shouldn't be here");
           const docSnap: DocumentData = await getDoc(
             doc(db, `users/${user.uid}`)
           );
@@ -189,7 +188,6 @@ function App() {
 
   useEffect(() => {
     const getAllPost = async () => {
-      console.log("shouldn't be here");
       const userPost = await getDocs(collectionGroup(db, "user_posts"));
       let arr: Post[] = [];
       userPost.forEach((item: DocumentData) => {
@@ -202,7 +200,6 @@ function App() {
 
   useEffect(() => {
     const getPost = async () => {
-      console.log("shouldn't be here");
       if (!userData.user_id) return;
       const userPost = await getDocs(
         collection(db, `/users/${userData.user_id}/user_posts`)
@@ -214,7 +211,6 @@ function App() {
       setUserPost(arr);
     };
     const getCollect = async () => {
-      console.log("shouldn't be here");
       if (!userData.user_id) return;
       const userPost = await getDocs(
         collection(db, `/users/${userData.user_id}/user_collections`)
