@@ -170,6 +170,8 @@ const Post = () => {
       setPost(postData);
     };
     const getMessage = async () => {
+      console.log("happened once");
+      st.setMessage([]);
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: DocumentData[] = [];
@@ -179,7 +181,7 @@ const Post = () => {
         }
       });
       let sortArr = arr.sort(function (arrA, arrB) {
-        return arrA.uploaded_time.seconds - arrB.uploaded_time.seconds;
+        return arrA.uploaded_time - arrB.uploaded_time;
       });
       st.setMessage(sortArr);
     };
@@ -187,6 +189,7 @@ const Post = () => {
     getPost();
     getMessage();
   }, []);
+
   useEffect(() => {
     setComment(st.message.length);
   }, [st.message]);
@@ -197,10 +200,10 @@ const Post = () => {
       if (item.post_id === postId) {
         arr = [...arr, item.tag];
       }
-      setPostTags(arr);
     });
+    setPostTags(arr);
   }, []);
-
+  console.log(st.message);
   const initStatus = st.userCollections.some(
     (item: Post) => item.post_id === postId
   );
@@ -247,7 +250,7 @@ const Post = () => {
                     comment_id: string;
                     message: string;
                     post_id: string;
-                    uploaded_time: { seconds: number; nanoseconds: number };
+                    uploaded_time: number;
                     user_avatar: string;
                     user_id: string;
                     user_name: string;
@@ -324,3 +327,6 @@ const Post = () => {
 };
 
 export default Post;
+function newDate(arg0: number) {
+  throw new Error("Function not implemented.");
+}

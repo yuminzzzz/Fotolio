@@ -113,7 +113,7 @@ const EditTextButton = ({
         user_name: st.userData.user_name,
         user_avatar: st.userData.user_avatar,
         message: response,
-        uploaded_time: serverTimestamp(),
+        uploaded_time: Date.now(),
       };
       st.setMessage((pre: Message[]) => {
         return [...pre, data];

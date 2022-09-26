@@ -74,13 +74,13 @@ const Comment = ({
   authorId: string;
   userAvatar: string;
   setTargetComment: Dispatch<SetStateAction<string>>;
-  uploadedTime: { seconds: number; nanoseconds: number };
+  uploadedTime: number;
 }) => {
   const st: any = useContext(GlobalContext);
   const [time, setTime] = useState("");
 
   useEffect(() => {
-    const commentTime = new Date(uploadedTime.seconds * 1000);
+    const commentTime = new Date(uploadedTime);
     const nowTime = new Date();
 
     let commentYear = commentTime.getFullYear();
@@ -96,8 +96,6 @@ const Comment = ({
     let hour = nowTime.getHours();
     let min = nowTime.getMinutes();
     let sec = nowTime.getSeconds();
-
-    console.log(uploadedTime);
 
     if (commentYear === year) {
       if (commentMonth === month) {
