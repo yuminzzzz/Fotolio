@@ -51,6 +51,7 @@ const UserAccountAvatar = styled.img`
   width: 60px;
   height: 60px;
   border-radius: 50%;
+  background-color: #e9e9e9;
 `;
 
 const UserAccountName = styled.p`

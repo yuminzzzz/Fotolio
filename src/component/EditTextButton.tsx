@@ -150,6 +150,7 @@ const EditTextButton = ({
 
   const deletePost = async () => {
     st.setAllPost(st.updateState(st.allPost, postId));
+    navigate("/home");
     st.setUserPost(st.updateState(st.userPost, postId));
     st.setUserCollections(st.updateState(st.userCollections, postId));
     st.setAllTags(st.updateState(st.allTags, postId));
@@ -169,7 +170,6 @@ const EditTextButton = ({
       }
     });
     Promise.all(deletePromise);
-    navigate("/home");
   };
   return (
     <ButtonContainer>

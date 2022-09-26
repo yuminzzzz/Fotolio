@@ -7,11 +7,16 @@ import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
-import styled from "styled-components";
+import styled, { css, keyframes } from "styled-components";
+
 import Input from "./Input";
 import { Navigate } from "react-router-dom";
+import { LoadingWrapper } from "../../component/Header/Header";
+import ClipLoader from "react-spinners/ClipLoader";
+
 interface Props {
   isUploadPage?: boolean;
+  isUploaded?: boolean;
 }
 
 const OutsideWrapper = styled.div<Props>`
@@ -26,6 +31,7 @@ const OutsideWrapper = styled.div<Props>`
 `;
 
 const Wrapper = styled.div<Props>`
+  position: relative;
   display: flex;
   border-radius: ${(props) => (props.isUploadPage ? "16px" : "32px")};
   box-shadow: rgb(0 0 0 / 10%) 0px 1px 20px 0px;
@@ -143,6 +149,7 @@ const AuthorAvatar = styled.img`
   width: 48px;
   height: 48px;
   border-radius: 50%;
+  background-color: #e9e9e9;
 `;
 
 const AuthorName = styled.p`
@@ -180,6 +187,41 @@ const ActiveUploadButton = styled(UploadButton)`
   }
 `;
 
+const test = keyframes`
+  0% {
+    opacity: 0;
+    transform: translateY(100px);
+  }
+  20% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(0px);
+  }
+`;
+
+const animate = css`
+  animation: ${test} 3s ease-in;
+`;
+
+const PromptButton = styled.button<Props>`
+  background-color: black;
+  padding: 16px;
+  color: #fff;
+  border-radius: 32px;
+  border: none;
+  font-weight: 300;
+  position: absolute;
+  bottom: 60px;
+  ${(props) => (props.isUploaded ? animate : "")};
+`;
+
 const Upload = () => {
   const [uploadData, setUploadData] = useState<{
     title: string;
@@ -191,11 +233,13 @@ const Upload = () => {
     file: "",
   });
   const [localTags, setLocalTags] = useState<string[]>([]);
+  const [animate, setAnimate] = useState(false);
   const isValid = Object.values(uploadData).every((item) => item !== "");
   const st: any = useContext(GlobalContext);
   const storage = getStorage(app);
   const post = async () => {
     try {
+      st.setLoading(true);
       const docRef = doc(
         collection(db, `users/${st.userData.user_id}/user_posts`)
       );
@@ -215,18 +259,16 @@ const Upload = () => {
               return { tag: item, post_id: docRef.id };
             }),
           };
-
           st.setAllPost((pre: Post[]) => {
             return [...pre, data];
           });
           st.setUserPost((pre: Post[]) => {
             return [...pre, data];
           });
-
           if (localTags.length > 0) {
             localTags.forEach((item) => {
               st.setAllTags((pre: { tag: string; postId: string }[]) => {
-                return [...pre, { tag: item, postId: docRef.id }];
+                return [...pre, { tag: item, post_id: docRef.id }];
               });
             });
           }
@@ -235,16 +277,18 @@ const Upload = () => {
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`
           );
           setDoc(postDocRef, data);
+          st.setLoading(false);
+          setAnimate(true);
+          setTimeout(() => {
+            setAnimate(false);
+          }, 2900);
+          setUploadData({
+            file: "",
+            title: "",
+            description: "",
+          });
+          setLocalTags([]);
         });
-
-        alert("上傳成功");
-
-        setUploadData({
-          file: "",
-          title: "",
-          description: "",
-        });
-        setLocalTags([]);
       });
     } catch (e) {
       console.error("Error adding document: ", e);
@@ -277,6 +321,11 @@ const Upload = () => {
     return (
       <OutsideWrapper>
         <Wrapper isUploadPage={true}>
+          {st.loading && (
+            <LoadingWrapper>
+              <ClipLoader color="orange" loading={st.loading} size={30} />
+            </LoadingWrapper>
+          )}
           <PreviewWrapper>
             <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
             {!uploadData.file && (
@@ -369,6 +418,7 @@ const Upload = () => {
             </ButtonWrapper>
           </ContentSection>
         </Wrapper>
+        {animate && <PromptButton isUploaded={true}>已成功上傳</PromptButton>}
       </OutsideWrapper>
     );
   }

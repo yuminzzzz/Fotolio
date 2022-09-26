@@ -113,6 +113,7 @@ function App() {
   });
   const [message, setMessage] = useState<Message[]>([]);
   const [allTags, setAllTags] = useState<{ tag: string; postId: string }[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const updateState = (data: Post[], postId: string) => {
     return data.filter((item: Post) => item.post_id !== postId);
@@ -139,6 +140,8 @@ function App() {
     setMessage,
     allTags,
     setAllTags,
+    loading,
+    setLoading,
   };
 
   useEffect(() => {
