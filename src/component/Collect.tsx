@@ -8,14 +8,8 @@ import {
   getDocs,
   collectionGroup,
 } from "firebase/firestore";
-import {
-  Dispatch,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useState,
-} from "react";
-import { GlobalContext } from "../App";
+import { useContext, useState } from "react";
+import { GlobalContext, Post } from "../App";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -46,11 +40,9 @@ const CollectedButton = styled(CollectButton)`
 const Collect = ({
   postId,
   initStatus,
-  setInitStatus,
 }: {
   postId: string;
   initStatus: boolean;
-  setInitStatus: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
   const [isSaved, setIsSaved] = useState(initStatus);
@@ -61,10 +53,19 @@ const Collect = ({
       `/users/${st.userData.user_id}/user_collections/${postId}`
     );
     if (isSaved) {
-      deleteDoc(collectionRef);
       setIsSaved(false);
-      setInitStatus(false);
+      // st.setRandomSwitch(false);
+      st.setUserCollections(st.updateState(st.userCollections, postId));
+      deleteDoc(collectionRef);
     } else {
+      setIsSaved(true);
+      // st.setRandomSwitch(false);
+      const newCollect = st.allPost.find(
+        (item: Post) => item.post_id === postId
+      );
+      st.setUserCollections((pre: Post[]) => {
+        return [...pre, newCollect];
+      });
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
       let postData;
@@ -74,8 +75,6 @@ const Collect = ({
         }
       });
       setDoc(collectionRef, postData);
-      setIsSaved(true);
-      setInitStatus(true);
     }
   };
 

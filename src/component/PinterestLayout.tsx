@@ -1,15 +1,6 @@
-import { useEffect, useState, useContext } from "react";
-import { GlobalContext } from "../App";
-
+import { useContext, useMemo } from "react";
+import { GlobalContext, Post } from "../App";
 import Pin from "./Pin";
-import { db } from "../utils/firebase";
-import {
-  getDocs,
-  collection,
-  DocumentData,
-  collectionGroup,
-  onSnapshot,
-} from "firebase/firestore";
 import styled from "styled-components";
 
 const PinContainer = styled.div`
@@ -24,76 +15,30 @@ const PinContainer = styled.div`
   grid-auto-rows: 10px;
   justify-content: center;
 `;
-let isMounted = true;
-let arr: string[];
-let random: number;
-const PinterestLayout = ({ location }: { location: string }) => {
-  interface Post {
-    author_avatar: string;
-    author_id: string;
-    author_name: string;
-    created_time: { seconds: number; nanoseconds: number };
-    description: string;
-    post_id: string;
-    title: string;
-    url: string;
-  }
-  const [post, setPost] = useState<Post[]>([]);
+
+let arr: string[] = ["small", "medium", "large"];
+
+const PinterestLayout = ({ post }: { post: Post[] }) => {
   const st: any = useContext(GlobalContext);
-  useEffect(() => {
-    setPost([]);
-    isMounted = true;
-    const getPost = async () => {
-      if (location === "home") {
-        const userPost = collectionGroup(db, "user_posts");
-        const unsubscirbe = onSnapshot(userPost, (querySnapshot) => {
-          let arr: Post[] = [];
-          querySnapshot.forEach((doc: DocumentData) => {
-            arr.push(doc.data());
-          });
-          arr.sort(() => Math.random() - 0.5);
-          setPost(arr);
-        });
-      } else if (location === "build") {
-        const userPost = await getDocs(
-          collection(db, `/users/${st.userData.user_id}/user_posts`)
-        );
-        let arr: Post[] = [];
-        userPost.forEach((item: DocumentData) => {
-          arr.push(item.data());
-        });
-        setPost(arr);
-      } else if (location === "saved") {
-        const q = collection(
-          db,
-          `/users/${st.userData.user_id}/user_collections`
-        );
-        const unsubscribe = onSnapshot(q, (querySnapshot) => {
-          let arr: Post[] = [];
-          querySnapshot.forEach((doc: DocumentData) => {
-            arr.push(doc.data());
-          });
-          setPost(arr);
-        });
-      }
-    };
-    getPost();
-  }, [location]);
+  const random = useMemo(() => {
+    return Array(post.length)
+      .fill(null)
+      .map((item) => Math.floor(Math.random() * 3));
+  }, [post]);
 
   return (
     <PinContainer>
-      {post.map((item) => {
-        if (isMounted) {
-          arr = ["small", "medium", "large"];
-          random = Math.floor(Math.random() * 3);
-          isMounted = false;
-        }
+      {post.map((item, index) => {
+        const initStatus = st.userCollections.some(
+          (doc: Post) => doc.post_id === item.post_id
+        );
         return (
           <Pin
-            size={arr[random]}
+            size={arr[random[index]]}
             key={item.post_id}
             postId={item.post_id}
             postSrc={item.url}
+            initStatus={initStatus}
           />
         );
       })}

@@ -1,5 +1,5 @@
-import React, { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext } from "../App";
+import { Dispatch, SetStateAction, useState, useContext } from "react";
+import { GlobalContext, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -17,8 +17,8 @@ const EditWrapper = styled.div<Props>`
   background-color: #ffffff;
   z-index: 2;
   min-width: 182px;
-  top: ${(props) => (props.userInfo ? "30px" : "50px")};
-  left: ${(props) => (props.userInfo ? "" : "-80px")};
+  top: ${(props) => (props.userInfo ? "30px" : "0px")};
+  left: ${(props) => (props.userInfo ? "" : "70px")};
   right: ${(props) => (props.userInfo ? "-18px" : "")};
   border: solid 1px lightgrey;
   border-radius: 20px;
@@ -51,6 +51,7 @@ const UserAccountAvatar = styled.img`
   width: 60px;
   height: 60px;
   border-radius: 50%;
+  background-color: #e9e9e9;
 `;
 
 const UserAccountName = styled.p`
@@ -72,6 +73,7 @@ const PopWindow = ({
   deleteTag,
   setTargetComment,
   authorId,
+  setToggle,
 }: {
   location: string;
   commentId?: string;
@@ -79,6 +81,7 @@ const PopWindow = ({
   deleteTag?: boolean;
   setTargetComment?: Dispatch<SetStateAction<string>>;
   authorId?: string;
+  setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
@@ -86,10 +89,14 @@ const PopWindow = ({
   const storage = getStorage();
   const postId = useParams().id;
   const deleteComment = async () => {
+    setEditOrDelete && setEditOrDelete(false);
+    const updatedComment = st.message.filter(
+      (item: Message) => item.comment_id !== commentId
+    );
+    st.setMessage(updatedComment);
     await deleteDoc(
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
-    setEditOrDelete && setEditOrDelete(false);
   };
   const downloadImg = async () => {
     const gsReference = ref(
@@ -128,6 +135,7 @@ const PopWindow = ({
     signOut(auth)
       .then(() => {
         st.setToggle(false);
+        st.setAllTags([]);
         navigate("/");
       })
       .catch((error) => {
@@ -189,7 +197,9 @@ const PopWindow = ({
           e.stopPropagation();
         }}
       >
-        <EditButton>下載圖片</EditButton>
+        <EditButton onClick={downloadImg} id="download">
+          下載圖片
+        </EditButton>
       </EditWrapper>
     );
   } else if (location === "userInfo") {
@@ -202,7 +212,7 @@ const PopWindow = ({
       >
         <EditButton
           onClick={() => {
-            st.setToggle(false);
+            setToggle && setToggle(false);
             navigate("/profile");
           }}
         >
@@ -222,7 +232,14 @@ const PopWindow = ({
             </div>
           </UserAccountWrapper>
         </EditButton>
-        <EditButton onClick={logout}>登出</EditButton>
+        <EditButton
+          onClick={() => {
+            setToggle && setToggle(false);
+            logout();
+          }}
+        >
+          登出
+        </EditButton>
       </EditWrapper>
     );
   } else {

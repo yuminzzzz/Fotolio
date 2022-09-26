@@ -1,4 +1,4 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
 import { GlobalContext } from "../../App";
 import styled from "styled-components";
@@ -8,17 +8,20 @@ import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+import ClipLoader from "react-spinners/ClipLoader";
 import PopWindow from "../PopWindow";
 import { auth, db } from "../../utils/firebase";
 import {
   createUserWithEmailAndPassword,
-  onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { setDoc, doc, getDoc, DocumentData } from "firebase/firestore";
+import { setDoc, doc } from "firebase/firestore";
 
 interface Props {
-  isProfile: boolean;
+  isProfile?: boolean;
+  isFocus?: boolean;
 }
 
 const Wrapper = styled.div`
@@ -50,9 +53,9 @@ const Logo = styled.img`
   }
 `;
 
-const LogoName = styled.h1`
-  line-height: 24px;
-  font-size: 24px;
+const LogoName = styled.h2`
+  line-height: 23px;
+  font-size: 23px;
   font-weight: 500;
   margin-left: 8px;
   color: orange;
@@ -88,12 +91,12 @@ const UserAvatar = styled.img`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
+  transform: translate(-51%, -51%);
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  // object-fit: cover;
   z-index: 998;
+  background-color: #e9e9e9;
 `;
 
 const UserInfoWrapper = styled.div`
@@ -107,6 +110,64 @@ const UserInfoWrapper = styled.div`
   cursor: pointer;
   &:hover {
     background-color: #efefef;
+  }
+`;
+
+const SearchWrapper = styled.div`
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background-color: #e9e9e9;
+  border: none;
+  border-radius: 24px;
+  margin: 0 8px;
+  padding-left: 16px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  &:hover {
+    background-color: rgb(225, 225, 225);
+  }
+`;
+
+const SearchInputForm = styled.form`
+  width: 100%;
+  height: 100%;
+`;
+
+const SearchInput = styled.input<Props>`
+  position: ${(props) => (props.isFocus ? "absolute" : "")};
+  padding-left: ${(props) => (props.isFocus ? "16px" : "0")};
+  left: 0;
+  top: 0;
+  border-radius: 24px;
+  background-color: inherit;
+  font-size: 16px;
+  width: 100%;
+  height: 100%;
+  border: none;
+  font-weight: 300;
+  ::placeholder {
+    font-weight: 300;
+    height: 100%;
+    line-height: 100%;
+  }
+`;
+
+const DeleteSearchIcon = styled.div`
+  position: absolute;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
+  cursor: pointer;
+  &:hover {
+    background-color: lightgrey;
   }
 `;
 
@@ -131,6 +192,19 @@ const LoginContainer = styled.div`
   align-items: center;
   flex-direction: column;
   border-radius: 24px;
+  overflow: hidden;
+`;
+
+const LoadingWrapper = styled.div`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgb(255, 252, 247, 0.4);
 `;
 
 const LoginLogo = styled(Logo)`
@@ -203,18 +277,12 @@ const RegisterPrompt = styled.p`
 `;
 
 const Header = () => {
-  const [isLogged, setIsLogged] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mouseDown, setMouseDown] = useState(false);
-  const toggleSwitch = () => {
-    if (st.toggle) {
-      st.setToggle(false);
-    } else {
-      st.setToggle(true);
-    }
-  };
+  const [focus, setFocus] = useState(false);
+  const [search, setSearch] = useState("");
+  const [toggle, setToggle] = useState(false);
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
   let isProfile = false;
@@ -223,9 +291,9 @@ const Header = () => {
   }
 
   const register = () => {
+    st.setLoading(true);
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed in
         const user = userCredential.user;
         const userId = user.uid;
         const docRef = doc(db, `users/${userId}`);
@@ -234,16 +302,17 @@ const Header = () => {
           user_name: name,
           user_email: email,
           user_avatar:
-            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pexels-magda-ehlers-1345814.jpg?alt=media&token=b389054f-0e1a-4840-85e2-3a534d62a978",
+            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pushed-brands.png?alt=media&token=a4dc7827-4de6-4d08-84a6-dc4952a92133",
         };
         setDoc(docRef, data);
         navigate("/home");
+        st.setLoading(false);
         setEmail("");
         setPassword("");
         setName("");
       })
       .catch((error) => {
-        //FIXBUG
+        st.setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
@@ -259,13 +328,17 @@ const Header = () => {
   };
 
   const login = () => {
+    st.setLoading(true);
     if (email === "" && password === "") return;
     signInWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
+        st.setLoading(false);
+        navigate("/home");
         setEmail("");
         setPassword("");
       })
       .catch((error) => {
+        st.setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         //FIXBUG
@@ -281,54 +354,25 @@ const Header = () => {
       });
   };
 
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        // get user data and store it into state
-        const docSnap: DocumentData = await getDoc(
-          doc(db, `users/${user.uid}`)
-        );
-        const data = docSnap.data();
-        st.setUserData({
-          user_avatar: data.user_avatar,
-          user_email: data.user_email,
-          user_id: data.user_id,
-          user_name: data.user_name,
-        });
-        setIsLogged(true);
-        navigate("/home");
-      } else {
-        st.setLogin(false);
-        st.setRegister(false);
-        setIsLogged(false);
-        navigate("/");
-      }
-    });
-  }, [isLogged]);
-
   return (
     <Wrapper>
       <LogoWrapper>
-        {!isLogged && (
+        {!st.isLogged && (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
         )}
-
-        {isLogged && (
+        {st.isLogged && (
           <>
-            <Logo
-              src={logo}
-              onClick={() => navigate("/home")}
-            ></Logo>
+            <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
               <EditTextButton buttonTag={"logged"} />
             </div>
           </>
         )}
       </LogoWrapper>
-      {!isLogged ? (
+      {!st.isLogged ? (
         <>
           <div style={{ marginTop: "-10px" }}>
             <EditTextButton buttonTag={"login"} />
@@ -336,6 +380,11 @@ const Header = () => {
           {st.login && (
             <LoginWrapper>
               <LoginContainer>
+                {st.loading && (
+                  <LoadingWrapper>
+                    <ClipLoader color="orange" loading={st.loading} size={30} />
+                  </LoadingWrapper>
+                )}
                 <CloseIconWrapper
                   onClick={() => {
                     st.setLogin(false);
@@ -415,23 +464,72 @@ const Header = () => {
           )}
         </>
       ) : (
-        <UserIconWrapper>
-          <UserAvatarWrapper onClick={() => navigate("/profile")}>
-            <UserAvatarActive isProfile={isProfile}>
-              <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-            </UserAvatarActive>
-          </UserAvatarWrapper>
-          <UserInfoWrapper onClick={toggleSwitch}>
-            <FontAwesomeIcon
-              icon={faAngleDown}
-              style={{ pointerEvents: "none" }}
-            />
-            {st.toggle && <PopWindow location="userInfo" />}
-          </UserInfoWrapper>
-        </UserIconWrapper>
+        <>
+          <SearchWrapper>
+            {!focus && (
+              <FontAwesomeIcon
+                icon={faMagnifyingGlass}
+                style={{ color: "767676", zIndex: "1", marginRight: "8px" }}
+              />
+            )}
+            <SearchInputForm
+              onSubmit={(e) => {
+                e.preventDefault();
+                navigate(`/search/${search}`);
+              }}
+            >
+              <SearchInput
+                placeholder="搜尋"
+                isFocus={focus}
+                onFocus={() => {
+                  setFocus(true);
+                }}
+                onBlur={(e) => {
+                  setFocus(false);
+                  e.target.value = "";
+                }}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                }}
+              ></SearchInput>
+            </SearchInputForm>
+            {focus && (
+              <DeleteSearchIcon>
+                <FontAwesomeIcon
+                  icon={faCircleXmark}
+                  style={{
+                    pointerEvents: "none",
+                    zIndex: "3",
+                    fontSize: "20px",
+                  }}
+                />
+              </DeleteSearchIcon>
+            )}
+          </SearchWrapper>
+          <UserIconWrapper>
+            <UserAvatarWrapper onClick={() => navigate("/profile")}>
+              <UserAvatarActive isProfile={isProfile}>
+                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+              </UserAvatarActive>
+            </UserAvatarWrapper>
+            <UserInfoWrapper
+              onClick={() => setToggle((prevToggle) => !prevToggle)}
+            >
+              <FontAwesomeIcon
+                icon={faAngleDown}
+                style={{ pointerEvents: "none" }}
+              />
+              {toggle && (
+                <PopWindow location="userInfo" setToggle={setToggle} />
+              )}
+            </UserInfoWrapper>
+          </UserIconWrapper>
+        </>
       )}
     </Wrapper>
   );
 };
 
 export default Header;
+
+export { LoadingWrapper };
