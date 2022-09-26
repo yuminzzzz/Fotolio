@@ -1,4 +1,4 @@
-import React, { Dispatch, SetStateAction, useState, useContext } from "react";
+import { Dispatch, SetStateAction, useState, useContext } from "react";
 import { GlobalContext, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
@@ -88,7 +88,6 @@ const PopWindow = ({
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
-
   const deleteComment = async () => {
     setEditOrDelete && setEditOrDelete(false);
     const updatedComment = st.message.filter(
@@ -99,7 +98,6 @@ const PopWindow = ({
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
   };
-
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
@@ -199,7 +197,9 @@ const PopWindow = ({
           e.stopPropagation();
         }}
       >
-        <EditButton>下載圖片</EditButton>
+        <EditButton onClick={downloadImg} id="download">
+          下載圖片
+        </EditButton>
       </EditWrapper>
     );
   } else if (location === "userInfo") {
