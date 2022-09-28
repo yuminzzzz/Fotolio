@@ -242,6 +242,18 @@ const LoginLabel = styled.label`
   margin: 0 0 4px 8px;
 `;
 
+const LoginPrompt = styled.p`
+  color: red;
+  font-size: 12px;
+  margin: -10px 0 0 8px;
+`;
+
+const AccountPrompt = styled(LoginPrompt)``;
+
+const PasswordPrompt = styled(LoginPrompt)``;
+
+const NamePrompt = styled(LoginPrompt)``;
+
 const CloseIconWrapper = styled.div`
   width: 40px;
   height: 40px;
@@ -277,77 +289,121 @@ const RegisterPrompt = styled.p`
 `;
 
 const Header = () => {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [loginInfo, setLoginInfo] = useState({
+    name: "",
+    email: "",
+    password: "",
+  });
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
   const [toggle, setToggle] = useState(false);
+  const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
   }
-
+  console.log(loginInfo);
   const register = () => {
+    if (
+      loginInfo.email === "" &&
+      loginInfo.password === "" &&
+      loginInfo.name === ""
+    ) {
+      setErrorPrompt({
+        acctPWT: "輸入框內不可為空白",
+        name: "輸入框內不可為空白",
+      });
+      return;
+    }
     st.setLoading(true);
-    createUserWithEmailAndPassword(auth, email, password)
+    createUserWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         const user = userCredential.user;
         const userId = user.uid;
         const docRef = doc(db, `users/${userId}`);
         const data = {
           user_id: userId,
-          user_name: name,
-          user_email: email,
+          user_name: loginInfo.name,
+          user_email: loginInfo.email,
           user_avatar:
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pushed-brands.png?alt=media&token=a4dc7827-4de6-4d08-84a6-dc4952a92133",
         };
         setDoc(docRef, data);
         navigate("/home");
         st.setLoading(false);
-        setEmail("");
-        setPassword("");
-        setName("");
+        setLoginInfo({ name: "", email: "", password: "" });
       })
       .catch((error) => {
         st.setLoading(false);
+        if (loginInfo.name === "") {
+          setErrorPrompt((pre) => {
+            return { ...pre, name: "輸入框內不可為空白" };
+          });
+        }
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
           case "auth/email-already-in-use":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "此帳號已被使用" };
+            });
             break;
           case "auth/invalid-email":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "請輸入完整帳號" };
+            });
             break;
           case "auth/weak-password":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "密碼強度不足" };
+            });
             break;
           default:
         }
       });
   };
-
   const login = () => {
+    if (loginInfo.email === "" && loginInfo.password === "") {
+      setErrorPrompt((pre) => {
+        return { ...pre, acctPWT: "輸入框內不可為空白" };
+      });
+      return;
+    }
     st.setLoading(true);
-    if (email === "" && password === "") return;
-    signInWithEmailAndPassword(auth, email, password)
+    signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         st.setLoading(false);
         navigate("/home");
-        setEmail("");
-        setPassword("");
+        setLoginInfo((pre) => {
+          return { ...pre, email: "", password: "" };
+        });
       })
       .catch((error) => {
         st.setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
-        //FIXBUG
         switch (error.code) {
           case "auth/invalid-email":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "請輸入完整帳號" };
+            });
             break;
           case "auth/user-not-found":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "查無此帳號" };
+            });
+            break;
+          case "auth/internal-error":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "請輸入密碼" };
+            });
             break;
           case "auth/wrong-password":
+            setErrorPrompt((pre) => {
+              return { ...pre, acctPWT: "密碼輸入錯誤" };
+            });
             break;
           default:
         }
@@ -418,33 +474,65 @@ const Header = () => {
                   <LoginInput
                     id="email"
                     placeholder="電子郵件"
-                    value={email}
+                    value={loginInfo.email}
+                    onFocus={() => {
+                      setErrorPrompt({ acctPWT: "", name: "" });
+                    }}
                     onChange={(e) => {
-                      setEmail(e.target.value);
+                      setLoginInfo((pre) => {
+                        return { ...pre, email: e.target.value };
+                      });
                     }}
                     autoFocus
                   />
+                  {(errorPrompt.acctPWT === "請輸入完整帳號" ||
+                    errorPrompt.acctPWT === "查無此帳號" ||
+                    errorPrompt.acctPWT === "此帳號已被使用" ||
+                    errorPrompt.acctPWT === "輸入框內不可為空白") && (
+                    <AccountPrompt>{errorPrompt.acctPWT}</AccountPrompt>
+                  )}
+
                   <LoginLabel htmlFor="password">密碼</LoginLabel>
                   <LoginInput
                     type="password"
                     id="password"
                     placeholder="密碼"
-                    value={password}
+                    value={loginInfo.password}
+                    onFocus={() => {
+                      setErrorPrompt({ acctPWT: "", name: "" });
+                    }}
                     onChange={(e) => {
-                      setPassword(e.target.value);
+                      setLoginInfo((pre) => {
+                        return { ...pre, password: e.target.value };
+                      });
                     }}
                   />
+                  {(errorPrompt.acctPWT === "請輸入密碼" ||
+                    errorPrompt.acctPWT === "密碼輸入錯誤" ||
+                    errorPrompt.acctPWT === "密碼強度不足" ||
+                    errorPrompt.acctPWT === "輸入框內不可為空白") && (
+                    <PasswordPrompt>{errorPrompt.acctPWT}</PasswordPrompt>
+                  )}
+
                   {st.register ? (
                     <>
                       <LoginLabel htmlFor="name">名字</LoginLabel>
                       <LoginInput
                         id="name"
                         placeholder="名字"
-                        value={name}
+                        value={loginInfo.name}
+                        onFocus={() => {
+                          setErrorPrompt({ acctPWT: "", name: "" });
+                        }}
                         onChange={(e) => {
-                          setName(e.target.value);
+                          setLoginInfo((pre) => {
+                            return { ...pre, name: e.target.value };
+                          });
                         }}
                       />
+                      {errorPrompt.name === "輸入框內不可為空白" && (
+                        <NamePrompt>{errorPrompt.name}</NamePrompt>
+                      )}
                       <LoginButton onClick={register}>繼續</LoginButton>
                       <RegisterPrompt onClick={() => st.setRegister(false)}>
                         已經有帳號了? 登入
