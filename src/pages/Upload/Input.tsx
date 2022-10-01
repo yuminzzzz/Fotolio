@@ -84,8 +84,8 @@ const Input = ({
         return pre.filter((_, index) => index !== deleteIndex);
       });
   };
-  const addTag = (e: { target: HTMLInputElement; key?: string }) => {
-    if (e.target.value !== "") {
+  const addTag = (e: { target: HTMLInputElement }) => {
+    if (e.target.value.trim() !== "") {
       setLocalTags && localTags && setLocalTags([...localTags, e.target.value]);
       e.target.value = "";
     }

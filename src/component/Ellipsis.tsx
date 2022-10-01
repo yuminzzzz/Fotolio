@@ -40,7 +40,6 @@ const Ellipsis = ({
   authorId?: string;
 }) => {
   const [editOrDelete, setEditOrDelete] = useState(false);
-  console.log(editOrDelete);
   return (
     <Wrapper
       onClick={(e) => {

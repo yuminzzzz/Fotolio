@@ -74,7 +74,7 @@ const Home = () => {
                   src={item}
                   style={{ cursor: "pointer" }}
                   onClick={() => st.setLogin(true)}
-                  alt="img"
+                  alt=""
                 />
               </SwiperSlide>
             );

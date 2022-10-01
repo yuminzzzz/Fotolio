@@ -3,20 +3,26 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext } from "../App";
 import Collect from "./Collect";
-import Ellipsis from "./Ellipsis";
 
 interface Props {
   card: string;
-  postSrc: string;
 }
 
 const PinCard = styled.div<Props>`
+  width: 230px;
+  height: ${(props) =>
+    props.card === "small"
+      ? "230px"
+      : props.card === "medium"
+      ? "300px"
+      : props.card === "large"
+      ? "420px"
+      : null};
   margin: 15px 10px;
   padding: 0;
   border-radius: 16px;
   background-color: lightgrey;
-  background-image: url(${(props) => props.postSrc});
-  background-size: cover;
+  overflow: hidden;
   position: relative;
   cursor: pointer;
   grid-row-end: ${(props) =>
@@ -27,6 +33,15 @@ const PinCard = styled.div<Props>`
       : props.card === "large"
       ? "span 45"
       : null};
+`;
+
+const PinImg = styled.img`
+  object-fit: cover;
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  top: 0;
+  left: 0;
 `;
 
 const HoverBackground = styled.div`
@@ -45,7 +60,6 @@ const CollectPosition = styled.div`
   top: 12px;
 `;
 
-
 const Pin = ({
   size,
   postId,
@@ -60,6 +74,33 @@ const Pin = ({
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
   const st: any = useContext(GlobalContext);
+
+  const images = document.querySelectorAll("[data-src]");
+  const preloadImage = (img: any) => {
+    const src = img.getAttribute("data-src");
+    if (!src) {
+      return;
+    }
+    img.src = src;
+  };
+
+  const imgOptions = {};
+
+  const imgObserver = new IntersectionObserver((entries, imgObserver) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) {
+        return;
+      } else {
+        preloadImage(entry.target);
+        imgObserver.unobserve(entry.target);
+      }
+    });
+  }, imgOptions);
+
+  images.forEach((image) => {
+    imgObserver.observe(image);
+  });
+
   return (
     <PinCard
       card={size}
@@ -68,8 +109,8 @@ const Pin = ({
       onClick={() => {
         navigate(`/posts/${postId}`);
       }}
-      postSrc={postSrc}
     >
+      <PinImg data-src={postSrc}></PinImg>
       {isHover && (
         <HoverBackground>
           <CollectPosition>

@@ -25,7 +25,6 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
       .fill(null)
       .map((item) => Math.floor(Math.random() * 3));
   }, [post]);
-
   return (
     <PinContainer>
       {post.map((item, index) => {

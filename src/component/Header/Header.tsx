@@ -304,7 +304,6 @@ const Header = () => {
   if (useLocation().pathname === "/profile") {
     isProfile = true;
   }
-  console.log(loginInfo);
   const register = () => {
     if (
       loginInfo.email === "" &&
@@ -413,13 +412,12 @@ const Header = () => {
   return (
     <Wrapper>
       <LogoWrapper>
-        {!st.isLogged && (
+        {!st.isLogged ? (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
-        )}
-        {st.isLogged && (
+        ) : (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>

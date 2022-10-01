@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -48,10 +48,23 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @-moz-document url-prefix() { 
+    html{
+      scrollbar-width: none;
+    }
   }
 
   body {
     font-family: "NotoSansTC";
+    margin: 0; 
+    scrollbar-width: none;
   }
 
   #root {
@@ -158,9 +171,10 @@ function App() {
     getTags();
   }, [isLogged]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setIsLogged(true);
         const getUserInfo = async () => {
           const docSnap: DocumentData = await getDoc(
             doc(db, `users/${user.uid}`)
@@ -174,7 +188,6 @@ function App() {
           });
         };
         getUserInfo();
-        setIsLogged(true);
       } else {
         setLogin(false);
         setRegister(false);
@@ -192,6 +205,9 @@ function App() {
       let arr: Post[] = [];
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
+      });
+      arr.sort(function () {
+        return Math.random() > 0.5 ? -1 : 1;
       });
       setAllPost(arr);
     };
