@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { GlobalContext } from "../../App";
 import styled from "styled-components";
 import EditTextButton from "../EditTextButton";
-import logo from "./pushed-brands.png";
+import logo from "./fotolio.png";
 import { useNavigate } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
