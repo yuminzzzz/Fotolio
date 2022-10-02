@@ -189,19 +189,6 @@ const PopWindow = ({
         <EditButton onClick={deleteComment}>刪除</EditButton>
       </EditWrapper>
     );
-  } else if (location === "pin") {
-    return (
-      <EditWrapper
-        userInfo={false}
-        onClick={(e) => {
-          e.stopPropagation();
-        }}
-      >
-        <EditButton onClick={downloadImg} id="download">
-          下載圖片
-        </EditButton>
-      </EditWrapper>
-    );
   } else if (location === "userInfo") {
     return (
       <EditWrapper

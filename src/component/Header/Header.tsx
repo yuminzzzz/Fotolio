@@ -99,7 +99,7 @@ const UserAvatar = styled.img`
   background-color: #e9e9e9;
 `;
 
-const UserInfoWrapper = styled.div`
+const UserInfoWrapper = styled.button`
   width: 24px;
   height: 24px;
   border-radius: 50%;
@@ -108,6 +108,7 @@ const UserInfoWrapper = styled.div`
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  border-style: none;
   &:hover {
     background-color: #efefef;
   }
@@ -599,7 +600,18 @@ const Header = () => {
               </UserAvatarActive>
             </UserAvatarWrapper>
             <UserInfoWrapper
-              onClick={() => setToggle((prevToggle) => !prevToggle)}
+              onClick={(e) => {
+                setToggle(!toggle);
+              }}
+              onBlur={(e) => {
+                if (
+                  e.relatedTarget?.innerHTML.includes("@") ||
+                  e.relatedTarget?.innerHTML === "登出"
+                ) {
+                  return;
+                }
+                setToggle(!toggle);
+              }}
             >
               <FontAwesomeIcon
                 icon={faAngleDown}
