@@ -224,6 +224,9 @@ function App() {
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
       });
+      arr.sort(function (postA, postB) {
+        return postA.created_time.seconds - postB.created_time.seconds;
+      });
       setUserPost(arr);
     };
     const getCollect = async () => {
@@ -240,7 +243,6 @@ function App() {
     getPost();
     getCollect();
   }, [userData]);
-
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />

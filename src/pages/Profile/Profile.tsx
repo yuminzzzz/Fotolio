@@ -61,13 +61,6 @@ const Button = styled.button<Props>`
 const Profile = () => {
   const [status, setStatus] = useState(false);
   const st: any = useContext(GlobalContext);
-  const isActive = () => {
-    if (status) {
-      setStatus(false);
-    } else {
-      setStatus(true);
-    }
-  };
 
   if (!st.isLogged) {
     return <Navigate to="/" />;
@@ -79,10 +72,10 @@ const Profile = () => {
           <UserName>{st.userData.user_name}</UserName>
         </UserInfoWrapper>
         <ButtonWrapper>
-          <Button active={!status} onClick={isActive}>
+          <Button active={!status} onClick={() => setStatus(!status)}>
             已建立
           </Button>
-          <Button active={status} onClick={isActive}>
+          <Button active={status} onClick={() => setStatus(!status)}>
             已儲存
           </Button>
         </ButtonWrapper>
