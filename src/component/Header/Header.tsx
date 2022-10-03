@@ -413,12 +413,13 @@ const Header = () => {
   return (
     <Wrapper>
       <LogoWrapper>
-        {!st.isLogged ? (
+        {st.isLogged === false && (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
-        ) : (
+        )}
+        {st.isLogged === true && (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
@@ -427,7 +428,7 @@ const Header = () => {
           </>
         )}
       </LogoWrapper>
-      {!st.isLogged ? (
+      {st.isLogged === false && (
         <>
           <div style={{ marginTop: "-10px" }}>
             <EditTextButton buttonTag={"login"} />
@@ -550,7 +551,8 @@ const Header = () => {
             </LoginWrapper>
           )}
         </>
-      ) : (
+      )}
+      {st.isLogged === true && (
         <>
           <SearchWrapper>
             {!focus && (

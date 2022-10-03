@@ -114,7 +114,7 @@ export interface Message {
 function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState<boolean | null>(null);
   const [allPost, setAllPost] = useState<Post[]>([]);
   const [userPost, setUserPost] = useState<Post[]>([]);
   const [userCollections, setUserCollections] = useState<Post[]>([]);
@@ -198,7 +198,7 @@ function App() {
       }
     });
   }, []);
-
+  console.log(isLogged);
   useEffect(() => {
     const getAllPost = async () => {
       const userPost = await getDocs(collectionGroup(db, "user_posts"));
