@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import styled from "styled-components";
 import EditTextButton from "../EditTextButton";
 import logo from "./fotolio.png";
@@ -300,7 +300,7 @@ const Header = () => {
   const [toggle, setToggle] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;

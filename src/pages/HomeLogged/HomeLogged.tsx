@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const HomeLogged = () => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
+
   if (!st.isLogged) {
     return <Navigate to="/" />;
   } else {

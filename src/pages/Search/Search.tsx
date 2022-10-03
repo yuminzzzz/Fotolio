@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, Post } from "../../App";
+import { GlobalContext, initialValue, Post } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 interface Props {
@@ -37,7 +37,7 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);

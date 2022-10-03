@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const Wrapper = styled.div`
@@ -60,7 +60,8 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
+
 
   if (!st.isLogged) {
     return <Navigate to="/" />;

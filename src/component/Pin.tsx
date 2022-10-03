@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext } from "../App";
+import { GlobalContext, initialValue } from "../App";
 import Collect from "./Collect";
 
 interface Props {
@@ -73,8 +73,6 @@ const Pin = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
-  const st: any = useContext(GlobalContext);
-
   const images = document.querySelectorAll("[data-src]");
   const preloadImage = (img: any) => {
     const src = img.getAttribute("data-src");

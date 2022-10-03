@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext, Message } from "../App";
+import { GlobalContext, initialValue, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -83,7 +83,7 @@ const PopWindow = ({
   authorId?: string;
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
@@ -134,12 +134,10 @@ const PopWindow = ({
   const logout = () => {
     signOut(auth)
       .then(() => {
-        st.setToggle(false);
         st.setAllTags([]);
         navigate("/");
       })
       .catch((error) => {
-        // An error happened.
       });
   };
   if (location === "post") {

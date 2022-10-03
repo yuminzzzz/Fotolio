@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue, Message } from "../../App";
 import { Navigate, useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
@@ -25,17 +25,6 @@ interface PostData {
   url: string;
 }
 
-// interface Message {
-//   author_avatar: string;
-//   author_id: string;
-//   author_name: string;
-//   comment_id: string;
-//   message: string;
-//   uploaded_time: {
-//     seconds: number;
-//     nanoseconds: number;
-//   };
-// }
 const CoverImgWrapper = styled.div`
   background-color: lightgrey;
   width: 508px;
@@ -138,15 +127,11 @@ const Post = () => {
   const [rawComment, setRawComment] = useState("");
   const [modifyCheck, setModifyCheck] = useState(false);
   const [deleteTag, setDeleteTag] = useState(false);
-  const [authorData, setAuthorData] = useState({
-    author_avatar: "",
-    author_id: "",
-    author_name: "",
-  });
   const [comment, setComment] = useState(0);
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
+
   interface Post {
     author_avatar: string;
     author_id: string;
@@ -166,22 +151,15 @@ const Post = () => {
       if (isAuthor) setDeleteTag(true);
     };
     const getPost = async () => {
-      const postData = await st.allPost.find(
-        (item: Post) => item.post_id === postId
-      );
-      setAuthorData({
-        author_avatar: postData.author_avatar,
-        author_id: postData.author_id,
-        author_name: postData.author_name,
-      });
+      const postData = st.allPost.find((item: Post) => item.post_id === postId);
       setPost(postData);
     };
     const getMessage = async () => {
       st.setMessage([]);
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
-      let arr: DocumentData[] = [];
-      querySnapshot.forEach((doc) => {
+      let arr: Message[] = [];
+      querySnapshot.forEach((doc:DocumentData) => {
         if (doc.data().post_id === postId) {
           arr.push(doc.data());
         }
@@ -250,55 +228,42 @@ const Post = () => {
               {comment}則回應
             </p>
             <CommentWrapper>
-              {st.message.map(
-                (
-                  item: {
-                    comment_id: string;
-                    message: string;
-                    post_id: string;
-                    uploaded_time: number;
-                    user_avatar: string;
-                    user_id: string;
-                    user_name: string;
-                  },
-                  index: number
-                ) => {
-                  if (targetComment === item.comment_id) {
-                    return (
-                      <div key={item.comment_id}>
-                        <MyComment
-                          comment={item.message}
-                          rawComment={rawComment}
-                          setRawComment={setRawComment}
-                        />
-                        <EditTextButton
-                          buttonTag="comment"
-                          setTargetComment={setTargetComment}
-                          rawComment={rawComment}
-                          comment={item.message}
-                          commentId={item.comment_id}
-                          authorId={authorData.author_id}
-                          setModifyCheck={setModifyCheck}
-                        />
-                      </div>
-                    );
-                  } else {
-                    return (
-                      <Comment
-                        key={index}
-                        userName={item.user_name}
-                        userAvatar={item.user_avatar}
-                        message={item.message}
-                        uploadedTime={item.uploaded_time}
-                        isAuthor={item.user_id === st.userData.user_id}
-                        commentId={item.comment_id}
-                        setTargetComment={setTargetComment}
-                        authorId={authorData.author_id}
+              {st.message.map((item, index) => {
+                if (targetComment === item.comment_id) {
+                  return (
+                    <div key={item.comment_id}>
+                      <MyComment
+                        comment={item.message}
+                        rawComment={rawComment}
+                        setRawComment={setRawComment}
                       />
-                    );
-                  }
+                      <EditTextButton
+                        buttonTag="comment"
+                        setTargetComment={setTargetComment}
+                        rawComment={rawComment}
+                        comment={item.message}
+                        commentId={item.comment_id}
+                        authorId={post?.author_id}
+                        setModifyCheck={setModifyCheck}
+                      />
+                    </div>
+                  );
+                } else {
+                  return (
+                    <Comment
+                      key={index}
+                      userName={item.user_name}
+                      userAvatar={item.user_avatar}
+                      message={item.message}
+                      uploadedTime={item.uploaded_time}
+                      isAuthor={item.user_id === st.userData.user_id}
+                      commentId={item.comment_id}
+                      setTargetComment={setTargetComment}
+                      authorId={post?.author_id}
+                    />
+                  );
                 }
-              )}
+              })}
             </CommentWrapper>
             <MyCommentWrapper>
               <UserAvatar src={st.userData.user_avatar}></UserAvatar>
@@ -315,7 +280,7 @@ const Post = () => {
                 response={response}
                 setResponse={setResponse}
                 setTyping={setTyping}
-                authorId={authorData.author_id}
+                authorId={post?.author_id}
               />
             )}
           </CommentSection>

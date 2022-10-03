@@ -1,14 +1,19 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext, Post } from "../../App";
-import { collection, setDoc, serverTimestamp, doc } from "firebase/firestore";
+import { GlobalContext, initialValue, Post } from "../../App";
+import {
+  collection,
+  setDoc,
+  serverTimestamp,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled, { css, keyframes } from "styled-components";
-
 import Input from "./Input";
 import { Navigate } from "react-router-dom";
 import { LoadingWrapper } from "../../component/Header/Header";
@@ -221,12 +226,11 @@ const PromptButton = styled.button<Props>`
   bottom: 60px;
   ${(props) => (props.isUploaded ? animate : "")};
 `;
-
 const Upload = () => {
   const [uploadData, setUploadData] = useState<{
     title: string;
     description: string;
-    file: any;
+    file: File | string;
   }>({
     title: "",
     description: "",
@@ -235,7 +239,7 @@ const Upload = () => {
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
   const isValid = Object.values(uploadData).every((item) => item !== "");
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const storage = getStorage(app);
   const post = async () => {
     try {
@@ -244,13 +248,14 @@ const Upload = () => {
         collection(db, `users/${st.userData.user_id}/user_posts`)
       );
       const fileRef = ref(storage, `post-image/${docRef.id}`);
-      uploadBytes(fileRef, uploadData.file).then(() => {
+
+      uploadBytes(fileRef, uploadData.file as File).then(() => {
         getDownloadURL(fileRef).then((url) => {
           const data = {
             post_id: docRef.id,
             title: uploadData.title,
             description: uploadData.description,
-            created_time: serverTimestamp(),
+            created_time: Timestamp.now(),
             author_id: st.userData.user_id,
             author_name: st.userData.user_name,
             author_avatar: st.userData.user_avatar,
@@ -259,15 +264,15 @@ const Upload = () => {
               return { tag: item, post_id: docRef.id };
             }),
           };
-          st.setAllPost((pre: Post[]) => {
+          st.setAllPost((pre) => {
             return [...pre, data];
           });
-          st.setUserPost((pre: Post[]) => {
+          st.setUserPost((pre) => {
             return [...pre, data];
           });
           if (localTags.length > 0) {
             localTags.forEach((item) => {
-              st.setAllTags((pre: { tag: string; postId: string }[]) => {
+              st.setAllTags((pre: { tag: string; post_id: string }[]) => {
                 return [...pre, { tag: item, post_id: docRef.id }];
               });
             });
@@ -294,6 +299,7 @@ const Upload = () => {
       console.error("Error adding document: ", e);
     }
   };
+  console.log(st.allTags);
 
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
@@ -312,7 +318,7 @@ const Upload = () => {
     });
   };
   const previewUrl = uploadData.file
-    ? URL.createObjectURL(uploadData.file)
+    ? URL.createObjectURL(uploadData.file as File)
     : "";
 
   if (!st.isLogged) {

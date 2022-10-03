@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext } from "react";
-import { GlobalContext } from "../App";
+import { GlobalContext, initialValue } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Message } from "../App";
@@ -7,7 +7,6 @@ import { db } from "../utils/firebase";
 import {
   collection,
   setDoc,
-  serverTimestamp,
   doc,
   updateDoc,
   deleteDoc,
@@ -96,7 +95,7 @@ const EditTextButton = ({
 }) => {
   const navigate = useNavigate();
   const postId = useParams().id;
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   let currentPage = useLocation().pathname;
 
   const postComment = () => {
@@ -116,7 +115,7 @@ const EditTextButton = ({
         uploaded_time: Date.now(),
       };
       st.setMessage((pre: Message[]) => {
-        return [...pre, data];
+        return [...pre, data] as Message[];
       });
       setDoc(
         doc(
@@ -149,11 +148,11 @@ const EditTextButton = ({
   };
 
   const deletePost = async () => {
-    st.setAllPost(st.updateState(st.allPost, postId));
+    st.setAllPost(st.updateState(st.allPost, postId!));
     navigate("/home");
-    st.setUserPost(st.updateState(st.userPost, postId));
-    st.setUserCollections(st.updateState(st.userCollections, postId));
-    st.setAllTags(st.updateState(st.allTags, postId));
+    st.setUserPost(st.updateState(st.userPost, postId!));
+    st.setUserCollections(st.updateState(st.userCollections, postId!));
+    st.setAllTags(st.allTags.filter((item) => item.post_id !== postId));
 
     const docRef = doc(
       db,
