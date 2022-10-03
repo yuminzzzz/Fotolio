@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { GlobalContext, Post } from "../App";
+import { GlobalContext, initialValue, Post } from "../App";
 import Pin from "./Pin";
 import styled from "styled-components";
 
@@ -19,13 +19,12 @@ const PinContainer = styled.div`
 let arr: string[] = ["small", "medium", "large"];
 
 const PinterestLayout = ({ post }: { post: Post[] }) => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const random = useMemo(() => {
     return Array(post.length)
       .fill(null)
       .map((item) => Math.floor(Math.random() * 3));
   }, [post]);
-
   return (
     <PinContainer>
       {post.map((item, index) => {

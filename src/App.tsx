@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -15,6 +15,7 @@ import {
   DocumentData,
   getDoc,
   getDocs,
+  Timestamp,
 } from "firebase/firestore";
 
 const GlobalStyle = createGlobalStyle`
@@ -48,10 +49,23 @@ const GlobalStyle = createGlobalStyle`
     box-sizing: border-box;
     padding: 0;
     margin: 0;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    ::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  @-moz-document url-prefix() { 
+    html{
+      scrollbar-width: none;
+    }
   }
 
   body {
     font-family: "NotoSansTC";
+    margin: 0; 
+    scrollbar-width: none;
   }
 
   #root {
@@ -76,12 +90,11 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
-export const GlobalContext = React.createContext(null);
 export interface Post {
   author_avatar: string;
   author_id: string;
   author_name: string;
-  created_time: { seconds: number; nanoseconds: number };
+  created_time: Timestamp;
   description: string;
   post_id: string;
   title: string;
@@ -92,16 +105,56 @@ export interface Message {
   comment_id: string;
   message: string;
   post_id: string;
-  uploaded_time: { seconds: number; nanoseconds: number };
+  uploaded_time: number;
   user_avatar: string;
   user_id: string;
   user_name: string;
 }
 
+export interface initialValue {
+  login: boolean;
+  setLogin: React.Dispatch<React.SetStateAction<boolean>>;
+  register: boolean;
+  setRegister: React.Dispatch<React.SetStateAction<boolean>>;
+  userData: {
+    user_avatar: string;
+    user_email: string;
+    user_id: string;
+    user_name: string;
+  };
+  setUserData: React.Dispatch<
+    React.SetStateAction<{
+      user_avatar: string;
+      user_email: string;
+      user_id: string;
+      user_name: string;
+    }>
+  >;
+  isLogged: boolean | null;
+  setIsLogged: React.Dispatch<React.SetStateAction<boolean | null>>;
+  allPost: Post[];
+  setAllPost: React.Dispatch<React.SetStateAction<Post[]>>;
+  userPost: Post[];
+  setUserPost: React.Dispatch<React.SetStateAction<Post[]>>;
+  userCollections: Post[];
+  setUserCollections: React.Dispatch<React.SetStateAction<Post[]>>;
+  updateState: (data: Post[], postId: string) => Post[];
+  message: Message[];
+  setMessage: React.Dispatch<React.SetStateAction<Message[]>>;
+  allTags: { tag: string; post_id: string }[];
+  setAllTags: React.Dispatch<
+    React.SetStateAction<{ tag: string; post_id: string }[]>
+  >;
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+}
+
+export const GlobalContext = React.createContext<initialValue | null>(null);
+
 function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
+  const [isLogged, setIsLogged] = useState<boolean | null>(null);
   const [allPost, setAllPost] = useState<Post[]>([]);
   const [userPost, setUserPost] = useState<Post[]>([]);
   const [userCollections, setUserCollections] = useState<Post[]>([]);
@@ -112,15 +165,18 @@ function App() {
     user_name: "",
   });
   const [message, setMessage] = useState<Message[]>([]);
-  const [allTags, setAllTags] = useState<{ tag: string; postId: string }[]>([]);
+  const [allTags, setAllTags] = useState<{ tag: string; post_id: string }[]>(
+    []
+  );
   const [loading, setLoading] = useState(false);
 
   const updateState = (data: Post[], postId: string) => {
-    return data.filter((item: Post) => item.post_id !== postId);
+    return data.filter((item) => item.post_id !== postId);
   };
 
   const navigate = useNavigate();
-  const initialState: any = {
+
+  const initialState = {
     login,
     setLogin,
     register,
@@ -147,7 +203,7 @@ function App() {
   useEffect(() => {
     const getTags = async () => {
       const tags = await getDocs(collectionGroup(db, "user_posts"));
-      let arr: { tag: string; postId: string }[] = [];
+      let arr: { tag: string; post_id: string }[] = [];
       tags.forEach((item: DocumentData) => {
         if (item.data().tags !== undefined) {
           arr.push(...item.data().tags);
@@ -158,9 +214,10 @@ function App() {
     getTags();
   }, [isLogged]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     onAuthStateChanged(auth, async (user) => {
       if (user) {
+        setIsLogged(true);
         const getUserInfo = async () => {
           const docSnap: DocumentData = await getDoc(
             doc(db, `users/${user.uid}`)
@@ -174,7 +231,6 @@ function App() {
           });
         };
         getUserInfo();
-        setIsLogged(true);
       } else {
         setLogin(false);
         setRegister(false);
@@ -193,11 +249,13 @@ function App() {
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
       });
+      arr.sort(function () {
+        return Math.random() > 0.5 ? -1 : 1;
+      });
       setAllPost(arr);
     };
     getAllPost();
   }, []);
-
   useEffect(() => {
     const getPost = async () => {
       if (!userData.user_id) return;
@@ -207,6 +265,9 @@ function App() {
       let arr: Post[] = [];
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
+      });
+      arr.sort(function (postA, postB) {
+        return postA.created_time.seconds - postB.created_time.seconds;
       });
       setUserPost(arr);
     };
@@ -224,7 +285,6 @@ function App() {
     getPost();
     getCollect();
   }, [userData]);
-
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />

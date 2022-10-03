@@ -1,12 +1,10 @@
-import React, {
+import {
   Dispatch,
   SetStateAction,
-  useContext,
   useEffect,
   useState,
 } from "react";
 import styled from "styled-components";
-import { GlobalContext } from "../../App";
 import Ellipsis from "../../component/Ellipsis";
 
 const Wrapper = styled.div`
@@ -76,7 +74,6 @@ const Comment = ({
   setTargetComment: Dispatch<SetStateAction<string>>;
   uploadedTime: number;
 }) => {
-  const st: any = useContext(GlobalContext);
   const [time, setTime] = useState("");
 
   useEffect(() => {

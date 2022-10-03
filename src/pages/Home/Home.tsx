@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -14,8 +14,7 @@ import { Navigate } from "react-router-dom";
 
 const Home = () => {
   const [imgUrlArr, setImgUrlArr] = useState([]);
-  const st: any = useContext(GlobalContext);
-
+  const st = useContext(GlobalContext) as initialValue;
   useEffect(() => {
     let arr: any = [];
     const getPost = async () => {
@@ -74,7 +73,7 @@ const Home = () => {
                   src={item}
                   style={{ cursor: "pointer" }}
                   onClick={() => st.setLogin(true)}
-                  alt="img"
+                  alt=""
                 />
               </SwiperSlide>
             );

@@ -9,7 +9,7 @@ import {
   collectionGroup,
 } from "firebase/firestore";
 import { useContext, useState } from "react";
-import { GlobalContext, Post } from "../App";
+import { GlobalContext, initialValue, Post } from "../App";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -44,7 +44,7 @@ const Collect = ({
   postId: string;
   initStatus: boolean;
 }) => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const [isSaved, setIsSaved] = useState(initStatus);
 
   const modifyCollect = async () => {
@@ -54,17 +54,15 @@ const Collect = ({
     );
     if (isSaved) {
       setIsSaved(false);
-      // st.setRandomSwitch(false);
       st.setUserCollections(st.updateState(st.userCollections, postId));
       deleteDoc(collectionRef);
     } else {
       setIsSaved(true);
-      // st.setRandomSwitch(false);
       const newCollect = st.allPost.find(
         (item: Post) => item.post_id === postId
       );
       st.setUserCollections((pre: Post[]) => {
-        return [...pre, newCollect];
+        return [...pre, newCollect] as Post[];
       });
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
