@@ -328,7 +328,7 @@ const Header = () => {
           user_name: loginInfo.name,
           user_email: loginInfo.email,
           user_avatar:
-            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/pushed-brands.png?alt=media&token=a4dc7827-4de6-4d08-84a6-dc4952a92133",
+            "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
         navigate("/home");
