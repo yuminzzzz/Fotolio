@@ -144,22 +144,19 @@ const Post = () => {
   }
 
   useEffect(() => {
-    const checkAuthor = async () => {
-      const isAuthor = st.userPost.some(
-        (item: Post) => item.post_id === postId
-      );
-      if (isAuthor) setDeleteTag(true);
-    };
-    const getPost = async () => {
-      const postData = st.allPost.find((item: Post) => item.post_id === postId);
-      setPost(postData);
-    };
+    const isAuthor = st.userPost.some((item: Post) => item.post_id === postId);
+    if (isAuthor) setDeleteTag(true);
+    const postData = st.allPost.find((item: Post) => item.post_id === postId);
+    setPost(postData);
+  }, []);
+  
+  useEffect(() => {
     const getMessage = async () => {
       st.setMessage([]);
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: Message[] = [];
-      querySnapshot.forEach((doc:DocumentData) => {
+      querySnapshot.forEach((doc: DocumentData) => {
         if (doc.data().post_id === postId) {
           arr.push(doc.data());
         }
@@ -169,8 +166,6 @@ const Post = () => {
       });
       st.setMessage(sortArr);
     };
-    checkAuthor();
-    getPost();
     getMessage();
   }, []);
 

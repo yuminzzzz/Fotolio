@@ -1,11 +1,10 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext, initialValue, Post } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import {
   collection,
   setDoc,
-  serverTimestamp,
   doc,
   Timestamp,
 } from "firebase/firestore";
