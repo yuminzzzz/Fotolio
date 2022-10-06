@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, Post } from "../../App";
+import { GlobalContext, initialValue, Post } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 interface Props {
@@ -21,7 +21,9 @@ const TagButton = styled.button<Props>`
   color: #fff;
   border: none;
   border-radius: 20px;
-  line-height: 17px;
+  font-size: 14px;
+  line-height: 14px;
+  text-align: center;
   margin: 0 4px;
   cursor: pointer;
   white-space: nowrap;
@@ -35,7 +37,7 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const st: any = useContext(GlobalContext);
+  const st = useContext(GlobalContext) as initialValue;
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);

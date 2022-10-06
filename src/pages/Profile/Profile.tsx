@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { Navigate } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext } from "../../App";
+import { GlobalContext, initialValue } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 const Wrapper = styled.div`
@@ -60,14 +60,8 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
-  const st: any = useContext(GlobalContext);
-  const isActive = () => {
-    if (status) {
-      setStatus(false);
-    } else {
-      setStatus(true);
-    }
-  };
+  const st = useContext(GlobalContext) as initialValue;
+
 
   if (!st.isLogged) {
     return <Navigate to="/" />;
@@ -79,10 +73,10 @@ const Profile = () => {
           <UserName>{st.userData.user_name}</UserName>
         </UserInfoWrapper>
         <ButtonWrapper>
-          <Button active={!status} onClick={isActive}>
+          <Button active={!status} onClick={() => setStatus(!status)}>
             已建立
           </Button>
-          <Button active={status} onClick={isActive}>
+          <Button active={status} onClick={() => setStatus(!status)}>
             已儲存
           </Button>
         </ButtonWrapper>

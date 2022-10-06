@@ -8,7 +8,7 @@ interface Props {
   roundSize: string;
 }
 
-const Wrapper = styled.div<Props>`
+const Wrapper = styled.button<Props>`
   position: relative;
   width: ${(props) => (props.roundSize === "48px" ? "48px" : "24px")};
   height: ${(props) => (props.roundSize === "48px" ? "48px" : "24px")};
@@ -21,6 +21,7 @@ const Wrapper = styled.div<Props>`
   justify-content: center;
   align-items: center;
   border-radius: 50%;
+  border-style: none;
   &:hover {
     background-color: #e9e9e9;
   }
@@ -40,7 +41,6 @@ const Ellipsis = ({
   authorId?: string;
 }) => {
   const [editOrDelete, setEditOrDelete] = useState(false);
-  console.log(editOrDelete);
   return (
     <Wrapper
       onClick={(e) => {
@@ -48,6 +48,17 @@ const Ellipsis = ({
         setEditOrDelete((pre) => !pre);
       }}
       roundSize={roundSize}
+      onBlur={(e) => {
+        if (
+          e.relatedTarget?.innerHTML === "刪除貼文" ||
+          e.relatedTarget?.innerHTML === "下載圖片" ||
+          e.relatedTarget?.innerHTML === "編輯" ||
+          e.relatedTarget?.innerHTML === "刪除"
+        ) {
+          return;
+        }
+        setEditOrDelete(!editOrDelete);
+      }}
     >
       <FontAwesomeIcon icon={faEllipsis} style={{ pointerEvents: "none" }} />
 
