@@ -104,42 +104,46 @@ const Search = () => {
 
   return (
     <>
-      <TagButtonWrapper>
-        {tags.map((tag: string, index: number) => {
-          return (
-            <TagButton
-              key={index}
-              backgroundColor={backgroundColor()}
-              onClick={() => navigate(`/search/${tag}`)}
-            >
-              {tag}
-            </TagButton>
-          );
-        })}
-      </TagButtonWrapper>
-      {post.length > 0 ? (
-        <PinterestLayout post={post}></PinterestLayout>
-      ) : (
+      {st.isLogged && (
         <>
-          <p style={{ textAlign: "center", margin: "32px auto" }}>
-            找不到有關{keyword}的貼圖
-          </p>
-          <div
-            style={{
-              width: "100%",
-              border: "solid 1px #cdcdcd",
-              height: "1px",
-            }}
-          ></div>
-          <PromptWrapper>
-            <h2 style={{ fontWeight: "500" }}>更多點子</h2>
-            <div style={{ padding: "8px 0" }}>
-              <div style={{ fontWeight: "300" }}>
-                這裡是一些你可能會喜歡的點子。
-              </div>
-            </div>
-          </PromptWrapper>
-          <PinterestLayout post={st.allPost}></PinterestLayout>
+          <TagButtonWrapper>
+            {tags.map((tag: string, index: number) => {
+              return (
+                <TagButton
+                  key={index}
+                  backgroundColor={backgroundColor()}
+                  onClick={() => navigate(`/search/${tag}`)}
+                >
+                  {tag}
+                </TagButton>
+              );
+            })}
+          </TagButtonWrapper>
+          {post.length > 0 ? (
+            <PinterestLayout post={post}></PinterestLayout>
+          ) : (
+            <>
+              <p style={{ textAlign: "center", margin: "32px auto" }}>
+                找不到有關{keyword}的貼圖
+              </p>
+              <div
+                style={{
+                  width: "100%",
+                  border: "solid 1px #cdcdcd",
+                  height: "1px",
+                }}
+              ></div>
+              <PromptWrapper>
+                <h2 style={{ fontWeight: "500" }}>更多點子</h2>
+                <div style={{ padding: "8px 0" }}>
+                  <div style={{ fontWeight: "300" }}>
+                    這裡是一些你可能會喜歡的點子。
+                  </div>
+                </div>
+              </PromptWrapper>
+              <PinterestLayout post={st.allPost}></PinterestLayout>
+            </>
+          )}
         </>
       )}
     </>

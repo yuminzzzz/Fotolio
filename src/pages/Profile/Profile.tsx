@@ -1,5 +1,4 @@
 import { useContext, useState } from "react";
-import { Navigate } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext, initialValue } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
@@ -61,33 +60,31 @@ const Button = styled.button<Props>`
 const Profile = () => {
   const [status, setStatus] = useState(false);
   const st = useContext(GlobalContext) as initialValue;
-
-
-  if (!st.isLogged) {
-    return <Navigate to="/" />;
-  } else {
-    return (
-      <Wrapper>
-        <UserInfoWrapper>
-          <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-          <UserName>{st.userData.user_name}</UserName>
-        </UserInfoWrapper>
-        <ButtonWrapper>
-          <Button active={!status} onClick={() => setStatus(!status)}>
-            已建立
-          </Button>
-          <Button active={status} onClick={() => setStatus(!status)}>
-            已儲存
-          </Button>
-        </ButtonWrapper>
-        {!status ? (
-          <PinterestLayout post={st.userPost} />
-        ) : (
-          <PinterestLayout post={st.userCollections} />
-        )}
-      </Wrapper>
-    );
-  }
+  return (
+    <>
+      {st.isLogged && (
+        <Wrapper>
+          <UserInfoWrapper>
+            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+            <UserName>{st.userData.user_name}</UserName>
+          </UserInfoWrapper>
+          <ButtonWrapper>
+            <Button active={!status} onClick={() => setStatus(!status)}>
+              已建立
+            </Button>
+            <Button active={status} onClick={() => setStatus(!status)}>
+              已儲存
+            </Button>
+          </ButtonWrapper>
+          {!status ? (
+            <PinterestLayout post={st.userPost} />
+          ) : (
+            <PinterestLayout post={st.userCollections} />
+          )}
+        </Wrapper>
+      )}
+    </>
+  );
 };
 
 export default Profile;

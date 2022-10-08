@@ -1,4 +1,10 @@
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useState,
+} from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -149,7 +155,7 @@ export interface initialValue {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-export const GlobalContext = React.createContext<initialValue | null>(null);
+export const GlobalContext = createContext<initialValue | null>(null);
 
 function App() {
   const [login, setLogin] = useState(false);
@@ -169,10 +175,9 @@ function App() {
     []
   );
   const [loading, setLoading] = useState(false);
-
-  const updateState = (data: Post[], postId: string) => {
+  const updateState = useCallback((data: Post[], postId: string) => {
     return data.filter((item) => item.post_id !== postId);
-  };
+  }, []);
 
   const navigate = useNavigate();
 
