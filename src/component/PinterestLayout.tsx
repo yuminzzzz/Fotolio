@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { GlobalContext, initialValue, Post } from "../App";
 import Pin from "./Pin";
 import styled from "styled-components";
@@ -25,6 +25,34 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
       .fill(null)
       .map((item) => Math.floor(Math.random() * 3));
   }, [post]);
+
+  useEffect(() => {
+    const images = document.querySelectorAll("[data-src]");
+    const preloadImage = (img: any) => {
+      const src = img.getAttribute("data-src");
+      if (!src) {
+        return;
+      }
+      img.src = src;
+    };
+
+    const imgObserver = new IntersectionObserver((entries, imgObserver) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        } else {
+          console.log(entry);
+          preloadImage(entry.target);
+          imgObserver.unobserve(entry.target);
+        }
+      });
+    }, {});
+
+    images.forEach((image) => {
+      imgObserver.observe(image);
+    });
+  }, [post]);
+
   return (
     <PinContainer>
       {post.map((item, index) => {

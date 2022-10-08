@@ -36,6 +36,7 @@ const PinCard = styled.div<Props>`
 
 const PinImg = styled.img`
   object-fit: cover;
+  object-position: cover;
   position: absolute;
   width: inherit;
   height: inherit;
@@ -72,31 +73,6 @@ const Pin = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
-  const images = document.querySelectorAll("[data-src]");
-  const preloadImage = (img: any) => {
-    const src = img.getAttribute("data-src");
-    if (!src) {
-      return;
-    }
-    img.src = src;
-  };
-
-  const imgOptions = {};
-
-  const imgObserver = new IntersectionObserver((entries, imgObserver) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) {
-        return;
-      } else {
-        preloadImage(entry.target);
-        imgObserver.unobserve(entry.target);
-      }
-    });
-  }, imgOptions);
-
-  images.forEach((image) => {
-    imgObserver.observe(image);
-  });
 
   return (
     <PinCard
