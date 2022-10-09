@@ -19,7 +19,6 @@ const PinContainer = styled.div`
 let arr: string[] = ["small", "medium", "large"];
 
 const PinterestLayout = ({ post }: { post: Post[] }) => {
-  const st = useContext(GlobalContext) as initialValue;
   const random = useMemo(() => {
     return Array(post.length)
       .fill(null)
@@ -56,16 +55,12 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
   return (
     <PinContainer>
       {post.map((item, index) => {
-        const initStatus = st.userCollections.some(
-          (doc: Post) => doc.post_id === item.post_id
-        );
         return (
           <Pin
             size={arr[random[index]]}
             key={item.post_id}
             postId={item.post_id}
             postSrc={item.url}
-            initStatus={initStatus}
           />
         );
       })}

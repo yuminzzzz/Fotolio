@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { GlobalContext, initialValue, Post } from "../App";
 import Collect from "./Collect";
 
 interface Props {
@@ -64,15 +65,18 @@ const Pin = ({
   size,
   postId,
   postSrc,
-  initStatus,
 }: {
   size: string;
   postId: string;
   postSrc: string;
-  initStatus: boolean;
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
+  const st = useContext(GlobalContext) as initialValue;
+  const initStatus = useMemo(
+    () => st.userCollections.some((doc: Post) => doc.post_id === postId),
+    [postId, st.userCollections]
+  );
 
   return (
     <PinCard
