@@ -56,12 +56,9 @@ const ButtonWrapper = styled.div`
 `;
 
 const PostTitle = styled.h1`
-  font-size: 32px;
-  height: 32px;
   width: 100%;
   margin-top: 16px;
   display: flex;
-  line-height: 32px;
   white-space: nowrap;
   overflow-x: scroll;
 `;

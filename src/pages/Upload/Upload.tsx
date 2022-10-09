@@ -2,12 +2,7 @@ import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
 import { GlobalContext, initialValue } from "../../App";
-import {
-  collection,
-  setDoc,
-  doc,
-  Timestamp,
- } from "firebase/firestore";
+import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
@@ -236,7 +231,11 @@ const Upload = () => {
   });
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
-  const isValid = Object.values(uploadData).every((item) => item !== "");
+  const isValid = () => {
+    if (uploadData.description.trim() === "" || uploadData.title.trim() === "")
+      return false;
+    return Object.values(uploadData).every((item) => item !== "");
+  };
   const st = useContext(GlobalContext) as initialValue;
   const storage = getStorage(app);
   const post = async () => {
@@ -412,7 +411,7 @@ const Upload = () => {
                 setLocalTags={setLocalTags}
               />
               <ButtonWrapper>
-                {isValid ? (
+                {isValid() ? (
                   <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
                 ) : (
                   <UploadButton>發佈</UploadButton>

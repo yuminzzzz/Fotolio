@@ -40,7 +40,6 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
         if (!entry.isIntersecting) {
           return;
         } else {
-          console.log(entry);
           preloadImage(entry.target);
           imgObserver.unobserve(entry.target);
         }
