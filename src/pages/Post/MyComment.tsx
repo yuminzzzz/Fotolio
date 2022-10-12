@@ -41,7 +41,6 @@ const MyComment = ({
       setRawComment(comment);
     }
   }, []);
-
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <CommentInput>
