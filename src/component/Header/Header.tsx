@@ -34,7 +34,7 @@ const Wrapper = styled.div`
   justify-content: space-between;
   padding: 16px;
   background-color: #fff;
-  z-index: 10;
+  z-index: 11;
 `;
 
 const LogoWrapper = styled.div`

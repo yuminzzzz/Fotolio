@@ -1,5 +1,5 @@
-import { useContext, useMemo } from "react";
-import { GlobalContext, initialValue, Post } from "../App";
+import { useEffect, useMemo } from "react";
+import { Post } from "../App";
 import Pin from "./Pin";
 import styled from "styled-components";
 
@@ -19,25 +19,46 @@ const PinContainer = styled.div`
 let arr: string[] = ["small", "medium", "large"];
 
 const PinterestLayout = ({ post }: { post: Post[] }) => {
-  const st = useContext(GlobalContext) as initialValue;
   const random = useMemo(() => {
     return Array(post.length)
       .fill(null)
       .map((item) => Math.floor(Math.random() * 3));
   }, [post]);
+
+  useEffect(() => {
+    const images = document.querySelectorAll("[data-src]");
+    const preloadImage = (img: any) => {
+      const src = img.getAttribute("data-src");
+      if (!src) {
+        return;
+      }
+      img.src = src;
+    };
+    const imgObserver = new IntersectionObserver((entries, imgObserver) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) {
+          return;
+        } else {
+          preloadImage(entry.target);
+          imgObserver.unobserve(entry.target);
+        }
+      });
+    }, {});
+
+    images.forEach((image) => {
+      imgObserver.observe(image);
+    });
+  }, [post]);
+
   return (
     <PinContainer>
       {post.map((item, index) => {
-        const initStatus = st.userCollections.some(
-          (doc: Post) => doc.post_id === item.post_id
-        );
         return (
           <Pin
             size={arr[random[index]]}
             key={item.post_id}
             postId={item.post_id}
             postSrc={item.url}
-            initStatus={initStatus}
           />
         );
       })}

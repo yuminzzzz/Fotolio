@@ -2,19 +2,13 @@ import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
 import { GlobalContext, initialValue } from "../../App";
-import {
-  collection,
-  setDoc,
-  doc,
-  Timestamp,
-} from "firebase/firestore";
+import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled, { css, keyframes } from "styled-components";
 import Input from "./Input";
-import { Navigate } from "react-router-dom";
 import { LoadingWrapper } from "../../component/Header/Header";
 import ClipLoader from "react-spinners/ClipLoader";
 
@@ -237,7 +231,11 @@ const Upload = () => {
   });
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
-  const isValid = Object.values(uploadData).every((item) => item !== "");
+  const isValid = () => {
+    if (uploadData.description.trim() === "" || uploadData.title.trim() === "")
+      return false;
+    return Object.values(uploadData).every((item) => item !== "");
+  };
   const st = useContext(GlobalContext) as initialValue;
   const storage = getStorage(app);
   const post = async () => {
@@ -298,7 +296,6 @@ const Upload = () => {
       console.error("Error adding document: ", e);
     }
   };
-  console.log(st.allTags);
 
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
@@ -320,113 +317,113 @@ const Upload = () => {
     ? URL.createObjectURL(uploadData.file as File)
     : "";
 
-  if (!st.isLogged) {
-    return <Navigate to="/" />;
-  } else {
-    return (
-      <OutsideWrapper>
-        <Wrapper isUploadPage={true}>
-          {st.loading && (
-            <LoadingWrapper>
-              <ClipLoader color="orange" loading={st.loading} size={30} />
-            </LoadingWrapper>
-          )}
-          <PreviewWrapper>
-            <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
-            {!uploadData.file && (
-              <PreviewContainer>
-                <PreviewLabel htmlFor="uploader"></PreviewLabel>
-                <PreviewOutline>
-                  <PreviewPromptContainer>
-                    <FontAwesomeIcon
-                      icon={faCircleUp}
-                      style={{
-                        fontSize: "30px",
-                        color: "#767676",
-                        marginBottom: "20px",
-                      }}
-                    />
-                    <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
-                  </PreviewPromptContainer>
-                </PreviewOutline>
-              </PreviewContainer>
+  return (
+    <>
+      {st.isLogged && (
+        <OutsideWrapper>
+          <Wrapper isUploadPage={true}>
+            {st.loading && (
+              <LoadingWrapper>
+                <ClipLoader color="orange" loading={st.loading} size={30} />
+              </LoadingWrapper>
             )}
-            {uploadData.file && (
-              <DeletePreview
-                onClick={() => {
+            <PreviewWrapper>
+              <PreviewImg src={previewUrl} alt="upload preview"></PreviewImg>
+              {!uploadData.file && (
+                <PreviewContainer>
+                  <PreviewLabel htmlFor="uploader"></PreviewLabel>
+                  <PreviewOutline>
+                    <PreviewPromptContainer>
+                      <FontAwesomeIcon
+                        icon={faCircleUp}
+                        style={{
+                          fontSize: "30px",
+                          color: "#767676",
+                          marginBottom: "20px",
+                        }}
+                      />
+                      <PreviewPrompt>按一下，已進行上傳</PreviewPrompt>
+                    </PreviewPromptContainer>
+                  </PreviewOutline>
+                </PreviewContainer>
+              )}
+              {uploadData.file && (
+                <DeletePreview
+                  onClick={() => {
+                    setUploadData((pre) => {
+                      return {
+                        ...pre,
+                        file: "",
+                      };
+                    });
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faTrash}
+                    style={{
+                      pointerEvents: "none",
+                    }}
+                  />
+                </DeletePreview>
+              )}
+
+              <input
+                type="file"
+                accept="image/png, image/jpeg, image/gif"
+                id="uploader"
+                style={{ display: "none" }}
+                onChange={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  const file = (target.files as FileList)[0];
                   setUploadData((pre) => {
                     return {
                       ...pre,
-                      file: "",
+                      file: file,
                     };
                   });
                 }}
-              >
-                <FontAwesomeIcon
-                  icon={faTrash}
-                  style={{
-                    pointerEvents: "none",
-                  }}
-                />
-              </DeletePreview>
-            )}
-
-            <input
-              type="file"
-              accept="image/png, image/jpeg, image/gif"
-              id="uploader"
-              style={{ display: "none" }}
-              onChange={(e) => {
-                const target = e.target as HTMLInputElement;
-                const file = (target.files as FileList)[0];
-                setUploadData((pre) => {
-                  return {
-                    ...pre,
-                    file: file,
-                  };
-                });
-              }}
-            />
-          </PreviewWrapper>
-          <ContentSection>
-            <Input
-              tag="title"
-              placeholder="新增標題"
-              value={uploadData.title}
-              onChange={titleOnChange}
-            />
-            <AuthorWrapper>
-              <AuthorAvatar
-                src={st.userData.user_avatar}
-                alt="user avatar"
-              ></AuthorAvatar>
-              <AuthorName>{st.userData.user_name}</AuthorName>
-            </AuthorWrapper>
-            <Input
-              tag="description"
-              placeholder="請輸入描述"
-              value={uploadData.description}
-              onChange={descriptionOnChange}
-            />
-            <Input
-              tag="tags"
-              placeholder="按下enter以建立標籤"
-              localTags={localTags}
-              setLocalTags={setLocalTags}
-            />
-            <ButtonWrapper>
-              {isValid ? (
-                <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
-              ) : (
-                <UploadButton>發佈</UploadButton>
-              )}
-            </ButtonWrapper>
-          </ContentSection>
-        </Wrapper>
-        {animate && <PromptButton isUploaded={true}>已成功上傳</PromptButton>}
-      </OutsideWrapper>
-    );
-  }
+              />
+            </PreviewWrapper>
+            <ContentSection>
+              <Input
+                tag="title"
+                placeholder="新增標題"
+                value={uploadData.title}
+                onChange={titleOnChange}
+              />
+              <AuthorWrapper>
+                <AuthorAvatar
+                  src={st.userData.user_avatar}
+                  alt="user avatar"
+                ></AuthorAvatar>
+                <AuthorName>{st.userData.user_name}</AuthorName>
+              </AuthorWrapper>
+              <Input
+                tag="description"
+                placeholder="請輸入描述"
+                value={uploadData.description}
+                onChange={descriptionOnChange}
+              />
+              <Input
+                tag="tags"
+                placeholder="按下enter以建立標籤"
+                localTags={localTags}
+                setLocalTags={setLocalTags}
+              />
+              <ButtonWrapper>
+                {isValid() ? (
+                  <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
+                ) : (
+                  <UploadButton>發佈</UploadButton>
+                )}
+              </ButtonWrapper>
+            </ContentSection>
+          </Wrapper>
+          {animate && <PromptButton isUploaded={true}>已成功上傳</PromptButton>}
+        </OutsideWrapper>
+      )}
+    </>
+  );
 };
 export default Upload;
 export { Wrapper, OutsideWrapper };

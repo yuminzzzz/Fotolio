@@ -230,7 +230,7 @@ const EditTextButton = ({
           >
             取消
           </Button>
-          {rawComment !== comment && rawComment !== "" ? (
+          {rawComment !== comment && rawComment?.trim() !== "" ? (
             <ActiveButton onClick={updateComment}>儲存</ActiveButton>
           ) : (
             <Button>儲存</Button>
@@ -247,7 +247,7 @@ const EditTextButton = ({
           >
             取消
           </Button>
-          {response !== "" ? (
+          {response?.trim() !== "" ? (
             <ActiveButton onClick={postComment}>完成</ActiveButton>
           ) : (
             <Button>完成</Button>

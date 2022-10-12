@@ -1,7 +1,10 @@
-import { useState } from "react";
+import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
+import { GlobalContext, initialValue, Post } from "../App";
 import Collect from "./Collect";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface Props {
   card: string;
@@ -36,6 +39,7 @@ const PinCard = styled.div<Props>`
 
 const PinImg = styled.img`
   object-fit: cover;
+  object-position: cover;
   position: absolute;
   width: inherit;
   height: inherit;
@@ -63,40 +67,25 @@ const Pin = ({
   size,
   postId,
   postSrc,
-  initStatus,
 }: {
   size: string;
   postId: string;
   postSrc: string;
-  initStatus: boolean;
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
-  const images = document.querySelectorAll("[data-src]");
-  const preloadImage = (img: any) => {
-    const src = img.getAttribute("data-src");
-    if (!src) {
-      return;
-    }
-    img.src = src;
+  const [isLoading, setIsLoading] = useState(true);
+  const st = useContext(GlobalContext) as initialValue;
+  const initStatus = useMemo(
+    () => st.userCollections.some((doc: Post) => doc.post_id === postId),
+    [postId, st.userCollections]
+  );
+
+  const height = (size: string) => {
+    if (size === "small") return 230;
+    if (size === "medium") return 300;
+    if (size === "large") return 420;
   };
-
-  const imgOptions = {};
-
-  const imgObserver = new IntersectionObserver((entries, imgObserver) => {
-    entries.forEach((entry) => {
-      if (!entry.isIntersecting) {
-        return;
-      } else {
-        preloadImage(entry.target);
-        imgObserver.unobserve(entry.target);
-      }
-    });
-  }, imgOptions);
-
-  images.forEach((image) => {
-    imgObserver.observe(image);
-  });
 
   return (
     <PinCard
@@ -107,7 +96,19 @@ const Pin = ({
         navigate(`/posts/${postId}`);
       }}
     >
-      <PinImg data-src={postSrc}></PinImg>
+      {isLoading && (
+        <Skeleton
+          height={height(size)}
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+          }}
+        />
+      )}
+
+      <PinImg data-src={postSrc} onLoad={() => setIsLoading(false)}></PinImg>
+
       {isHover && (
         <HoverBackground>
           <CollectPosition>
