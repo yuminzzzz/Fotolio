@@ -245,7 +245,7 @@ function App() {
         navigate("/");
       }
     });
-  }, []);
+  }, [navigate]);
 
   useEffect(() => {
     const getAllPost = async () => {

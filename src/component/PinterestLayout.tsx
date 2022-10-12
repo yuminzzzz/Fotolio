@@ -1,5 +1,5 @@
-import { useContext, useEffect, useMemo } from "react";
-import { GlobalContext, initialValue, Post } from "../App";
+import { useEffect, useMemo } from "react";
+import { Post } from "../App";
 import Pin from "./Pin";
 import styled from "styled-components";
 
@@ -34,7 +34,6 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
       }
       img.src = src;
     };
-
     const imgObserver = new IntersectionObserver((entries, imgObserver) => {
       entries.forEach((entry) => {
         if (!entry.isIntersecting) {

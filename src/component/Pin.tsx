@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext, initialValue, Post } from "../App";
 import Collect from "./Collect";
+import Skeleton from "react-loading-skeleton";
+import "react-loading-skeleton/dist/skeleton.css";
 
 interface Props {
   card: string;
@@ -72,11 +74,18 @@ const Pin = ({
 }) => {
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   const st = useContext(GlobalContext) as initialValue;
   const initStatus = useMemo(
     () => st.userCollections.some((doc: Post) => doc.post_id === postId),
     [postId, st.userCollections]
   );
+
+  const height = (size: string) => {
+    if (size === "small") return 230;
+    if (size === "medium") return 300;
+    if (size === "large") return 420;
+  };
 
   return (
     <PinCard
@@ -87,7 +96,19 @@ const Pin = ({
         navigate(`/posts/${postId}`);
       }}
     >
-      <PinImg data-src={postSrc}></PinImg>
+      {isLoading && (
+        <Skeleton
+          height={height(size)}
+          style={{
+            position: "absolute",
+            top: "0",
+            left: "0",
+          }}
+        />
+      )}
+
+      <PinImg data-src={postSrc} onLoad={() => setIsLoading(false)}></PinImg>
+
       {isHover && (
         <HoverBackground>
           <CollectPosition>
