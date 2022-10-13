@@ -298,6 +298,7 @@ const Header = () => {
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
   const [toggle, setToggle] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
   const st = useContext(GlobalContext) as initialValue;
@@ -317,7 +318,7 @@ const Header = () => {
       });
       return;
     }
-    st.setLoading(true);
+    setLoading(true);
     createUserWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -332,11 +333,11 @@ const Header = () => {
         };
         setDoc(docRef, data);
         navigate("/home");
-        st.setLoading(false);
+        setLoading(false);
         setLoginInfo({ name: "", email: "", password: "" });
       })
       .catch((error) => {
-        st.setLoading(false);
+        setLoading(false);
         if (loginInfo.name === "") {
           setErrorPrompt((pre) => {
             return { ...pre, name: "輸入框內不可為空白" };
@@ -371,17 +372,17 @@ const Header = () => {
       });
       return;
     }
-    st.setLoading(true);
+    setLoading(true);
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
-        st.setLoading(false);
+        setLoading(false);
         navigate("/home");
         setLoginInfo((pre) => {
           return { ...pre, email: "", password: "" };
         });
       })
       .catch((error) => {
-        st.setLoading(false);
+        setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
@@ -436,9 +437,9 @@ const Header = () => {
           {st.login && (
             <LoginWrapper>
               <LoginContainer>
-                {st.loading && (
+                {loading && (
                   <LoadingWrapper>
-                    <ClipLoader color="orange" loading={st.loading} size={30} />
+                    <ClipLoader color="orange" loading={loading} size={30} />
                   </LoadingWrapper>
                 )}
                 <CloseIconWrapper

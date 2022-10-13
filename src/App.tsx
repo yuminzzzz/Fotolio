@@ -151,8 +151,6 @@ export interface initialValue {
   setAllTags: React.Dispatch<
     React.SetStateAction<{ tag: string; post_id: string }[]>
   >;
-  loading: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 export const GlobalContext = createContext<initialValue | null>(null);
@@ -160,24 +158,27 @@ export const GlobalContext = createContext<initialValue | null>(null);
 function App() {
   const [login, setLogin] = useState(false);
   const [register, setRegister] = useState(false);
-  const [isLogged, setIsLogged] = useState<boolean | null>(null);
-  const [allPost, setAllPost] = useState<Post[]>([]);
-  const [userPost, setUserPost] = useState<Post[]>([]);
-  const [userCollections, setUserCollections] = useState<Post[]>([]);
+  const [isLogged, setIsLogged] = useState<boolean | null>(false);
   const [userData, setUserData] = useState({
     user_avatar: "",
     user_email: "",
     user_id: "",
     user_name: "",
   });
+
+  const [allPost, setAllPost] = useState<Post[]>([]);
+  const [userPost, setUserPost] = useState<Post[]>([]);
+  const [userCollections, setUserCollections] = useState<Post[]>([]);
+  const updateState = useCallback((data: Post[], postId: string) => {
+    return data.filter((item) => item.post_id !== postId);
+  }, []);
+
+
   const [message, setMessage] = useState<Message[]>([]);
   const [allTags, setAllTags] = useState<{ tag: string; post_id: string }[]>(
     []
   );
-  const [loading, setLoading] = useState(false);
-  const updateState = useCallback((data: Post[], postId: string) => {
-    return data.filter((item) => item.post_id !== postId);
-  }, []);
+  
 
   const navigate = useNavigate();
 
@@ -201,8 +202,6 @@ function App() {
     setMessage,
     allTags,
     setAllTags,
-    loading,
-    setLoading,
   };
 
   useEffect(() => {

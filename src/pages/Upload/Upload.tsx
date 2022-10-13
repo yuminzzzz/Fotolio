@@ -231,6 +231,7 @@ const Upload = () => {
   });
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isValid = () => {
     if (uploadData.description.trim() === "" || uploadData.title.trim() === "")
       return false;
@@ -240,7 +241,7 @@ const Upload = () => {
   const storage = getStorage(app);
   const post = async () => {
     try {
-      st.setLoading(true);
+      setLoading(true);
       const docRef = doc(
         collection(db, `users/${st.userData.user_id}/user_posts`)
       );
@@ -279,7 +280,7 @@ const Upload = () => {
             `/users/${st.userData.user_id}/user_posts/${docRef.id}`
           );
           setDoc(postDocRef, data);
-          st.setLoading(false);
+          setLoading(false);
           setAnimate(true);
           setTimeout(() => {
             setAnimate(false);
@@ -322,9 +323,9 @@ const Upload = () => {
       {st.isLogged && (
         <OutsideWrapper>
           <Wrapper isUploadPage={true}>
-            {st.loading && (
+            {loading && (
               <LoadingWrapper>
-                <ClipLoader color="orange" loading={st.loading} size={30} />
+                <ClipLoader color="orange" loading={loading} size={30} />
               </LoadingWrapper>
             )}
             <PreviewWrapper>
