@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext, initialValue, Message } from "../App";
+import { GlobalContext, Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -83,7 +83,8 @@ const PopWindow = ({
   authorId?: string;
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const st = useContext(GlobalContext) as initialValue;
+  const st: any = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(GlobalContext);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
@@ -135,10 +136,10 @@ const PopWindow = ({
     signOut(auth)
       .then(() => {
         st.setAllTags([]);
+        authDispatch({ type: "LOGOUT" });
         navigate("/");
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
   if (location === "post") {
     return (
@@ -202,9 +203,7 @@ const PopWindow = ({
           }}
         >
           <UserAccountWrapper>
-            <UserAccountAvatar
-              src={st.userData.user_avatar}
-            ></UserAccountAvatar>
+            <UserAccountAvatar src={authState.userAvatar}></UserAccountAvatar>
             <div
               style={{
                 display: "flex",
@@ -212,8 +211,8 @@ const PopWindow = ({
                 marginLeft: "5px",
               }}
             >
-              <UserAccountName>{st.userData.user_name}</UserAccountName>
-              <UserAccountEmail>{st.userData.user_email}</UserAccountEmail>
+              <UserAccountName>{authState.userName}</UserAccountName>
+              <UserAccountEmail>{authState.userEmail}</UserAccountEmail>
             </div>
           </UserAccountWrapper>
         </EditButton>

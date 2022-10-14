@@ -9,7 +9,7 @@ import {
   collectionGroup,
 } from "firebase/firestore";
 import { useContext, useState } from "react";
-import { GlobalContext, initialValue, Post } from "../App";
+import { GlobalContext, Post } from "../App";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -44,13 +44,14 @@ const Collect = ({
   postId: string;
   initStatus: boolean;
 }) => {
-  const st = useContext(GlobalContext) as initialValue;
+  const st: any = useContext(GlobalContext);
+  const { authState } = useContext(GlobalContext);
   const [isSaved, setIsSaved] = useState(initStatus);
 
   const modifyCollect = async () => {
     const collectionRef = doc(
       db,
-      `/users/${st.userData.user_id}/user_collections/${postId}`
+      `/users/${authState.userId}/user_collections/${postId}`
     );
     if (isSaved) {
       setIsSaved(false);

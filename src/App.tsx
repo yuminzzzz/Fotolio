@@ -1,8 +1,9 @@
-import React, {
+import {
   createContext,
   useCallback,
   useEffect,
   useLayoutEffect,
+  useReducer,
   useState,
 } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -23,6 +24,8 @@ import {
   getDocs,
   Timestamp,
 } from "firebase/firestore";
+import authReducer from "./reducers/authreducer";
+import { authInitState } from "./reducers/authreducer";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -117,80 +120,44 @@ export interface Message {
   user_name: string;
 }
 
-export interface initialValue {
-  login: boolean;
-  setLogin: React.Dispatch<React.SetStateAction<boolean>>;
-  register: boolean;
-  setRegister: React.Dispatch<React.SetStateAction<boolean>>;
-  userData: {
-    user_avatar: string;
-    user_email: string;
-    user_id: string;
-    user_name: string;
-  };
-  setUserData: React.Dispatch<
-    React.SetStateAction<{
-      user_avatar: string;
-      user_email: string;
-      user_id: string;
-      user_name: string;
-    }>
-  >;
-  isLogged: boolean | null;
-  setIsLogged: React.Dispatch<React.SetStateAction<boolean | null>>;
-  allPost: Post[];
-  setAllPost: React.Dispatch<React.SetStateAction<Post[]>>;
-  userPost: Post[];
-  setUserPost: React.Dispatch<React.SetStateAction<Post[]>>;
-  userCollections: Post[];
-  setUserCollections: React.Dispatch<React.SetStateAction<Post[]>>;
-  updateState: (data: Post[], postId: string) => Post[];
-  message: Message[];
-  setMessage: React.Dispatch<React.SetStateAction<Message[]>>;
-  allTags: { tag: string; post_id: string }[];
-  setAllTags: React.Dispatch<
-    React.SetStateAction<{ tag: string; post_id: string }[]>
-  >;
-}
+// export interface initialValue {
+//   allPost: Post[];
+//   setAllPost: React.Dispatch<React.SetStateAction<Post[]>>;
+//   userPost: Post[];
+//   setUserPost: React.Dispatch<React.SetStateAction<Post[]>>;
+//   userCollections: Post[];
+//   setUserCollections: React.Dispatch<React.SetStateAction<Post[]>>;
+//   updateState: (data: Post[], postId: string) => Post[];
+//   message: Message[];
+//   setMessage: React.Dispatch<React.SetStateAction<Message[]>>;
+//   allTags: { tag: string; post_id: string }[];
+//   setAllTags: React.Dispatch<
+//     React.SetStateAction<{ tag: string; post_id: string }[]>
+//   >;
+// }
 
-export const GlobalContext = createContext<initialValue | null>(null);
+let isMounted = true;
+
+export const GlobalContext = createContext<any>(null);
 
 function App() {
-  const [login, setLogin] = useState(false);
-  const [register, setRegister] = useState(false);
-  const [isLogged, setIsLogged] = useState<boolean | null>(false);
-  const [userData, setUserData] = useState({
-    user_avatar: "",
-    user_email: "",
-    user_id: "",
-    user_name: "",
-  });
-
   const [allPost, setAllPost] = useState<Post[]>([]);
   const [userPost, setUserPost] = useState<Post[]>([]);
   const [userCollections, setUserCollections] = useState<Post[]>([]);
   const updateState = useCallback((data: Post[], postId: string) => {
     return data.filter((item) => item.post_id !== postId);
   }, []);
-
-
   const [message, setMessage] = useState<Message[]>([]);
   const [allTags, setAllTags] = useState<{ tag: string; post_id: string }[]>(
     []
   );
-  
+  const [authState, authDispatch] = useReducer(authReducer, authInitState);
 
   const navigate = useNavigate();
 
   const initialState = {
-    login,
-    setLogin,
-    register,
-    setRegister,
-    userData,
-    setUserData,
-    isLogged,
-    setIsLogged,
+    authState,
+    authDispatch,
     allPost,
     setAllPost,
     userPost,
@@ -204,46 +171,41 @@ function App() {
     setAllTags,
   };
 
+  // useEffect(() => {
+  //   const getTags = async () => {
+  //     const tags = await getDocs(collectionGroup(db, "user_posts"));
+  //     let arr: { tag: string; post_id: string }[] = [];
+  //     tags.forEach((item: DocumentData) => {
+  //       if (item.data().tags !== undefined) {
+  //         arr.push(...item.data().tags);
+  //       }
+  //     });
+  //     setAllTags(arr);
+  //   };
+  //   getTags();
+  // }, [authState.isLogged]);
+
   useEffect(() => {
-    const getTags = async () => {
-      const tags = await getDocs(collectionGroup(db, "user_posts"));
-      let arr: { tag: string; post_id: string }[] = [];
-      tags.forEach((item: DocumentData) => {
-        if (item.data().tags !== undefined) {
-          arr.push(...item.data().tags);
+    if (isMounted) {
+      onAuthStateChanged(auth, async (user) => {
+        if (user) {
+          authDispatch({ type: "TOGGLE_ISLOGGED" });
+          const getUserInfo = async () => {
+            const docSnap: DocumentData = await getDoc(
+              doc(db, `users/${user.uid}`)
+            );
+            const data = docSnap.data();
+            authDispatch({ type: "GET_USER_INFO", payload: data });
+          };
+          getUserInfo();
+        } else {
+          setUserPost([]);
+          setUserCollections([]);
+          navigate("/");
         }
       });
-      setAllTags(arr);
-    };
-    getTags();
-  }, [isLogged]);
-
-  useLayoutEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        setIsLogged(true);
-        const getUserInfo = async () => {
-          const docSnap: DocumentData = await getDoc(
-            doc(db, `users/${user.uid}`)
-          );
-          const data = docSnap.data();
-          setUserData({
-            user_avatar: data.user_avatar,
-            user_email: data.user_email,
-            user_id: data.user_id,
-            user_name: data.user_name,
-          });
-        };
-        getUserInfo();
-      } else {
-        setLogin(false);
-        setRegister(false);
-        setIsLogged(false);
-        setUserPost([]);
-        setUserCollections([]);
-        navigate("/");
-      }
-    });
+      isMounted = false;
+    }
   }, [navigate]);
 
   useEffect(() => {
@@ -262,9 +224,9 @@ function App() {
   }, []);
   useEffect(() => {
     const getPost = async () => {
-      if (!userData.user_id) return;
+      if (!authState.userId) return;
       const userPost = await getDocs(
-        collection(db, `/users/${userData.user_id}/user_posts`)
+        collection(db, `/users/${authState.userId}/user_posts`)
       );
       let arr: Post[] = [];
       userPost.forEach((item: DocumentData) => {
@@ -276,9 +238,9 @@ function App() {
       setUserPost(arr);
     };
     const getCollect = async () => {
-      if (!userData.user_id) return;
+      if (!authState.userId) return;
       const userPost = await getDocs(
-        collection(db, `/users/${userData.user_id}/user_collections`)
+        collection(db, `/users/${authState.userId}/user_collections`)
       );
       let arr: Post[] = [];
       userPost.forEach((item: DocumentData) => {
@@ -288,7 +250,12 @@ function App() {
     };
     getPost();
     getCollect();
-  }, [userData]);
+  }, [
+    authState.userAvatar,
+    authState.userEmail,
+    authState.userId,
+    authState.userName,
+  ]);
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />

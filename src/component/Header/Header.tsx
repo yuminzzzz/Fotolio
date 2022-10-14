@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
-import { GlobalContext, initialValue } from "../../App";
+import { GlobalContext } from "../../App";
 import styled from "styled-components";
 import EditTextButton from "../EditTextButton";
 import logo from "./fotolio.png";
@@ -301,7 +301,7 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, authDispatch } = useContext(GlobalContext);
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
@@ -332,7 +332,9 @@ const Header = () => {
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
+        authDispatch({ type: "TOGGLE_ISLOGGED" });
         navigate("/home");
+        authDispatch({ type: "TOGGLE_REGISTER" });
         setLoading(false);
         setLoginInfo({ name: "", email: "", password: "" });
       })
@@ -376,6 +378,7 @@ const Header = () => {
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         setLoading(false);
+        authDispatch({ type: "TOGGLE_ISLOGGED" });
         navigate("/home");
         setLoginInfo((pre) => {
           return { ...pre, email: "", password: "" };
@@ -410,17 +413,17 @@ const Header = () => {
         }
       });
   };
-
+  console.log(authState);
   return (
     <Wrapper>
       <LogoWrapper>
-        {st.isLogged === false && (
+        {authState.isLogged === false && (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
         )}
-        {st.isLogged === true && (
+        {authState.isLogged === true && (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
@@ -429,12 +432,12 @@ const Header = () => {
           </>
         )}
       </LogoWrapper>
-      {st.isLogged === false && (
+      {authState.isLogged === false && (
         <>
           <div style={{ marginTop: "-10px" }}>
             <EditTextButton buttonTag={"login"} />
           </div>
-          {st.login && (
+          {(authState.login || authState.register) && (
             <LoginWrapper>
               <LoginContainer>
                 {loading && (
@@ -444,8 +447,7 @@ const Header = () => {
                 )}
                 <CloseIconWrapper
                   onClick={() => {
-                    st.setLogin(false);
-                    st.setRegister(false);
+                    authDispatch({ type: "CLOSE_POPWINDOW" });
                   }}
                 >
                   <FontAwesomeIcon
@@ -464,7 +466,7 @@ const Header = () => {
                 <LoginForm
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (st.login) {
+                    if (authState.login) {
                       login();
                     } else {
                       register();
@@ -515,7 +517,7 @@ const Header = () => {
                     <PasswordPrompt>{errorPrompt.acctPWT}</PasswordPrompt>
                   )}
 
-                  {st.register ? (
+                  {authState.register ? (
                     <>
                       <LoginLabel htmlFor="name">名字</LoginLabel>
                       <LoginInput
@@ -535,14 +537,24 @@ const Header = () => {
                         <NamePrompt>{errorPrompt.name}</NamePrompt>
                       )}
                       <LoginButton onClick={register}>繼續</LoginButton>
-                      <RegisterPrompt onClick={() => st.setRegister(false)}>
+                      <RegisterPrompt
+                        onClick={() => {
+                          authDispatch({ type: "TOGGLE_REGISTER" });
+                          authDispatch({ type: "TOGGLE_LOGIN" });
+                        }}
+                      >
                         已經有帳號了? 登入
                       </RegisterPrompt>
                     </>
                   ) : (
                     <>
                       <LoginButton onClick={login}>登入</LoginButton>
-                      <RegisterPrompt onClick={() => st.setRegister(true)}>
+                      <RegisterPrompt
+                        onClick={() => {
+                          authDispatch({ type: "TOGGLE_REGISTER" });
+                          authDispatch({ type: "TOGGLE_LOGIN" });
+                        }}
+                      >
                         還未加入Fotolio? 註冊
                       </RegisterPrompt>
                     </>
@@ -553,7 +565,7 @@ const Header = () => {
           )}
         </>
       )}
-      {st.isLogged === true && (
+      {authState.isLogged === true && (
         <>
           <SearchWrapper>
             {!focus && (
@@ -599,7 +611,7 @@ const Header = () => {
           <UserIconWrapper>
             <UserAvatarWrapper onClick={() => navigate("/profile")}>
               <UserAvatarActive isProfile={isProfile}>
-                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+                <UserAvatar src={authState.userAvatar}></UserAvatar>
               </UserAvatarActive>
             </UserAvatarWrapper>
             <UserInfoWrapper

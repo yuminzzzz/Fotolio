@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, initialValue, Post } from "../../App";
+import { GlobalContext, Post } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 
 interface Props {
@@ -37,7 +37,9 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const st = useContext(GlobalContext) as initialValue;
+  const st: any = useContext(GlobalContext);
+  const { authState } = useContext(GlobalContext);
+
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);
@@ -104,7 +106,7 @@ const Search = () => {
 
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <>
           <TagButtonWrapper>
             {tags.map((tag: string, index: number) => {

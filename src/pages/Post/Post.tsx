@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { GlobalContext, initialValue, Message } from "../../App";
+import { GlobalContext, Message } from "../../App";
 import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
@@ -127,7 +127,8 @@ const Post = () => {
   const [comment, setComment] = useState(0);
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
-  const st = useContext(GlobalContext) as initialValue;
+  const st: any = useContext(GlobalContext);
+  const { authState } = useContext(GlobalContext);
 
   interface Post {
     author_avatar: string;
@@ -185,7 +186,7 @@ const Post = () => {
   );
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <OutsideWrapper>
           <LastPageButton />
           <Wrapper>
@@ -218,7 +219,7 @@ const Post = () => {
                 {comment}則回應
               </p>
               <CommentWrapper>
-                {st.message.map((item, index) => {
+                {st.message.map((item: any, index: number) => {
                   if (targetComment === item.comment_id) {
                     return (
                       <div key={item.comment_id}>
@@ -246,7 +247,7 @@ const Post = () => {
                         userAvatar={item.user_avatar}
                         message={item.message}
                         uploadedTime={item.uploaded_time}
-                        isAuthor={item.user_id === st.userData.user_id}
+                        isAuthor={item.user_id === authState.userId}
                         commentId={item.comment_id}
                         setTargetComment={setTargetComment}
                         authorId={post?.author_id}
@@ -256,7 +257,7 @@ const Post = () => {
                 })}
               </CommentWrapper>
               <MyCommentWrapper>
-                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+                <UserAvatar src={authState.Avatar}></UserAvatar>
                 <MyComment
                   response={response}
                   setResponse={setResponse}

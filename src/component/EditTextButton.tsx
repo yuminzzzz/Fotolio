@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useContext } from "react";
-import { GlobalContext, initialValue } from "../App";
+import { GlobalContext } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Message } from "../App";
@@ -95,7 +95,8 @@ const EditTextButton = ({
 }) => {
   const navigate = useNavigate();
   const postId = useParams().id;
-  const st = useContext(GlobalContext) as initialValue;
+  const st: any = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(GlobalContext);
   let currentPage = useLocation().pathname;
 
   const postComment = () => {
@@ -108,9 +109,9 @@ const EditTextButton = ({
       const data = {
         post_id: postId,
         comment_id: docRef.id,
-        user_id: st.userData.user_id,
-        user_name: st.userData.user_name,
-        user_avatar: st.userData.user_avatar,
+        user_id: authState.userId,
+        user_name: authState.userName,
+        user_avatar: authState.userAvatar,
         message: response,
         uploaded_time: Date.now(),
       };
@@ -152,12 +153,9 @@ const EditTextButton = ({
     navigate("/home");
     st.setUserPost(st.updateState(st.userPost, postId!));
     st.setUserCollections(st.updateState(st.userCollections, postId!));
-    st.setAllTags(st.allTags.filter((item) => item.post_id !== postId));
+    st.setAllTags(st.allTags.filter((item: any) => item.post_id !== postId));
 
-    const docRef = doc(
-      db,
-      `/users/${st.userData.user_id}/user_posts/${postId}`
-    );
+    const docRef = doc(db, `/users/${authState.userId}/user_posts/${postId}`);
     const querySnapshot = await getDocs(
       collectionGroup(db, "user_collections")
     );
@@ -255,12 +253,13 @@ const EditTextButton = ({
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton onClick={() => st.setLogin(true)}>登入</ActiveButton>
+          <ActiveButton onClick={() => authDispatch({ type: "TOGGLE_LOGIN" })}>
+            登入
+          </ActiveButton>
           <Button
             cancel={true}
             onClick={() => {
-              st.setLogin(true);
-              st.setRegister(true);
+              authDispatch({ type: "TOGGLE_REGISTER" });
             }}
           >
             註冊

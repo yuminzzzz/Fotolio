@@ -1,7 +1,7 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext, initialValue } from "../../App";
+import { GlobalContext } from "../../App";
 import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -237,13 +237,15 @@ const Upload = () => {
       return false;
     return Object.values(uploadData).every((item) => item !== "");
   };
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState } = useContext(GlobalContext);
+  const st: any = useContext(GlobalContext);
+
   const storage = getStorage(app);
   const post = async () => {
     try {
       setLoading(true);
       const docRef = doc(
-        collection(db, `users/${st.userData.user_id}/user_posts`)
+        collection(db, `users/${authState.userId}/user_posts`)
       );
       const fileRef = ref(storage, `post-image/${docRef.id}`);
 
@@ -254,18 +256,18 @@ const Upload = () => {
             title: uploadData.title,
             description: uploadData.description,
             created_time: Timestamp.now(),
-            author_id: st.userData.user_id,
-            author_name: st.userData.user_name,
-            author_avatar: st.userData.user_avatar,
+            author_id: authState.userId,
+            author_name: authState.userName,
+            author_avatar: authState.userAvatar,
             url,
             tags: localTags.map((item: string) => {
               return { tag: item, post_id: docRef.id };
             }),
           };
-          st.setAllPost((pre) => {
+          st.setAllPost((pre: any) => {
             return [...pre, data];
           });
-          st.setUserPost((pre) => {
+          st.setUserPost((pre: any) => {
             return [...pre, data];
           });
           if (localTags.length > 0) {
@@ -277,7 +279,7 @@ const Upload = () => {
           }
           const postDocRef = doc(
             db,
-            `/users/${st.userData.user_id}/user_posts/${docRef.id}`
+            `/users/${authState.userId}/user_posts/${docRef.id}`
           );
           setDoc(postDocRef, data);
           setLoading(false);
@@ -320,7 +322,7 @@ const Upload = () => {
 
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <OutsideWrapper>
           <Wrapper isUploadPage={true}>
             {loading && (
@@ -394,10 +396,10 @@ const Upload = () => {
               />
               <AuthorWrapper>
                 <AuthorAvatar
-                  src={st.userData.user_avatar}
+                  src={authState.userAvatar}
                   alt="user avatar"
                 ></AuthorAvatar>
-                <AuthorName>{st.userData.user_name}</AuthorName>
+                <AuthorName>{authState.userName}</AuthorName>
               </AuthorWrapper>
               <Input
                 tag="description"
