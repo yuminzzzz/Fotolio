@@ -1,10 +1,4 @@
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useLayoutEffect,
-  useState,
-} from "react";
+import { useContext, useEffect, useLayoutEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -97,7 +91,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
 `;
-export interface Post {
+export type Post = {
   author_avatar: string;
   author_id: string;
   author_name: string;
@@ -107,8 +101,8 @@ export interface Post {
   title: string;
   url: string;
   tags: { post_id: string; tag: string }[];
-}
-export interface Message {
+};
+export type Message = {
   comment_id: string;
   message: string;
   post_id: string;
@@ -116,35 +110,23 @@ export interface Message {
   user_avatar: string;
   user_id: string;
   user_name: string;
-}
-
-// export interface initialValue {
-//   message: Message[];
-//   setMessage: React.Dispatch<React.SetStateAction<Message[]>>;
-//   allTags: { tag: string; post_id: string }[];
-//   setAllTags: React.Dispatch<
-//     React.SetStateAction<{ tag: string; post_id: string }[]>
-//   >;
-// }
-
+};
+export type Tags = {
+  tag: string;
+  post_id: string;
+};
 let isMounted = true;
-export const GlobalContext = createContext<any>(null);
 
 function App() {
-  const [message, setMessage] = useState<Message[]>([]);
-  const [allTags, setAllTags] = useState<{ tag: string; post_id: string }[]>(
-    []
-  );
-  const { authState, authDispatch, postDispatch } = useContext(Context);
+  const {
+    authState,
+    authDispatch,
+    postDispatch,
+    commentDispatch,
+    commentState,
+  } = useContext(Context);
 
   const navigate = useNavigate();
-
-  const initialState = {
-    message,
-    setMessage,
-    allTags,
-    setAllTags,
-  };
 
   useLayoutEffect(() => {
     if (isMounted) {
@@ -176,10 +158,10 @@ function App() {
           arr.push(...item.data().tags);
         }
       });
-      setAllTags(arr);
+      commentDispatch({ type: "UPDATE_ALLTAGS", payload: arr });
     };
     getTags();
-  }, [authState.isLogged]);
+  }, [commentDispatch]);
 
   useEffect(() => {
     const getAllPost = async () => {
@@ -226,13 +208,13 @@ function App() {
       getCollect();
     }
   }, [authState.isLogged, authState.userId, postDispatch]);
-
+  console.log(commentState);
   return (
-    <GlobalContext.Provider value={initialState}>
+    <>
       <GlobalStyle />
       <Header />
       <Outlet />
-    </GlobalContext.Provider>
+    </>
   );
 }
 

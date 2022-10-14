@@ -9,7 +9,7 @@ import {
   collectionGroup,
 } from "firebase/firestore";
 import { useCallback, useContext, useState } from "react";
-import { GlobalContext, Post } from "../App";
+import { Post } from "../App";
 import { Context } from "../store/ContextProvider";
 
 const CollectButton = styled.div`
@@ -45,7 +45,6 @@ const Collect = ({
   postId: string;
   initStatus: boolean;
 }) => {
-  const st: any = useContext(GlobalContext);
   const { authState, postState, postDispatch } = useContext(Context);
   const [isSaved, setIsSaved] = useState(initStatus);
   const updateState = useCallback((data: Post[], postId: string) => {

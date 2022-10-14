@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, Post } from "../../App";
+import { Post } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 import { Context } from "../../store/ContextProvider";
 
@@ -38,9 +38,7 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const st: any = useContext(GlobalContext);
-  const { authState } = useContext(Context);
-  const { postState } = useContext(Context);
+  const { authState, postState, commentState } = useContext(Context);
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);
@@ -96,14 +94,14 @@ const Search = () => {
       });
       setPost(arr);
     }
-    let rawTags = st.allTags.map(
+    let rawTags = commentState.allTags.map(
       (item: { tag: string; post_id: string }) => item.tag
     );
     rawTags.sort(function () {
       return Math.random() > 0.5 ? -1 : 1;
     });
     setTags(rawTags);
-  }, [keyword, postState.allPost, st.allTags]);
+  }, [commentState.allTags, keyword, postState.allPost]);
 
   return (
     <>

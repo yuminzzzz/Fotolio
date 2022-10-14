@@ -1,8 +1,7 @@
 import { Dispatch, SetStateAction, useCallback, useContext } from "react";
-import { GlobalContext, Post } from "../App";
+import { Post } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { Message } from "../App";
 import { db } from "../utils/firebase";
 import {
   collection,
@@ -96,11 +95,15 @@ const EditTextButton = ({
 }) => {
   const navigate = useNavigate();
   const postId = useParams().id;
-  const st: any = useContext(GlobalContext);
-  const { authState, authDispatch } = useContext(Context);
-  const { postState, postDispatch } = useContext(Context);
+  const {
+    authState,
+    authDispatch,
+    postState,
+    postDispatch,
+    commentState,
+    commentDispatch,
+  } = useContext(Context);
   let currentPage = useLocation().pathname;
-
   const postComment = () => {
     if (!response) return;
     if (!authorId) return;
@@ -117,8 +120,10 @@ const EditTextButton = ({
         message: response,
         uploaded_time: Date.now(),
       };
-      st.setMessage((pre: Message[]) => {
-        return [...pre, data] as Message[];
+
+      commentDispatch({
+        type: "UPDATE_MESSAGE",
+        payload: [...commentState.message, data],
       });
       setDoc(
         doc(
@@ -135,13 +140,17 @@ const EditTextButton = ({
   };
   const updateComment = async () => {
     setTargetComment && setTargetComment("");
-    const updatedMessage = st.message.map((item: any) => {
+    const updatedMessage = commentState.message.map((item: any) => {
       if (item.comment_id === commentId) {
         item.message = rawComment;
       }
       return item;
     });
-    st.setMessage(updatedMessage);
+    commentDispatch({ type: "RESET_MESSAGE" });
+    commentDispatch({
+      type: "UPDATE_MESSAGE",
+      payload: updatedMessage,
+    });
     if (!authorId) return;
     const docRef = doc(
       db,
@@ -166,10 +175,13 @@ const EditTextButton = ({
       type: "UPDATE_USERCOLLECTIONS",
       payload: updateState(postState.userCollections, postId!),
     });
-
-    st.setAllTags(st.allTags.filter((item: any) => item.post_id !== postId));
+    commentDispatch({
+      type: "UPDATE_ALLTAGS",
+      payload: commentState.allTags.filter(
+        (item: any) => item.post_id !== postId
+      ),
+    });
     navigate("/home");
-
     const docRef = doc(db, `/users/${authState.userId}/user_posts/${postId}`);
     const querySnapshot = await getDocs(
       collectionGroup(db, "user_collections")

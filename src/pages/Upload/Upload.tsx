@@ -1,7 +1,6 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
 import { useState, useContext } from "react";
-import { GlobalContext, Post } from "../../App";
 import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -238,11 +237,11 @@ const Upload = () => {
       return false;
     return Object.values(uploadData).every((item) => item !== "");
   };
-  const { authState } = useContext(Context);
-  const { postDispatch, postState } = useContext(Context);
-  const st: any = useContext(GlobalContext);
+  const { authState, postDispatch, postState, commentState, commentDispatch } =
+    useContext(Context);
 
   const storage = getStorage(app);
+
   const post = async () => {
     try {
       setLoading(true);
@@ -275,10 +274,13 @@ const Upload = () => {
             payload: [...postState.userPost, data],
           });
           if (localTags.length > 0) {
+            let tags = commentState.allTags;
             localTags.forEach((item) => {
-              st.setAllTags((pre: { tag: string; post_id: string }[]) => {
-                return [...pre, { tag: item, post_id: docRef.id }];
-              });
+              tags = [...tags, { tag: item, post_id: docRef.id }];
+            });
+            commentDispatch({
+              type: "UPDATE_ALLTAGS",
+              payload: tags,
             });
           }
           const postDocRef = doc(
@@ -434,6 +436,3 @@ const Upload = () => {
 };
 export default Upload;
 export { Wrapper, OutsideWrapper };
-function postDispatch(arg0: { type: string; payload: any[] }) {
-  throw new Error("Function not implemented.");
-}

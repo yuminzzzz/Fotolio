@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext, Message } from "../App";
+import { Message } from "../App";
 import styled from "styled-components";
 import DeleteCheck from "./DeleteCheck";
 import { getDownloadURL, getStorage, ref } from "firebase/storage";
@@ -84,18 +84,23 @@ const PopWindow = ({
   authorId?: string;
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const st: any = useContext(GlobalContext);
-  const { authState, authDispatch, postDispatch } = useContext(Context);
+  const {
+    authState,
+    authDispatch,
+    postDispatch,
+    commentState,
+    commentDispatch,
+  } = useContext(Context);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
   const deleteComment = async () => {
     setEditOrDelete && setEditOrDelete(false);
-    const updatedComment = st.message.filter(
+    const updatedComment = commentState.message.filter(
       (item: Message) => item.comment_id !== commentId
     );
-    st.setMessage(updatedComment);
+    commentDispatch({ type: "UPDATE_MESSAGE", payload: updatedComment });
     await deleteDoc(
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
@@ -136,9 +141,9 @@ const PopWindow = ({
   const logout = () => {
     signOut(auth)
       .then(() => {
-        st.setAllTags([]);
-        authDispatch({ type: "LOGOUT" });
-        postDispatch({ type: "LOGOUT" });
+        authDispatch({ type: "LOG_OUT" });
+        postDispatch({ type: "LOG_OUT" });
+        commentDispatch({ type: "LOG_OUT" });
       })
       .catch((error) => {});
   };

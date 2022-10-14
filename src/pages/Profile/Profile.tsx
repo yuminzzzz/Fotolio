@@ -1,6 +1,5 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { GlobalContext } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 import { Context } from "../../store/ContextProvider";
 
@@ -60,9 +59,7 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
-  const { authState } = useContext(Context);
-  const { postState } = useContext(Context);
-  const st: any = useContext(GlobalContext);
+  const { authState, postState } = useContext(Context);
 
   return (
     <>

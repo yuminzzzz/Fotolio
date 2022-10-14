@@ -10,7 +10,7 @@ const actionType = {
   UPDATE_ALLPOST: "UPDATE_ALLPOST",
   UPDATE_USERPOST: "UPDATE_USERPOST",
   UPDATE_USERCOLLECTIONS: "UPDATE_USERCOLLECTIONS",
-  LOGOUT: "LOGOUT",
+  LOG_OUT: "LOG_OUT",
 };
 
 type State = {
@@ -30,7 +30,7 @@ const postReducer = (state: State, action: any) => {
     case actionType.UPDATE_USERCOLLECTIONS: {
       return { ...state, userCollections: action.payload };
     }
-    case actionType.LOGOUT: {
+    case actionType.LOG_OUT: {
       return { allPost: [], userPost: [], userCollections: [] };
     }
     default:

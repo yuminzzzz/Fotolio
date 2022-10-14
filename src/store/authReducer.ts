@@ -13,7 +13,7 @@ const actionType = {
   TOGGLE_REGISTER: "TOGGLE_REGISTER",
   TOGGLE_ISLOGGED: "TOGGLE_ISLOGGED",
   GET_USER_INFO: "GET_USER_INFO",
-  LOGOUT: "LOGOUT",
+  LOG_OUT: "LOG_OUT",
   CLOSE_POPWINDOW: "CLOSE_POPWINDOW",
 };
 
@@ -60,7 +60,7 @@ const authReducer = (state: State, action: any) => {
         userId: action.payload.user_id,
         userName: action.payload.user_name,
       };
-    case actionType.LOGOUT:
+    case actionType.LOG_OUT:
       return {
         login: false,
         register: false,

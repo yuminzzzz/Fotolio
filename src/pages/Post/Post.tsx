@@ -1,5 +1,5 @@
 import { useState, useEffect, useContext } from "react";
-import { GlobalContext, Message } from "../../App";
+import { Message, Tags } from "../../App";
 import { Context } from "../../store/ContextProvider";
 import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
@@ -128,9 +128,8 @@ const Post = () => {
   const [comment, setComment] = useState(0);
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
-  const st: any = useContext(GlobalContext);
-  const { authState } = useContext(Context);
-  const { postState } = useContext(Context);
+  const { authState, postState, commentState, commentDispatch } =
+    useContext(Context);
 
   interface Post {
     author_avatar: string;
@@ -144,15 +143,19 @@ const Post = () => {
   }
 
   useEffect(() => {
-    const isAuthor = postState.userPost.some((item: Post) => item.post_id === postId);
+    const isAuthor = postState.userPost.some(
+      (item: Post) => item.post_id === postId
+    );
     if (isAuthor) setDeleteTag(true);
-    const postData = postState.allPost.find((item: Post) => item.post_id === postId);
+    const postData = postState.allPost.find(
+      (item: Post) => item.post_id === postId
+    );
     setPost(postData);
-  }, []);
+  }, [postId, postState.allPost, postState.userPost]);
 
   useEffect(() => {
     const getMessage = async () => {
-      st.setMessage([]);
+      commentDispatch({ type: "RESET_MESSAGE" });
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: Message[] = [];
@@ -164,24 +167,24 @@ const Post = () => {
       let sortArr = arr.sort(function (arrA, arrB) {
         return arrA.uploaded_time - arrB.uploaded_time;
       });
-      st.setMessage(sortArr);
+      commentDispatch({ type: "UPDATE_MESSAGE", payload: sortArr });
     };
     getMessage();
-  }, []);
+  }, [commentDispatch, postId]);
 
   useEffect(() => {
-    setComment(st.message.length);
-  }, [st.message]);
+    setComment(commentState.message.length);
+  }, [commentState.message.length]);
 
   useEffect(() => {
     let arr: string[] = [];
-    st.allTags.forEach((item: { tag: string; post_id: string }) => {
+    commentState.allTags.forEach((item: Tags) => {
       if (item.post_id === postId) {
         arr = [...arr, item.tag];
       }
     });
     setPostTags(arr);
-  }, []);
+  }, [commentState.allTags, postId]);
 
   const initStatus = postState.userCollections.some(
     (item: Post) => item.post_id === postId
@@ -221,7 +224,7 @@ const Post = () => {
                 {comment}則回應
               </p>
               <CommentWrapper>
-                {st.message.map((item: any, index: number) => {
+                {commentState.message.map((item: any, index: number) => {
                   if (targetComment === item.comment_id) {
                     return (
                       <div key={item.comment_id}>
