@@ -7,11 +7,11 @@ import { Context } from "../../store/ContextProvider";
 const HomeLogged = () => {
   const st: any = useContext(GlobalContext);
   const { authState } = useContext(Context);
-
+  const { postState } = useContext(Context);
   if (!authState.isLogged) {
     return <Navigate to="/" />;
   } else {
-    return <PinterestLayout post={st.allPost} />;
+    return <PinterestLayout post={postState.allPost} />;
   }
 };
 

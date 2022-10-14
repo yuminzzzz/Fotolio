@@ -1,7 +1,8 @@
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, Post } from "../App";
+import { Post } from "../App";
+import { Context } from "../store/ContextProvider";
 import Collect from "./Collect";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
@@ -75,10 +76,11 @@ const Pin = ({
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const st: any = useContext(GlobalContext);
+  const { postState } = useContext(Context);
+
   const initStatus = useMemo(
-    () => st.userCollections.some((doc: Post) => doc.post_id === postId),
-    [postId, st.userCollections]
+    () => postState.userCollections.some((doc: Post) => doc.post_id === postId),
+    [postId, postState.userCollections]
   );
 
   const height = (size: string) => {

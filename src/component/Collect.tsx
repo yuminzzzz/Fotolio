@@ -8,7 +8,7 @@ import {
   getDocs,
   collectionGroup,
 } from "firebase/firestore";
-import { useContext, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { GlobalContext, Post } from "../App";
 import { Context } from "../store/ContextProvider";
 
@@ -46,9 +46,11 @@ const Collect = ({
   initStatus: boolean;
 }) => {
   const st: any = useContext(GlobalContext);
-  const { authState } = useContext(Context);
+  const { authState, postState, postDispatch } = useContext(Context);
   const [isSaved, setIsSaved] = useState(initStatus);
-
+  const updateState = useCallback((data: Post[], postId: string) => {
+    return data.filter((item) => item.post_id !== postId);
+  }, []);
   const modifyCollect = async () => {
     const collectionRef = doc(
       db,
@@ -56,15 +58,19 @@ const Collect = ({
     );
     if (isSaved) {
       setIsSaved(false);
-      st.setUserCollections(st.updateState(st.userCollections, postId));
+      postDispatch({
+        type: "UPDATE_USERCOLLECTIONS",
+        payload: updateState(postState.userCollections, postId),
+      });
       deleteDoc(collectionRef);
     } else {
       setIsSaved(true);
-      const newCollect = st.allPost.find(
+      const newCollect = postState.allPost.find(
         (item: Post) => item.post_id === postId
       );
-      st.setUserCollections((pre: Post[]) => {
-        return [...pre, newCollect] as Post[];
+      postDispatch({
+        type: "UPDATE_USERCOLLECTIONS",
+        payload: [...postState.userCollections, newCollect],
       });
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);

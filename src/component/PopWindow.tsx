@@ -85,7 +85,7 @@ const PopWindow = ({
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
-  const { authState, authDispatch } = useContext(Context);
+  const { authState, authDispatch, postDispatch } = useContext(Context);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
@@ -138,7 +138,7 @@ const PopWindow = ({
       .then(() => {
         st.setAllTags([]);
         authDispatch({ type: "LOGOUT" });
-        navigate("/");
+        postDispatch({ type: "LOGOUT" });
       })
       .catch((error) => {});
   };

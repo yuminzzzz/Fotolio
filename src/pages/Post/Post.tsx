@@ -130,6 +130,7 @@ const Post = () => {
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   const { authState } = useContext(Context);
+  const { postState } = useContext(Context);
 
   interface Post {
     author_avatar: string;
@@ -143,9 +144,9 @@ const Post = () => {
   }
 
   useEffect(() => {
-    const isAuthor = st.userPost.some((item: Post) => item.post_id === postId);
+    const isAuthor = postState.userPost.some((item: Post) => item.post_id === postId);
     if (isAuthor) setDeleteTag(true);
-    const postData = st.allPost.find((item: Post) => item.post_id === postId);
+    const postData = postState.allPost.find((item: Post) => item.post_id === postId);
     setPost(postData);
   }, []);
 
@@ -182,7 +183,7 @@ const Post = () => {
     setPostTags(arr);
   }, []);
 
-  const initStatus = st.userCollections.some(
+  const initStatus = postState.userCollections.some(
     (item: Post) => item.post_id === postId
   );
   return (

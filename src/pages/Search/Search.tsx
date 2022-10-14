@@ -40,6 +40,7 @@ const PromptWrapper = styled.div`
 const Search = () => {
   const st: any = useContext(GlobalContext);
   const { authState } = useContext(Context);
+  const { postState } = useContext(Context);
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);
@@ -83,7 +84,7 @@ const Search = () => {
   useEffect(() => {
     let arr: Post[] = [];
     if (keyword) {
-      st.allPost.forEach((item: Post) => {
+      postState.allPost.forEach((item: Post) => {
         if (
           item.author_name === keyword ||
           item.title === keyword ||
@@ -102,7 +103,7 @@ const Search = () => {
       return Math.random() > 0.5 ? -1 : 1;
     });
     setTags(rawTags);
-  }, [keyword, st.allPost, st.allTags]);
+  }, [keyword, postState.allPost, st.allTags]);
 
   return (
     <>
@@ -143,7 +144,7 @@ const Search = () => {
                   </div>
                 </div>
               </PromptWrapper>
-              <PinterestLayout post={st.allPost}></PinterestLayout>
+              <PinterestLayout post={postState.allPost}></PinterestLayout>
             </>
           )}
         </>

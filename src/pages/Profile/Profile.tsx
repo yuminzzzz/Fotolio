@@ -61,6 +61,7 @@ const Button = styled.button<Props>`
 const Profile = () => {
   const [status, setStatus] = useState(false);
   const { authState } = useContext(Context);
+  const { postState } = useContext(Context);
   const st: any = useContext(GlobalContext);
 
   return (
@@ -80,9 +81,9 @@ const Profile = () => {
             </Button>
           </ButtonWrapper>
           {!status ? (
-            <PinterestLayout post={st.userPost} />
+            <PinterestLayout post={postState.userPost} />
           ) : (
-            <PinterestLayout post={st.userCollections} />
+            <PinterestLayout post={postState.userCollections} />
           )}
         </Wrapper>
       )}

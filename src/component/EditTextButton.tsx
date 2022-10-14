@@ -1,5 +1,5 @@
-import { Dispatch, SetStateAction, useContext } from "react";
-import { GlobalContext } from "../App";
+import { Dispatch, SetStateAction, useCallback, useContext } from "react";
+import { GlobalContext, Post } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { Message } from "../App";
@@ -98,6 +98,7 @@ const EditTextButton = ({
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
   const { authState, authDispatch } = useContext(Context);
+  const { postState, postDispatch } = useContext(Context);
   let currentPage = useLocation().pathname;
 
   const postComment = () => {
@@ -148,13 +149,26 @@ const EditTextButton = ({
     );
     await updateDoc(docRef, { message: rawComment });
   };
+  const updateState = useCallback((data: Post[], postId: string) => {
+    return data.filter((item) => item.post_id !== postId);
+  }, []);
 
   const deletePost = async () => {
-    st.setAllPost(st.updateState(st.allPost, postId!));
-    navigate("/home");
-    st.setUserPost(st.updateState(st.userPost, postId!));
-    st.setUserCollections(st.updateState(st.userCollections, postId!));
+    postDispatch({
+      type: "UPDATE_ALLPOST",
+      payload: updateState(postState.allPost, postId!),
+    });
+    postDispatch({
+      type: "UPDATE_USERPOST",
+      payload: updateState(postState.userPost, postId!),
+    });
+    postDispatch({
+      type: "UPDATE_USERCOLLECTIONS",
+      payload: updateState(postState.userCollections, postId!),
+    });
+
     st.setAllTags(st.allTags.filter((item: any) => item.post_id !== postId));
+    navigate("/home");
 
     const docRef = doc(db, `/users/${authState.userId}/user_posts/${postId}`);
     const querySnapshot = await getDocs(
