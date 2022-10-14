@@ -7,6 +7,7 @@ import { auth, db } from "../utils/firebase";
 import { doc, deleteDoc } from "firebase/firestore";
 import { useParams, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
+import { Context } from "../store/ContextProvider";
 
 interface Props {
   userInfo: boolean;
@@ -84,7 +85,7 @@ const PopWindow = ({
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
   const st: any = useContext(GlobalContext);
-  const { authState, authDispatch } = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(Context);
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();

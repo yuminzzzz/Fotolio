@@ -1,6 +1,7 @@
 import {
   createContext,
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useReducer,
@@ -24,8 +25,7 @@ import {
   getDocs,
   Timestamp,
 } from "firebase/firestore";
-import authReducer from "./reducers/authreducer";
-import { authInitState } from "./reducers/authreducer";
+import { Context } from "./store/ContextProvider";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -137,7 +137,6 @@ export interface Message {
 // }
 
 let isMounted = true;
-
 export const GlobalContext = createContext<any>(null);
 
 function App() {
@@ -151,13 +150,11 @@ function App() {
   const [allTags, setAllTags] = useState<{ tag: string; post_id: string }[]>(
     []
   );
-  const [authState, authDispatch] = useReducer(authReducer, authInitState);
+  const { authState, authDispatch } = useContext(Context);
 
   const navigate = useNavigate();
 
   const initialState = {
-    authState,
-    authDispatch,
     allPost,
     setAllPost,
     userPost,
@@ -165,25 +162,26 @@ function App() {
     userCollections,
     setUserCollections,
     updateState,
+
     message,
     setMessage,
     allTags,
     setAllTags,
   };
 
-  // useEffect(() => {
-  //   const getTags = async () => {
-  //     const tags = await getDocs(collectionGroup(db, "user_posts"));
-  //     let arr: { tag: string; post_id: string }[] = [];
-  //     tags.forEach((item: DocumentData) => {
-  //       if (item.data().tags !== undefined) {
-  //         arr.push(...item.data().tags);
-  //       }
-  //     });
-  //     setAllTags(arr);
-  //   };
-  //   getTags();
-  // }, [authState.isLogged]);
+  useEffect(() => {
+    const getTags = async () => {
+      const tags = await getDocs(collectionGroup(db, "user_posts"));
+      let arr: { tag: string; post_id: string }[] = [];
+      tags.forEach((item: DocumentData) => {
+        if (item.data().tags !== undefined) {
+          arr.push(...item.data().tags);
+        }
+      });
+      setAllTags(arr);
+    };
+    getTags();
+  }, [authState.isLogged]);
 
   useEffect(() => {
     if (isMounted) {
@@ -250,12 +248,7 @@ function App() {
     };
     getPost();
     getCollect();
-  }, [
-    authState.userAvatar,
-    authState.userEmail,
-    authState.userId,
-    authState.userName,
-  ]);
+  }, [authState.userId]);
   return (
     <GlobalContext.Provider value={initialState}>
       <GlobalStyle />

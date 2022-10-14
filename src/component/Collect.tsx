@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import { useContext, useState } from "react";
 import { GlobalContext, Post } from "../App";
+import { Context } from "../store/ContextProvider";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -45,7 +46,7 @@ const Collect = ({
   initStatus: boolean;
 }) => {
   const st: any = useContext(GlobalContext);
-  const { authState } = useContext(GlobalContext);
+  const { authState } = useContext(Context);
   const [isSaved, setIsSaved] = useState(initStatus);
 
   const modifyCollect = async () => {

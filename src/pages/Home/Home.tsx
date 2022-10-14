@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from "react";
-import { GlobalContext } from "../../App";
+import { Context } from "../../store/ContextProvider";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
@@ -14,7 +14,7 @@ import { Navigate } from "react-router-dom";
 
 const Home = () => {
   const [imgUrlArr, setImgUrlArr] = useState([]);
-  const { authState, authDispatch } = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(Context);
 
   useEffect(() => {
     let arr: any = [];

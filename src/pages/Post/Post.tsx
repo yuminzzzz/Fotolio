@@ -1,5 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { GlobalContext, Message } from "../../App";
+import { Context } from "../../store/ContextProvider";
 import { useParams } from "react-router-dom";
 import { db } from "../../utils/firebase";
 import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
@@ -128,7 +129,7 @@ const Post = () => {
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
-  const { authState } = useContext(GlobalContext);
+  const { authState } = useContext(Context);
 
   interface Post {
     author_avatar: string;

@@ -1,7 +1,7 @@
 export const authInitState = {
   login: false,
   register: false,
-  isLogged: null,
+  isLogged: false,
   userAvatar: "",
   userEmail: "",
   userId: "",
@@ -20,7 +20,7 @@ const actionType = {
 type State = {
   login: boolean;
   register: boolean;
-  isLogged: null | boolean;
+  isLogged: boolean;
   userAvatar: string;
   userEmail: string;
   userId: string;
@@ -64,7 +64,7 @@ const authReducer = (state: State, action: any) => {
       return {
         login: false,
         register: false,
-        isLogged: null,
+        isLogged: false,
         userAvatar: "",
         userEmail: "",
         userId: "",

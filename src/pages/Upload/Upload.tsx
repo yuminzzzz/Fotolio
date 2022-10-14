@@ -11,6 +11,7 @@ import styled, { css, keyframes } from "styled-components";
 import Input from "./Input";
 import { LoadingWrapper } from "../../component/Header/Header";
 import ClipLoader from "react-spinners/ClipLoader";
+import { Context } from "../../store/ContextProvider";
 
 interface Props {
   isUploadPage?: boolean;
@@ -237,7 +238,7 @@ const Upload = () => {
       return false;
     return Object.values(uploadData).every((item) => item !== "");
   };
-  const { authState } = useContext(GlobalContext);
+  const { authState } = useContext(Context);
   const st: any = useContext(GlobalContext);
 
   const storage = getStorage(app);

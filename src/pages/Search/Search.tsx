@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { GlobalContext, Post } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
+import { Context } from "../../store/ContextProvider";
 
 interface Props {
   backgroundColor: string;
@@ -38,8 +39,7 @@ const PromptWrapper = styled.div`
 
 const Search = () => {
   const st: any = useContext(GlobalContext);
-  const { authState } = useContext(GlobalContext);
-
+  const { authState } = useContext(Context);
   const keyword = useParams().search;
   const navigate = useNavigate();
   const [post, setPost] = useState<Post[]>([]);
@@ -102,7 +102,7 @@ const Search = () => {
       return Math.random() > 0.5 ? -1 : 1;
     });
     setTags(rawTags);
-  }, [keyword]);
+  }, [keyword, st.allPost, st.allTags]);
 
   return (
     <>

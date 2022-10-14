@@ -8,6 +8,7 @@ import Home from "./pages/Home/Home";
 import HomeLogged from "./pages/HomeLogged/HomeLogged";
 import Profile from "./pages/Profile/Profile";
 import Search from "./pages/Search/Search";
+import ContextProvider from "./store/ContextProvider";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -15,16 +16,18 @@ const root = ReactDOM.createRoot(
 
 root.render(
   <BrowserRouter>
-    <Routes>
-      <Route path="/" element={<App />}>
-        <Route index element={<Home />} />
-        <Route path="home" element={<HomeLogged />} />
-        <Route path="upload" element={<Upload />} />
-        <Route path="posts/:id" element={<Post />} />
-        <Route path="search/:search" element={<Search />} />
-        <Route path="profile" element={<Profile />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Route>
-    </Routes>
+    <ContextProvider>
+      <Routes>
+        <Route path="/" element={<App />}>
+          <Route index element={<Home />} />
+          <Route path="home" element={<HomeLogged />} />
+          <Route path="upload" element={<Upload />} />
+          <Route path="posts/:id" element={<Post />} />
+          <Route path="search/:search" element={<Search />} />
+          <Route path="profile" element={<Profile />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Route>
+      </Routes>
+    </ContextProvider>
   </BrowserRouter>
 );

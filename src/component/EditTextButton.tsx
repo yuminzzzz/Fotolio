@@ -13,6 +13,7 @@ import {
   collectionGroup,
   getDocs,
 } from "firebase/firestore";
+import { Context } from "../store/ContextProvider";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -96,7 +97,7 @@ const EditTextButton = ({
   const navigate = useNavigate();
   const postId = useParams().id;
   const st: any = useContext(GlobalContext);
-  const { authState, authDispatch } = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(Context);
   let currentPage = useLocation().pathname;
 
   const postComment = () => {

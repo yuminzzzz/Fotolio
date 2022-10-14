@@ -1,6 +1,6 @@
 import { useState, useContext } from "react";
 import { useLocation } from "react-router-dom";
-import { GlobalContext } from "../../App";
+import { Context } from "../../store/ContextProvider";
 import styled from "styled-components";
 import EditTextButton from "../EditTextButton";
 import logo from "./fotolio.png";
@@ -292,8 +292,8 @@ const RegisterPrompt = styled.p`
 const Header = () => {
   const [loginInfo, setLoginInfo] = useState({
     name: "",
-    email: "",
-    password: "",
+    email: "test@test.com",
+    password: "Aaa123",
   });
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
@@ -301,7 +301,7 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const { authState, authDispatch } = useContext(GlobalContext);
+  const { authState, authDispatch } = useContext(Context);
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
@@ -380,9 +380,9 @@ const Header = () => {
         setLoading(false);
         authDispatch({ type: "TOGGLE_ISLOGGED" });
         navigate("/home");
-        setLoginInfo((pre) => {
-          return { ...pre, email: "", password: "" };
-        });
+        // setLoginInfo((pre) => {
+        //   return { ...pre, email: "", password: "" };
+        // });
       })
       .catch((error) => {
         setLoading(false);
@@ -413,7 +413,6 @@ const Header = () => {
         }
       });
   };
-  console.log(authState);
   return (
     <Wrapper>
       <LogoWrapper>

@@ -125,7 +125,7 @@ const Comment = ({
       let currentTime = year - commentYear;
       setTime(`${currentTime}y`);
     }
-  }, []);
+  }, [uploadedTime]);
 
   return (
     <Wrapper>
