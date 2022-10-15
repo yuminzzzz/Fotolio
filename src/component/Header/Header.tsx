@@ -332,7 +332,7 @@ const Header = () => {
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
-        authDispatch({ type: "TOGGLE_ISLOGGED" });
+        authDispatch({ type: "TOGGLE_IS_LOGGED" });
         navigate("/home");
         authDispatch({ type: "TOGGLE_REGISTER" });
         setLoading(false);
@@ -378,11 +378,8 @@ const Header = () => {
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         setLoading(false);
-        authDispatch({ type: "TOGGLE_ISLOGGED" });
+        authDispatch({ type: "TOGGLE_IS_LOGGED" });
         navigate("/home");
-        // setLoginInfo((pre) => {
-        //   return { ...pre, email: "", password: "" };
-        // });
       })
       .catch((error) => {
         setLoading(false);
@@ -446,7 +443,7 @@ const Header = () => {
                 )}
                 <CloseIconWrapper
                   onClick={() => {
-                    authDispatch({ type: "CLOSE_POPWINDOW" });
+                    authDispatch({ type: "CLOSE_POP_WINDOW" });
                   }}
                 >
                   <FontAwesomeIcon
@@ -624,7 +621,7 @@ const Header = () => {
                 ) {
                   return;
                 }
-                setToggle(!toggle);
+                setToggle(false);
               }}
             >
               <FontAwesomeIcon

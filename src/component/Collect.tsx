@@ -58,7 +58,7 @@ const Collect = ({
     if (isSaved) {
       setIsSaved(false);
       postDispatch({
-        type: "UPDATE_USERCOLLECTIONS",
+        type: "UPDATE_USER_COLLECTIONS",
         payload: updateState(postState.userCollections, postId),
       });
       deleteDoc(collectionRef);
@@ -68,7 +68,7 @@ const Collect = ({
         (item: Post) => item.post_id === postId
       );
       postDispatch({
-        type: "UPDATE_USERCOLLECTIONS",
+        type: "UPDATE_USER_COLLECTIONS",
         payload: [...postState.userCollections, newCollect],
       });
       const userPost = collectionGroup(db, "user_posts");

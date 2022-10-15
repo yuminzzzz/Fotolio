@@ -123,7 +123,6 @@ function App() {
     authDispatch,
     postDispatch,
     commentDispatch,
-    commentState,
   } = useContext(Context);
 
   const navigate = useNavigate();
@@ -132,7 +131,7 @@ function App() {
     if (isMounted) {
       onAuthStateChanged(auth, async (user) => {
         if (user) {
-          authDispatch({ type: "TOGGLE_ISLOGGED" });
+          authDispatch({ type: "TOGGLE_IS_LOGGED" });
           const getUserInfo = async () => {
             const docSnap: DocumentData = await getDoc(
               doc(db, `users/${user.uid}`)
@@ -158,7 +157,7 @@ function App() {
           arr.push(...item.data().tags);
         }
       });
-      commentDispatch({ type: "UPDATE_ALLTAGS", payload: arr });
+      commentDispatch({ type: "UPDATE_ALL_TAGS", payload: arr });
     };
     getTags();
   }, [commentDispatch]);
@@ -173,7 +172,7 @@ function App() {
       arr.sort(function () {
         return Math.random() > 0.5 ? -1 : 1;
       });
-      postDispatch({ type: "UPDATE_ALLPOST", payload: arr });
+      postDispatch({ type: "UPDATE_ALL_POST", payload: arr });
     };
     getAllPost();
   }, [postDispatch]);
@@ -190,7 +189,7 @@ function App() {
       arr.sort(function (postA, postB) {
         return postA.created_time.seconds - postB.created_time.seconds;
       });
-      postDispatch({ type: "UPDATE_USERPOST", payload: arr });
+      postDispatch({ type: "UPDATE_USER_POST", payload: arr });
     };
     const getCollect = async () => {
       const userPost = await getDocs(
@@ -200,7 +199,7 @@ function App() {
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
       });
-      postDispatch({ type: "UPDATE_USERCOLLECTIONS", payload: arr });
+      postDispatch({ type: "UPDATE_USER_COLLECTIONS", payload: arr });
     };
 
     if (authState.userId) {
@@ -208,7 +207,6 @@ function App() {
       getCollect();
     }
   }, [authState.isLogged, authState.userId, postDispatch]);
-  console.log(commentState);
   return (
     <>
       <GlobalStyle />

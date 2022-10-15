@@ -7,9 +7,9 @@ export const postInitState = {
 };
 
 const actionType = {
-  UPDATE_ALLPOST: "UPDATE_ALLPOST",
-  UPDATE_USERPOST: "UPDATE_USERPOST",
-  UPDATE_USERCOLLECTIONS: "UPDATE_USERCOLLECTIONS",
+  UPDATE_ALL_POST: "UPDATE_ALL_POST",
+  UPDATE_USER_POST: "UPDATE_USER_POST",
+  UPDATE_USER_COLLECTIONS: "UPDATE_USER_COLLECTIONS",
   LOG_OUT: "LOG_OUT",
 };
 
@@ -21,13 +21,13 @@ type State = {
 
 const postReducer = (state: State, action: any) => {
   switch (action.type) {
-    case actionType.UPDATE_ALLPOST: {
+    case actionType.UPDATE_ALL_POST: {
       return { ...state, allPost: action.payload };
     }
-    case actionType.UPDATE_USERPOST: {
+    case actionType.UPDATE_USER_POST: {
       return { ...state, userPost: action.payload };
     }
-    case actionType.UPDATE_USERCOLLECTIONS: {
+    case actionType.UPDATE_USER_COLLECTIONS: {
       return { ...state, userCollections: action.payload };
     }
     case actionType.LOG_OUT: {

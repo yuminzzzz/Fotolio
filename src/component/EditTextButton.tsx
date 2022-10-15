@@ -164,19 +164,19 @@ const EditTextButton = ({
 
   const deletePost = async () => {
     postDispatch({
-      type: "UPDATE_ALLPOST",
+      type: "UPDATE_ALL_POST",
       payload: updateState(postState.allPost, postId!),
     });
     postDispatch({
-      type: "UPDATE_USERPOST",
+      type: "UPDATE_USER_POST",
       payload: updateState(postState.userPost, postId!),
     });
     postDispatch({
-      type: "UPDATE_USERCOLLECTIONS",
+      type: "UPDATE_USER_COLLECTIONS",
       payload: updateState(postState.userCollections, postId!),
     });
     commentDispatch({
-      type: "UPDATE_ALLTAGS",
+      type: "UPDATE_ALL_TAGS",
       payload: commentState.allTags.filter(
         (item: any) => item.post_id !== postId
       ),

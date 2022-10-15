@@ -22,7 +22,6 @@ const Textarea = styled.textarea`
 const MyComment = ({
   response,
   setResponse,
-  typing,
   setTyping,
   comment,
   rawComment,
@@ -30,7 +29,6 @@ const MyComment = ({
 }: {
   response?: string;
   setResponse?: Dispatch<SetStateAction<string>>;
-  typing?: boolean;
   setTyping?: Dispatch<SetStateAction<boolean>>;
   comment?: string;
   rawComment?: string;
@@ -40,7 +38,7 @@ const MyComment = ({
     if (setRawComment && comment) {
       setRawComment(comment);
     }
-  }, []);
+  }, [comment, setRawComment]);
   return (
     <div style={{ display: "flex", flexDirection: "column" }}>
       <CommentInput>

@@ -11,10 +11,10 @@ export const authInitState = {
 const actionType = {
   TOGGLE_LOGIN: "TOGGLE_LOGIN",
   TOGGLE_REGISTER: "TOGGLE_REGISTER",
-  TOGGLE_ISLOGGED: "TOGGLE_ISLOGGED",
+  TOGGLE_IS_LOGGED: "TOGGLE_IS_LOGGED",
   GET_USER_INFO: "GET_USER_INFO",
   LOG_OUT: "LOG_OUT",
-  CLOSE_POPWINDOW: "CLOSE_POPWINDOW",
+  CLOSE_POP_WINDOW: "CLOSE_POP_WINDOW",
 };
 
 type State = {
@@ -27,30 +27,13 @@ type State = {
   userName: string;
 };
 
-// type Action = {
-//   type: {
-//     ACTIONTYPE: {
-//       TOGGLE_LOGIN: string;
-//       TOGGLE_REGISTER: string;
-//       TOGGLE_ISLOGGED: string;
-//       GET_USER_INFO: string;
-//     };
-//   };
-//   payload: {
-//     user_avatar: string;
-//     user_email: string;
-//     user_id: string;
-//     user_name: string;
-//   };
-// };
-
 const authReducer = (state: State, action: any) => {
   switch (action.type) {
     case actionType.TOGGLE_LOGIN:
       return { ...state, login: !state.login };
     case actionType.TOGGLE_REGISTER:
       return { ...state, register: !state.register };
-    case actionType.TOGGLE_ISLOGGED:
+    case actionType.TOGGLE_IS_LOGGED:
       return { ...state, isLogged: !state.isLogged };
     case actionType.GET_USER_INFO:
       return {
@@ -70,7 +53,7 @@ const authReducer = (state: State, action: any) => {
         userId: "",
         userName: "",
       };
-    case actionType.CLOSE_POPWINDOW:
+    case actionType.CLOSE_POP_WINDOW:
       return {
         ...state,
         login: false,

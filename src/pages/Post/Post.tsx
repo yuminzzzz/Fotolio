@@ -262,11 +262,10 @@ const Post = () => {
                 })}
               </CommentWrapper>
               <MyCommentWrapper>
-                <UserAvatar src={authState.Avatar}></UserAvatar>
+                <UserAvatar src={authState.userAvatar}></UserAvatar>
                 <MyComment
                   response={response}
                   setResponse={setResponse}
-                  typing={typing}
                   setTyping={setTyping}
                 />
               </MyCommentWrapper>

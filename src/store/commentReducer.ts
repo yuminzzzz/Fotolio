@@ -6,7 +6,7 @@ export const commentInitState = {
 };
 
 const actionType = {
-  UPDATE_ALLTAGS: "UPDATE_ALLTAGS",
+  UPDATE_ALL_TAGS: "UPDATE_ALL_TAGS",
   UPDATE_MESSAGE: "UPDATE_MESSAGE",
   RESET_MESSAGE: "RESET_MESSAGE",
   LOG_OUT: "LOG_OUT",
@@ -19,7 +19,7 @@ type State = {
 
 const commentReducer = (state: State, action: any) => {
   switch (action.type) {
-    case actionType.UPDATE_ALLTAGS: {
+    case actionType.UPDATE_ALL_TAGS: {
       return { ...state, allTags: action.payload };
     }
     case actionType.UPDATE_MESSAGE: {

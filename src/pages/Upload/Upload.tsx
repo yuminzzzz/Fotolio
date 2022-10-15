@@ -266,11 +266,11 @@ const Upload = () => {
             }),
           };
           postDispatch({
-            type: "UPDATE_ALLPOST",
+            type: "UPDATE_ALL_POST",
             payload: [...postState.allPost, data],
           });
           postDispatch({
-            type: "UPDATE_USERPOST",
+            type: "UPDATE_USER_POST",
             payload: [...postState.userPost, data],
           });
           if (localTags.length > 0) {
@@ -279,7 +279,7 @@ const Upload = () => {
               tags = [...tags, { tag: item, post_id: docRef.id }];
             });
             commentDispatch({
-              type: "UPDATE_ALLTAGS",
+              type: "UPDATE_ALL_TAGS",
               payload: tags,
             });
           }
@@ -341,6 +341,23 @@ const Upload = () => {
               {!uploadData.file && (
                 <PreviewContainer>
                   <PreviewLabel htmlFor="uploader"></PreviewLabel>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/gif"
+                    id="uploader"
+                    style={{ display: "none" }}
+                    placeholder="file upload"
+                    onChange={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      const file = (target.files as FileList)[0];
+                      setUploadData((pre) => {
+                        return {
+                          ...pre,
+                          file: file,
+                        };
+                      });
+                    }}
+                  />
                   <PreviewOutline>
                     <PreviewPromptContainer>
                       <FontAwesomeIcon
@@ -375,23 +392,6 @@ const Upload = () => {
                   />
                 </DeletePreview>
               )}
-
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/gif"
-                id="uploader"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  const file = (target.files as FileList)[0];
-                  setUploadData((pre) => {
-                    return {
-                      ...pre,
-                      file: file,
-                    };
-                  });
-                }}
-              />
             </PreviewWrapper>
             <ContentSection>
               <Input
