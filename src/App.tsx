@@ -100,7 +100,7 @@ export type Post = {
   post_id: string;
   title: string;
   url: string;
-  tags: { post_id: string; tag: string }[];
+  tags: Tags[];
 };
 export type Message = {
   comment_id: string;
@@ -118,12 +118,8 @@ export type Tags = {
 let isMounted = true;
 
 function App() {
-  const {
-    authState,
-    authDispatch,
-    postDispatch,
-    commentDispatch,
-  } = useContext(Context);
+  const { authState, authDispatch, postDispatch, commentDispatch } =
+    useContext(Context);
 
   const navigate = useNavigate();
 

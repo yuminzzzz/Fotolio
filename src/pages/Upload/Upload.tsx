@@ -1,13 +1,13 @@
 import app from "../../utils/firebase";
 import { db } from "../../utils/firebase";
-import { useState, useContext } from "react";
+import { useState, useContext, useRef } from "react";
 import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
 import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 import { faTrash } from "@fortawesome/free-solid-svg-icons";
 import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
 import styled, { css, keyframes } from "styled-components";
-import Input from "./Input";
 import { LoadingWrapper } from "../../component/Header/Header";
 import ClipLoader from "react-spinners/ClipLoader";
 import { Context } from "../../store/ContextProvider";
@@ -15,6 +15,7 @@ import { Context } from "../../store/ContextProvider";
 interface Props {
   isUploadPage?: boolean;
   isUploaded?: boolean;
+  tag?: string;
 }
 
 const OutsideWrapper = styled.div<Props>`
@@ -138,6 +139,64 @@ const ContentSection = styled.div`
   }
 `;
 
+const TitleInput = styled.input<Props>`
+  height: 54px;
+  font-size: ${(props) =>
+    props.tag === "title" ? "40px" : props.tag === "description" ? "20px" : ""};
+  line-height: normal;
+  padding-bottom: ${(props) => (props.tag === "tags" ? "" : "10px")};
+  border-bottom: ${(props) =>
+    props.tag === "tags" ? "none" : "solid 1px #c8c8c8;"};
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  outline: medium;
+  outline-color: orange;
+  ::placeholder {
+    color: #9197a3;
+    font-size: ${(props) =>
+      props.tag === "title"
+        ? "35px"
+        : props.tag === "description"
+        ? "20px"
+        : ""};
+    padding-left: ${(props) => (props.tag === "description" ? "4px" : "")};
+    font-weight: ${(props) => (props.tag === "description" ? "300" : "")};
+  }
+`;
+
+const TagsWrapper = styled.div`
+  display: flex;
+  margin-top: 34px;
+  align-items: center;
+  border-bottom: solid 1px #c8c8c8;
+  overflow-x: scroll;
+`;
+
+const TagWrapper = styled.ul`
+  display: flex;
+  align-items: center;
+`;
+
+const Tag = styled.li`
+  height: 36px;
+  padding: 8px;
+  font-size: 18px;
+  line-height: 18px;
+  border-radius: 8px;
+  margin-right: 8px;
+  border: solid 1px orange;
+  color: orange;
+  font-weight: 300;
+  display: flex;
+  white-space: nowrap;
+`;
+
+const CloseIcon = styled.span`
+  margin-left: 12px;
+  cursor: pointer;
+`;
+
 const AuthorWrapper = styled.div`
   display: flex;
   margin: 34px 0;
@@ -232,6 +291,7 @@ const Upload = () => {
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
   const [loading, setLoading] = useState(false);
+  const tagRef = useRef<HTMLInputElement | null>(null);
   const isValid = () => {
     if (uploadData.description.trim() === "" || uploadData.title.trim() === "")
       return false;
@@ -305,7 +365,6 @@ const Upload = () => {
       console.error("Error adding document: ", e);
     }
   };
-
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
       return {
@@ -322,6 +381,22 @@ const Upload = () => {
       };
     });
   };
+  const deleteTag = (deleteIndex: number) => {
+    setLocalTags((pre: string[]) => {
+      return pre.filter((_, index) => index !== deleteIndex);
+    });
+  };
+  const addTag = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && tagRef.current) {
+      if (tagRef.current.value.trim() !== "") {
+        setLocalTags([...localTags, tagRef.current.value]);
+        tagRef.current.value = "";
+      }
+    } else {
+      return;
+    }
+  };
+
   const previewUrl = uploadData.file
     ? URL.createObjectURL(uploadData.file as File)
     : "";
@@ -394,12 +469,12 @@ const Upload = () => {
               )}
             </PreviewWrapper>
             <ContentSection>
-              <Input
+              <TitleInput
                 tag="title"
                 placeholder="新增標題"
                 value={uploadData.title}
                 onChange={titleOnChange}
-              />
+              ></TitleInput>
               <AuthorWrapper>
                 <AuthorAvatar
                   src={authState.userAvatar}
@@ -407,18 +482,36 @@ const Upload = () => {
                 ></AuthorAvatar>
                 <AuthorName>{authState.userName}</AuthorName>
               </AuthorWrapper>
-              <Input
+              <TitleInput
                 tag="description"
                 placeholder="請輸入描述"
                 value={uploadData.description}
                 onChange={descriptionOnChange}
-              />
-              <Input
-                tag="tags"
-                placeholder="按下enter以建立標籤"
-                localTags={localTags}
-                setLocalTags={setLocalTags}
-              />
+              ></TitleInput>
+              <TagsWrapper>
+                <TagWrapper>
+                  {localTags &&
+                    localTags.map((item: string, index: number) => {
+                      return (
+                        <Tag key={index}>
+                          {item}
+                          <CloseIcon onClick={() => deleteTag(index)}>
+                            <FontAwesomeIcon
+                              icon={faXmark}
+                              style={{ pointerEvents: "none" }}
+                            />
+                          </CloseIcon>
+                        </Tag>
+                      );
+                    })}
+                </TagWrapper>
+                <TitleInput
+                  tag="tags"
+                  placeholder={"按下enter以建立標籤"}
+                  ref={tagRef}
+                  onKeyUp={(e) => addTag(e)}
+                ></TitleInput>
+              </TagsWrapper>
               <ButtonWrapper>
                 {isValid() ? (
                   <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
@@ -435,4 +528,4 @@ const Upload = () => {
   );
 };
 export default Upload;
-export { Wrapper, OutsideWrapper };
+export { Wrapper, OutsideWrapper, Tag, TagWrapper };

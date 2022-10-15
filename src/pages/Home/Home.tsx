@@ -13,15 +13,14 @@ import { getDocs, collectionGroup, DocumentData } from "firebase/firestore";
 import { Navigate } from "react-router-dom";
 
 const Home = () => {
-  const [imgUrlArr, setImgUrlArr] = useState([]);
+  const [imgUrlArr, setImgUrlArr] = useState<string[]>([]);
   const { authState, authDispatch } = useContext(Context);
 
   useEffect(() => {
-    let arr: any = [];
     const getPost = async () => {
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
-
+      let arr: string[] = [];
       querySnapshot.forEach((doc: DocumentData) => {
         if (arr.length < 10) {
           arr.push(doc.data().url);

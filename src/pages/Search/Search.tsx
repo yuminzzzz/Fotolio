@@ -87,7 +87,7 @@ const Search = () => {
           item.author_name === keyword ||
           item.title === keyword ||
           item.description === keyword ||
-          (item.tags && item.tags.map((tag: any) => tag.tag).includes(keyword))
+          (item.tags && item.tags.map((tag: Tags) => tag.tag).includes(keyword))
         ) {
           arr = [...arr, item];
         }

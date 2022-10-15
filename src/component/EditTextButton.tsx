@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useCallback, useContext } from "react";
-import { Post } from "../App";
+import { Post, Tags } from "../App";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
 import { db } from "../utils/firebase";
@@ -178,7 +178,7 @@ const EditTextButton = ({
     commentDispatch({
       type: "UPDATE_ALL_TAGS",
       payload: commentState.allTags.filter(
-        (item: any) => item.post_id !== postId
+        (item: Tags) => item.post_id !== postId
       ),
     });
     navigate("/home");

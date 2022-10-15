@@ -13,7 +13,7 @@ import DeleteCheck from "../../component/DeleteCheck";
 import Collect from "../../component/Collect";
 import LastPageButton from "./LastPageButton";
 import Ellipsis from "../../component/Ellipsis";
-import { Tag, TagWrapper } from "../Upload/Input";
+import { Tag, TagWrapper } from "../Upload/Upload";
 
 interface PostData {
   author_avatar: string;
@@ -224,7 +224,7 @@ const Post = () => {
                 {comment}則回應
               </p>
               <CommentWrapper>
-                {commentState.message.map((item: any, index: number) => {
+                {commentState.message.map((item: Message, index: number) => {
                   if (targetComment === item.comment_id) {
                     return (
                       <div key={item.comment_id}>
