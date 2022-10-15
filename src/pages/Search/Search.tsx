@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { Post } from "../../App";
+import { Post, Tags } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
 import { Context } from "../../store/ContextProvider";
 
@@ -94,13 +94,17 @@ const Search = () => {
       });
       setPost(arr);
     }
-    let rawTags = commentState.allTags.map(
+    const rawTags = commentState.allTags.map(
       (item: { tag: string; post_id: string }) => item.tag
     );
-    rawTags.sort(function () {
+    const filteredTags = rawTags.filter(
+      (ele: Tags, pos: number) => rawTags.indexOf(ele) === pos
+    );
+
+    filteredTags.sort(function () {
       return Math.random() > 0.5 ? -1 : 1;
     });
-    setTags(rawTags);
+    setTags(filteredTags);
   }, [commentState.allTags, keyword, postState.allPost]);
 
   return (
