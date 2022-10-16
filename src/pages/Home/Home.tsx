@@ -1,26 +1,25 @@
-import { useEffect, useState, useContext } from "react";
-import { GlobalContext, initialValue } from "../../App";
-import { Swiper, SwiperSlide } from "swiper/react";
+import { collectionGroup, DocumentData, getDocs } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import { Navigate } from "react-router-dom";
+import { Autoplay, EffectCoverflow, Pagination } from "swiper";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { EffectCoverflow, Pagination, Autoplay } from "swiper";
+import "swiper/css/pagination";
+import { Swiper, SwiperSlide } from "swiper/react";
+import { AuthActionKind } from "../../store/authReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { db } from "../../utils/firebase";
 import "./styles.css";
 
-import { db } from "../../utils/firebase";
-import { getDocs, collectionGroup, DocumentData } from "firebase/firestore";
-import { Navigate } from "react-router-dom";
-
 const Home = () => {
-  const [imgUrlArr, setImgUrlArr] = useState([]);
-  const st = useContext(GlobalContext) as initialValue;
+  const [imgUrlArr, setImgUrlArr] = useState<string[]>([]);
+  const { authState, authDispatch } = useContext(Context) as ContextType;
   useEffect(() => {
-    let arr: any = [];
     const getPost = async () => {
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
-
+      let arr: string[] = [];
       querySnapshot.forEach((doc: DocumentData) => {
         if (arr.length < 10) {
           arr.push(doc.data().url);
@@ -31,7 +30,8 @@ const Home = () => {
     };
     getPost();
   }, []);
-  if (st.isLogged) {
+
+  if (authState.isLogged) {
     return <Navigate to="/home" />;
   } else {
     return (
@@ -72,7 +72,9 @@ const Home = () => {
                 <img
                   src={item}
                   style={{ cursor: "pointer" }}
-                  onClick={() => st.setLogin(true)}
+                  onClick={() => {
+                    authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
+                  }}
                   alt=""
                 />
               </SwiperSlide>

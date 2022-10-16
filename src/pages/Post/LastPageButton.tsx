@@ -1,7 +1,7 @@
-import styled from "styled-components";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faArrowLeft } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
 
 const Wrapper = styled.div`
   position: fixed;
@@ -21,6 +21,7 @@ const Wrapper = styled.div`
 
 const LastPageButton = () => {
   const navigate = useNavigate();
+  
   return (
     <Wrapper onClick={() => navigate(-1)}>
       <FontAwesomeIcon icon={faArrowLeft} style={{ pointerEvents: "none" }} />

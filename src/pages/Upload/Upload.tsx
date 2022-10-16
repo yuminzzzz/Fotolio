@@ -1,20 +1,24 @@
-import app from "../../utils/firebase";
-import { db } from "../../utils/firebase";
-import { useState, useContext } from "react";
-import { GlobalContext, initialValue } from "../../App";
-import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
-import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  faCircleUp,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
-import styled, { css, keyframes } from "styled-components";
-import Input from "./Input";
-import { LoadingWrapper } from "../../component/Header/Header";
+import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { useContext, useRef, useState } from "react";
 import ClipLoader from "react-spinners/ClipLoader";
+import styled, { css, keyframes } from "styled-components";
+import { LoadingWrapper } from "../../component/Header/Header";
+import { CommentActionKind } from "../../store/commentReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { PostActionKind } from "../../store/postReducer";
+import app, { db } from "../../utils/firebase";
 
 interface Props {
   isUploadPage?: boolean;
   isUploaded?: boolean;
+  tag?: string;
 }
 
 const OutsideWrapper = styled.div<Props>`
@@ -138,6 +142,64 @@ const ContentSection = styled.div`
   }
 `;
 
+const TitleInput = styled.input<Props>`
+  height: 54px;
+  font-size: ${(props) =>
+    props.tag === "title" ? "40px" : props.tag === "description" ? "20px" : ""};
+  line-height: normal;
+  padding-bottom: ${(props) => (props.tag === "tags" ? "" : "10px")};
+  border-bottom: ${(props) =>
+    props.tag === "tags" ? "none" : "solid 1px #c8c8c8;"};
+  border-top: 0;
+  border-right: 0;
+  border-left: 0;
+  outline: medium;
+  outline-color: orange;
+  ::placeholder {
+    color: #9197a3;
+    font-size: ${(props) =>
+      props.tag === "title"
+        ? "35px"
+        : props.tag === "description"
+        ? "20px"
+        : ""};
+    padding-left: ${(props) => (props.tag === "description" ? "4px" : "")};
+    font-weight: ${(props) => (props.tag === "description" ? "300" : "")};
+  }
+`;
+
+const TagsWrapper = styled.div`
+  display: flex;
+  margin-top: 34px;
+  align-items: center;
+  border-bottom: solid 1px #c8c8c8;
+  overflow-x: scroll;
+`;
+
+const TagWrapper = styled.ul`
+  display: flex;
+  align-items: center;
+`;
+
+const Tag = styled.li`
+  height: 36px;
+  padding: 8px;
+  font-size: 18px;
+  line-height: 18px;
+  border-radius: 8px;
+  margin-right: 8px;
+  border: solid 1px orange;
+  color: orange;
+  font-weight: 300;
+  display: flex;
+  white-space: nowrap;
+`;
+
+const CloseIcon = styled.span`
+  margin-left: 12px;
+  cursor: pointer;
+`;
+
 const AuthorWrapper = styled.div`
   display: flex;
   margin: 34px 0;
@@ -231,18 +293,24 @@ const Upload = () => {
   });
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [animate, setAnimate] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const tagRef = useRef<HTMLInputElement | null>(null);
   const isValid = () => {
     if (uploadData.description.trim() === "" || uploadData.title.trim() === "")
       return false;
     return Object.values(uploadData).every((item) => item !== "");
   };
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, postDispatch, postState, commentState, commentDispatch } =
+    useContext(Context) as ContextType;
+  const previewUrl = uploadData.file
+    ? URL.createObjectURL(uploadData.file as File)
+    : "";
   const storage = getStorage(app);
   const post = async () => {
     try {
-      st.setLoading(true);
+      setLoading(true);
       const docRef = doc(
-        collection(db, `users/${st.userData.user_id}/user_posts`)
+        collection(db, `users/${authState.userId}/user_posts`)
       );
       const fileRef = ref(storage, `post-image/${docRef.id}`);
 
@@ -253,33 +321,38 @@ const Upload = () => {
             title: uploadData.title,
             description: uploadData.description,
             created_time: Timestamp.now(),
-            author_id: st.userData.user_id,
-            author_name: st.userData.user_name,
-            author_avatar: st.userData.user_avatar,
+            author_id: authState.userId,
+            author_name: authState.userName,
+            author_avatar: authState.userAvatar,
             url,
             tags: localTags.map((item: string) => {
               return { tag: item, post_id: docRef.id };
             }),
           };
-          st.setAllPost((pre) => {
-            return [...pre, data];
+          postDispatch({
+            type: PostActionKind.UPDATE_ALL_POST,
+            payload: [...postState.allPost, data],
           });
-          st.setUserPost((pre) => {
-            return [...pre, data];
+          postDispatch({
+            type: PostActionKind.UPDATE_USER_POST,
+            payload: [...postState.userPost, data],
           });
           if (localTags.length > 0) {
+            let tags = commentState.allTags;
             localTags.forEach((item) => {
-              st.setAllTags((pre: { tag: string; post_id: string }[]) => {
-                return [...pre, { tag: item, post_id: docRef.id }];
-              });
+              tags = [...tags, { tag: item, post_id: docRef.id }];
+            });
+            commentDispatch({
+              type: CommentActionKind.UPDATE_ALL_TAGS,
+              payload: tags,
             });
           }
           const postDocRef = doc(
             db,
-            `/users/${st.userData.user_id}/user_posts/${docRef.id}`
+            `/users/${authState.userId}/user_posts/${docRef.id}`
           );
           setDoc(postDocRef, data);
-          st.setLoading(false);
+          setLoading(false);
           setAnimate(true);
           setTimeout(() => {
             setAnimate(false);
@@ -296,7 +369,6 @@ const Upload = () => {
       console.error("Error adding document: ", e);
     }
   };
-
   const titleOnChange = (e: { target: HTMLInputElement }) => {
     setUploadData((pre) => {
       return {
@@ -313,18 +385,30 @@ const Upload = () => {
       };
     });
   };
-  const previewUrl = uploadData.file
-    ? URL.createObjectURL(uploadData.file as File)
-    : "";
+  const deleteTag = (deleteIndex: number) => {
+    setLocalTags((pre: string[]) => {
+      return pre.filter((_, index) => index !== deleteIndex);
+    });
+  };
+  const addTag = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && tagRef.current) {
+      if (tagRef.current.value.trim() !== "") {
+        setLocalTags([...localTags, tagRef.current.value]);
+        tagRef.current.value = "";
+      }
+    } else {
+      return;
+    }
+  };
 
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <OutsideWrapper>
           <Wrapper isUploadPage={true}>
-            {st.loading && (
+            {loading && (
               <LoadingWrapper>
-                <ClipLoader color="orange" loading={st.loading} size={30} />
+                <ClipLoader color="orange" loading={loading} size={30} />
               </LoadingWrapper>
             )}
             <PreviewWrapper>
@@ -332,6 +416,23 @@ const Upload = () => {
               {!uploadData.file && (
                 <PreviewContainer>
                   <PreviewLabel htmlFor="uploader"></PreviewLabel>
+                  <input
+                    type="file"
+                    accept="image/png, image/jpeg, image/gif"
+                    id="uploader"
+                    style={{ display: "none" }}
+                    placeholder="file upload"
+                    onChange={(e) => {
+                      const target = e.target as HTMLInputElement;
+                      const file = (target.files as FileList)[0];
+                      setUploadData((pre) => {
+                        return {
+                          ...pre,
+                          file: file,
+                        };
+                      });
+                    }}
+                  />
                   <PreviewOutline>
                     <PreviewPromptContainer>
                       <FontAwesomeIcon
@@ -366,50 +467,51 @@ const Upload = () => {
                   />
                 </DeletePreview>
               )}
-
-              <input
-                type="file"
-                accept="image/png, image/jpeg, image/gif"
-                id="uploader"
-                style={{ display: "none" }}
-                onChange={(e) => {
-                  const target = e.target as HTMLInputElement;
-                  const file = (target.files as FileList)[0];
-                  setUploadData((pre) => {
-                    return {
-                      ...pre,
-                      file: file,
-                    };
-                  });
-                }}
-              />
             </PreviewWrapper>
             <ContentSection>
-              <Input
+              <TitleInput
                 tag="title"
                 placeholder="新增標題"
                 value={uploadData.title}
                 onChange={titleOnChange}
-              />
+              ></TitleInput>
               <AuthorWrapper>
                 <AuthorAvatar
-                  src={st.userData.user_avatar}
+                  src={authState.userAvatar}
                   alt="user avatar"
                 ></AuthorAvatar>
-                <AuthorName>{st.userData.user_name}</AuthorName>
+                <AuthorName>{authState.userName}</AuthorName>
               </AuthorWrapper>
-              <Input
+              <TitleInput
                 tag="description"
                 placeholder="請輸入描述"
                 value={uploadData.description}
                 onChange={descriptionOnChange}
-              />
-              <Input
-                tag="tags"
-                placeholder="按下enter以建立標籤"
-                localTags={localTags}
-                setLocalTags={setLocalTags}
-              />
+              ></TitleInput>
+              <TagsWrapper>
+                <TagWrapper>
+                  {localTags &&
+                    localTags.map((item: string, index: number) => {
+                      return (
+                        <Tag key={index}>
+                          {item}
+                          <CloseIcon onClick={() => deleteTag(index)}>
+                            <FontAwesomeIcon
+                              icon={faXmark}
+                              style={{ pointerEvents: "none" }}
+                            />
+                          </CloseIcon>
+                        </Tag>
+                      );
+                    })}
+                </TagWrapper>
+                <TitleInput
+                  tag="tags"
+                  placeholder={"按下enter以建立標籤"}
+                  ref={tagRef}
+                  onKeyUp={(e) => addTag(e)}
+                ></TitleInput>
+              </TagsWrapper>
               <ButtonWrapper>
                 {isValid() ? (
                   <ActiveUploadButton onClick={post}>發佈</ActiveUploadButton>
@@ -426,4 +528,4 @@ const Upload = () => {
   );
 };
 export default Upload;
-export { Wrapper, OutsideWrapper };
+export { Wrapper, OutsideWrapper, Tag, TagWrapper };

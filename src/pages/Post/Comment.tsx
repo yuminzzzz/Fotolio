@@ -1,9 +1,4 @@
-import {
-  Dispatch,
-  SetStateAction,
-  useEffect,
-  useState,
-} from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styled from "styled-components";
 import Ellipsis from "../../component/Ellipsis";
 
@@ -75,7 +70,6 @@ const Comment = ({
   uploadedTime: number;
 }) => {
   const [time, setTime] = useState("");
-
   useEffect(() => {
     const commentTime = new Date(uploadedTime);
     const nowTime = new Date();
@@ -125,7 +119,7 @@ const Comment = ({
       let currentTime = year - commentYear;
       setTime(`${currentTime}y`);
     }
-  }, []);
+  }, [uploadedTime]);
 
   return (
     <Wrapper>

@@ -1,15 +1,17 @@
-import styled from "styled-components";
-import { db } from "../utils/firebase";
 import {
+  collectionGroup,
+  deleteDoc,
   doc,
   DocumentData,
-  setDoc,
-  deleteDoc,
   getDocs,
-  collectionGroup,
+  setDoc,
 } from "firebase/firestore";
-import { useContext, useState } from "react";
-import { GlobalContext, initialValue, Post } from "../App";
+import { useCallback, useContext, useState } from "react";
+import styled from "styled-components";
+import { PostType } from "../App";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { db } from "../utils/firebase";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -44,25 +46,33 @@ const Collect = ({
   postId: string;
   initStatus: boolean;
 }) => {
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, postState, postDispatch } = useContext(
+    Context
+  ) as ContextType;
   const [isSaved, setIsSaved] = useState(initStatus);
-
+  const updateState = useCallback((data: PostType[], postId: string) => {
+    return data.filter((item) => item.post_id !== postId);
+  }, []);
   const modifyCollect = async () => {
     const collectionRef = doc(
       db,
-      `/users/${st.userData.user_id}/user_collections/${postId}`
+      `/users/${authState.userId}/user_collections/${postId}`
     );
     if (isSaved) {
       setIsSaved(false);
-      st.setUserCollections(st.updateState(st.userCollections, postId));
+      postDispatch({
+        type: PostActionKind.UPDATE_USER_COLLECTIONS,
+        payload: updateState(postState.userCollections, postId),
+      });
       deleteDoc(collectionRef);
     } else {
       setIsSaved(true);
-      const newCollect = st.allPost.find(
-        (item: Post) => item.post_id === postId
+      const newCollect = postState.allPost.find(
+        (item) => item.post_id === postId
       );
-      st.setUserCollections((pre: Post[]) => {
-        return [...pre, newCollect] as Post[];
+      postDispatch({
+        type: PostActionKind.UPDATE_USER_COLLECTIONS,
+        payload: [...postState.userCollections, newCollect] as PostType[],
       });
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);
