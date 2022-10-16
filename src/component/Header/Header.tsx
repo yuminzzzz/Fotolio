@@ -589,7 +589,9 @@ const Header = () => {
             <SearchInputForm
               onSubmit={(e) => {
                 e.preventDefault();
-                navigate(`/search/${search}`);
+                if (search.trim() !== "") {
+                  navigate(`/search/${search}`);
+                }
               }}
             >
               <SearchInput

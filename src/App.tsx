@@ -209,7 +209,6 @@ function App() {
       getCollect();
     }
   }, [authState.isLogged, authState.userId, postDispatch]);
-  console.log(postState.allPost)
   return (
     <>
       <GlobalStyle />
