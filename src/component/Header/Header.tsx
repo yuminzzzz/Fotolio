@@ -1,23 +1,25 @@
-import { useState, useContext } from "react";
-import { useLocation } from "react-router-dom";
-import { GlobalContext, initialValue } from "../../App";
-import styled from "styled-components";
-import EditTextButton from "../EditTextButton";
-import logo from "./fotolio.png";
-import { useNavigate } from "react-router-dom";
+import {
+  faAngleDown,
+  faCircleXmark,
+  faMagnifyingGlass,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import ClipLoader from "react-spinners/ClipLoader";
-import PopWindow from "../PopWindow";
-import { auth, db } from "../../utils/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
+import styled from "styled-components";
+import { AuthActionKind } from "../../store/authReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { auth, db } from "../../utils/firebase";
+import EditTextButton from "../EditTextButton";
+import PopWindow from "../PopWindow";
+import logo from "./fotolio.png";
 
 interface Props {
   isProfile?: boolean;
@@ -292,15 +294,16 @@ const RegisterPrompt = styled.p`
 const Header = () => {
   const [loginInfo, setLoginInfo] = useState({
     name: "",
-    email: "",
-    password: "",
+    email: "test@test.com",
+    password: "Aaa123",
   });
   const [focus, setFocus] = useState(false);
   const [search, setSearch] = useState("");
   const [toggle, setToggle] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, authDispatch } = useContext(Context) as ContextType;
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
@@ -317,7 +320,7 @@ const Header = () => {
       });
       return;
     }
-    st.setLoading(true);
+    setLoading(true);
     createUserWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         const user = userCredential.user;
@@ -331,12 +334,16 @@ const Header = () => {
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
+        authDispatch({
+          type: AuthActionKind.TOGGLE_IS_LOGGED,
+        });
         navigate("/home");
-        st.setLoading(false);
+        authDispatch({ type: AuthActionKind.TOGGLE_REGISTER });
+        setLoading(false);
         setLoginInfo({ name: "", email: "", password: "" });
       })
       .catch((error) => {
-        st.setLoading(false);
+        setLoading(false);
         if (loginInfo.name === "") {
           setErrorPrompt((pre) => {
             return { ...pre, name: "輸入框內不可為空白" };
@@ -371,17 +378,15 @@ const Header = () => {
       });
       return;
     }
-    st.setLoading(true);
+    setLoading(true);
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
-        st.setLoading(false);
+        setLoading(false);
+        authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
         navigate("/home");
-        setLoginInfo((pre) => {
-          return { ...pre, email: "", password: "" };
-        });
       })
       .catch((error) => {
-        st.setLoading(false);
+        setLoading(false);
         const errorCode = error.code;
         console.log(errorCode);
         switch (error.code) {
@@ -409,17 +414,16 @@ const Header = () => {
         }
       });
   };
-
   return (
     <Wrapper>
       <LogoWrapper>
-        {st.isLogged === false && (
+        {authState.isLogged === false && (
           <>
             <Logo src={logo} onClick={() => navigate("/")}></Logo>
             <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
           </>
         )}
-        {st.isLogged === true && (
+        {authState.isLogged === true && (
           <>
             <Logo src={logo} onClick={() => navigate("/home")}></Logo>
             <div style={{ marginTop: "-10px" }}>
@@ -428,23 +432,30 @@ const Header = () => {
           </>
         )}
       </LogoWrapper>
-      {st.isLogged === false && (
+      {authState.isLogged === false && (
         <>
           <div style={{ marginTop: "-10px" }}>
             <EditTextButton buttonTag={"login"} />
           </div>
-          {st.login && (
-            <LoginWrapper>
+          {(authState.login || authState.register) && (
+            <LoginWrapper
+              id="background"
+              onClick={(e) => {
+                const target = e.target as HTMLDivElement;
+                if (target.id === "background") {
+                  authDispatch({ type: AuthActionKind.CLOSE_POP_WINDOW });
+                }
+              }}
+            >
               <LoginContainer>
-                {st.loading && (
+                {loading && (
                   <LoadingWrapper>
-                    <ClipLoader color="orange" loading={st.loading} size={30} />
+                    <ClipLoader color="orange" loading={loading} size={30} />
                   </LoadingWrapper>
                 )}
                 <CloseIconWrapper
                   onClick={() => {
-                    st.setLogin(false);
-                    st.setRegister(false);
+                    authDispatch({ type: AuthActionKind.CLOSE_POP_WINDOW });
                   }}
                 >
                   <FontAwesomeIcon
@@ -463,7 +474,7 @@ const Header = () => {
                 <LoginForm
                   onSubmit={(e) => {
                     e.preventDefault();
-                    if (st.login) {
+                    if (authState.login) {
                       login();
                     } else {
                       register();
@@ -514,7 +525,7 @@ const Header = () => {
                     <PasswordPrompt>{errorPrompt.acctPWT}</PasswordPrompt>
                   )}
 
-                  {st.register ? (
+                  {authState.register ? (
                     <>
                       <LoginLabel htmlFor="name">名字</LoginLabel>
                       <LoginInput
@@ -534,14 +545,28 @@ const Header = () => {
                         <NamePrompt>{errorPrompt.name}</NamePrompt>
                       )}
                       <LoginButton onClick={register}>繼續</LoginButton>
-                      <RegisterPrompt onClick={() => st.setRegister(false)}>
+                      <RegisterPrompt
+                        onClick={() => {
+                          authDispatch({
+                            type: AuthActionKind.TOGGLE_REGISTER,
+                          });
+                          authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
+                        }}
+                      >
                         已經有帳號了? 登入
                       </RegisterPrompt>
                     </>
                   ) : (
                     <>
                       <LoginButton onClick={login}>登入</LoginButton>
-                      <RegisterPrompt onClick={() => st.setRegister(true)}>
+                      <RegisterPrompt
+                        onClick={() => {
+                          authDispatch({
+                            type: AuthActionKind.TOGGLE_REGISTER,
+                          });
+                          authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
+                        }}
+                      >
                         還未加入Fotolio? 註冊
                       </RegisterPrompt>
                     </>
@@ -552,7 +577,7 @@ const Header = () => {
           )}
         </>
       )}
-      {st.isLogged === true && (
+      {authState.isLogged === true && (
         <>
           <SearchWrapper>
             {!focus && (
@@ -598,7 +623,7 @@ const Header = () => {
           <UserIconWrapper>
             <UserAvatarWrapper onClick={() => navigate("/profile")}>
               <UserAvatarActive isProfile={isProfile}>
-                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+                <UserAvatar src={authState.userAvatar}></UserAvatar>
               </UserAvatarActive>
             </UserAvatarWrapper>
             <UserInfoWrapper
@@ -612,7 +637,7 @@ const Header = () => {
                 ) {
                   return;
                 }
-                setToggle(!toggle);
+                setToggle(false);
               }}
             >
               <FontAwesomeIcon

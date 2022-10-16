@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
-import { GlobalContext, initialValue } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
+import { Context, ContextType } from "../../store/ContextProvider";
 
 const Wrapper = styled.div`
   padding: 0 27px;
@@ -59,14 +59,15 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, postState } = useContext(Context) as ContextType;
+
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <Wrapper>
           <UserInfoWrapper>
-            <UserAvatar src={st.userData.user_avatar}></UserAvatar>
-            <UserName>{st.userData.user_name}</UserName>
+            <UserAvatar src={authState.userAvatar}></UserAvatar>
+            <UserName>{authState.userName}</UserName>
           </UserInfoWrapper>
           <ButtonWrapper>
             <Button active={!status} onClick={() => setStatus(!status)}>
@@ -77,9 +78,9 @@ const Profile = () => {
             </Button>
           </ButtonWrapper>
           {!status ? (
-            <PinterestLayout post={st.userPost} />
+            <PinterestLayout post={postState.userPost} />
           ) : (
-            <PinterestLayout post={st.userCollections} />
+            <PinterestLayout post={postState.userCollections} />
           )}
         </Wrapper>
       )}

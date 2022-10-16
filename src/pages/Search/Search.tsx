@@ -1,8 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { GlobalContext, initialValue, Post } from "../../App";
+import { PostType, Tags } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
+import { Context, ContextType } from "../../store/ContextProvider";
 
 interface Props {
   backgroundColor: string;
@@ -37,10 +38,12 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const st = useContext(GlobalContext) as initialValue;
+  const { authState, postState, commentState } = useContext(
+    Context
+  ) as ContextType;
   const keyword = useParams().search;
   const navigate = useNavigate();
-  const [post, setPost] = useState<Post[]>([]);
+  const [post, setPost] = useState<PostType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const backgroundColor = () => {
     const color = [
@@ -79,32 +82,36 @@ const Search = () => {
     return randomColor;
   };
   useEffect(() => {
-    let arr: Post[] = [];
+    let arr: PostType[] = [];
     if (keyword) {
-      st.allPost.forEach((item: Post) => {
+      postState.allPost.forEach((item) => {
         if (
           item.author_name === keyword ||
           item.title === keyword ||
           item.description === keyword ||
-          (item.tags && item.tags.map((tag: any) => tag.tag).includes(keyword))
+          (item.tags && item.tags.map((tag: Tags) => tag.tag).includes(keyword))
         ) {
           arr = [...arr, item];
         }
       });
       setPost(arr);
     }
-    let rawTags = st.allTags.map(
+    const rawTags = commentState.allTags.map(
       (item: { tag: string; post_id: string }) => item.tag
     );
-    rawTags.sort(function () {
+    const filteredTags = rawTags.filter(
+      (ele: string, pos: number) => rawTags.indexOf(ele) === pos
+    );
+
+    filteredTags.sort(function () {
       return Math.random() > 0.5 ? -1 : 1;
     });
-    setTags(rawTags);
-  }, [keyword]);
+    setTags(filteredTags);
+  }, [commentState.allTags, keyword, postState.allPost]);
 
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <>
           <TagButtonWrapper>
             {tags.map((tag: string, index: number) => {
@@ -141,7 +148,7 @@ const Search = () => {
                   </div>
                 </div>
               </PromptWrapper>
-              <PinterestLayout post={st.allPost}></PinterestLayout>
+              <PinterestLayout post={postState.allPost}></PinterestLayout>
             </>
           )}
         </>

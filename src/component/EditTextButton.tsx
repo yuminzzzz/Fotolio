@@ -1,18 +1,21 @@
-import { Dispatch, SetStateAction, useContext } from "react";
-import { GlobalContext, initialValue } from "../App";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import styled from "styled-components";
-import { Message } from "../App";
-import { db } from "../utils/firebase";
 import {
   collection,
-  setDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
   collectionGroup,
+  deleteDoc,
+  doc,
   getDocs,
+  setDoc,
+  updateDoc,
 } from "firebase/firestore";
+import { Dispatch, SetStateAction, useCallback, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { Message, PostType, Tags } from "../App";
+import { AuthActionKind } from "../store/authReducer";
+import { CommentActionKind } from "../store/commentReducer";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { db } from "../utils/firebase";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -95,9 +98,15 @@ const EditTextButton = ({
 }) => {
   const navigate = useNavigate();
   const postId = useParams().id;
-  const st = useContext(GlobalContext) as initialValue;
+  const {
+    authState,
+    authDispatch,
+    postState,
+    postDispatch,
+    commentState,
+    commentDispatch,
+  } = useContext(Context) as ContextType;
   let currentPage = useLocation().pathname;
-
   const postComment = () => {
     if (!response) return;
     if (!authorId) return;
@@ -108,14 +117,16 @@ const EditTextButton = ({
       const data = {
         post_id: postId,
         comment_id: docRef.id,
-        user_id: st.userData.user_id,
-        user_name: st.userData.user_name,
-        user_avatar: st.userData.user_avatar,
+        user_id: authState.userId,
+        user_name: authState.userName,
+        user_avatar: authState.userAvatar,
         message: response,
         uploaded_time: Date.now(),
       };
-      st.setMessage((pre: Message[]) => {
-        return [...pre, data] as Message[];
+
+      commentDispatch({
+        type: CommentActionKind.UPDATE_MESSAGE,
+        payload: [...commentState.message, data] as Message[],
       });
       setDoc(
         doc(
@@ -132,13 +143,17 @@ const EditTextButton = ({
   };
   const updateComment = async () => {
     setTargetComment && setTargetComment("");
-    const updatedMessage = st.message.map((item: any) => {
+    const updatedMessage = commentState.message.map((item: Message) => {
       if (item.comment_id === commentId) {
-        item.message = rawComment;
+        item.message = rawComment!;
       }
       return item;
     });
-    st.setMessage(updatedMessage);
+    commentDispatch({ type: CommentActionKind.RESET_MESSAGE });
+    commentDispatch({
+      type: CommentActionKind.UPDATE_MESSAGE,
+      payload: updatedMessage as Message[],
+    });
     if (!authorId) return;
     const docRef = doc(
       db,
@@ -146,22 +161,34 @@ const EditTextButton = ({
     );
     await updateDoc(docRef, { message: rawComment });
   };
-
+  const updateState = useCallback((data: PostType[], postId: string) => {
+    return data.filter((item) => item.post_id !== postId);
+  }, []);
   const deletePost = async () => {
-    st.setAllPost(st.updateState(st.allPost, postId!));
+    postDispatch({
+      type: PostActionKind.UPDATE_ALL_POST,
+      payload: updateState(postState.allPost, postId!),
+    });
+    postDispatch({
+      type: PostActionKind.UPDATE_USER_POST,
+      payload: updateState(postState.userPost, postId!),
+    });
+    postDispatch({
+      type: PostActionKind.UPDATE_USER_COLLECTIONS,
+      payload: updateState(postState.userCollections, postId!),
+    });
+    commentDispatch({
+      type: CommentActionKind.UPDATE_ALL_TAGS,
+      payload: commentState.allTags.filter(
+        (item: Tags) => item.post_id !== postId
+      ),
+    });
     navigate("/home");
-    st.setUserPost(st.updateState(st.userPost, postId!));
-    st.setUserCollections(st.updateState(st.userCollections, postId!));
-    st.setAllTags(st.allTags.filter((item) => item.post_id !== postId));
-
-    const docRef = doc(
-      db,
-      `/users/${st.userData.user_id}/user_posts/${postId}`
-    );
+    const docRef = doc(db, `/users/${authState.userId}/user_posts/${postId}`);
     const querySnapshot = await getDocs(
       collectionGroup(db, "user_collections")
     );
-    let deletePromise: any[] = [deleteDoc(docRef)];
+    let deletePromise: Promise<void>[] = [deleteDoc(docRef)];
     querySnapshot.forEach((item) => {
       const postDocRef = doc(db, item.ref.path);
       if (postId && item.ref.path.includes(postId)) {
@@ -255,12 +282,15 @@ const EditTextButton = ({
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton onClick={() => st.setLogin(true)}>登入</ActiveButton>
+          <ActiveButton
+            onClick={() => authDispatch({ type: AuthActionKind.TOGGLE_LOGIN })}
+          >
+            登入
+          </ActiveButton>
           <Button
             cancel={true}
             onClick={() => {
-              st.setLogin(true);
-              st.setRegister(true);
+              authDispatch({ type: AuthActionKind.TOGGLE_REGISTER });
             }}
           >
             註冊

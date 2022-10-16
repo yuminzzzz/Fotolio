@@ -1,12 +1,16 @@
-import { Dispatch, SetStateAction, useState, useContext } from "react";
-import { GlobalContext, initialValue, Message } from "../App";
-import styled from "styled-components";
-import DeleteCheck from "./DeleteCheck";
-import { getDownloadURL, getStorage, ref } from "firebase/storage";
-import { auth, db } from "../utils/firebase";
-import { doc, deleteDoc } from "firebase/firestore";
-import { useParams, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
+import { deleteDoc, doc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { Message } from "../App";
+import { AuthActionKind } from "../store/authReducer";
+import { CommentActionKind } from "../store/commentReducer";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { auth, db } from "../utils/firebase";
+import DeleteCheck from "./DeleteCheck";
 
 interface Props {
   userInfo: boolean;
@@ -83,17 +87,26 @@ const PopWindow = ({
   authorId?: string;
   setToggle?: Dispatch<SetStateAction<boolean>>;
 }) => {
-  const st = useContext(GlobalContext) as initialValue;
+  const {
+    authState,
+    authDispatch,
+    postDispatch,
+    commentState,
+    commentDispatch,
+  } = useContext(Context) as ContextType;
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
   const postId = useParams().id;
   const deleteComment = async () => {
     setEditOrDelete && setEditOrDelete(false);
-    const updatedComment = st.message.filter(
+    const updatedComment = commentState.message.filter(
       (item: Message) => item.comment_id !== commentId
     );
-    st.setMessage(updatedComment);
+    commentDispatch({
+      type: CommentActionKind.UPDATE_MESSAGE,
+      payload: updatedComment,
+    });
     await deleteDoc(
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
@@ -134,12 +147,13 @@ const PopWindow = ({
   const logout = () => {
     signOut(auth)
       .then(() => {
-        st.setAllTags([]);
-        navigate("/");
+        authDispatch({ type: AuthActionKind.LOG_OUT });
+        postDispatch({ type: PostActionKind.LOG_OUT });
+        commentDispatch({ type: CommentActionKind.LOG_OUT });
       })
-      .catch((error) => {
-      });
+      .catch((error) => {});
   };
+  
   if (location === "post") {
     return (
       <EditWrapper
@@ -202,9 +216,7 @@ const PopWindow = ({
           }}
         >
           <UserAccountWrapper>
-            <UserAccountAvatar
-              src={st.userData.user_avatar}
-            ></UserAccountAvatar>
+            <UserAccountAvatar src={authState.userAvatar}></UserAccountAvatar>
             <div
               style={{
                 display: "flex",
@@ -212,8 +224,8 @@ const PopWindow = ({
                 marginLeft: "5px",
               }}
             >
-              <UserAccountName>{st.userData.user_name}</UserAccountName>
-              <UserAccountEmail>{st.userData.user_email}</UserAccountEmail>
+              <UserAccountName>{authState.userName}</UserAccountName>
+              <UserAccountEmail>{authState.userEmail}</UserAccountEmail>
             </div>
           </UserAccountWrapper>
         </EditButton>

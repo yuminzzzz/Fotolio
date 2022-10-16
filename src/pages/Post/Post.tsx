@@ -1,29 +1,19 @@
-import { useState, useEffect, useContext } from "react";
-import { GlobalContext, initialValue, Message } from "../../App";
+import { collectionGroup, DocumentData, getDocs } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { db } from "../../utils/firebase";
-import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
-import { Wrapper, OutsideWrapper } from "../Upload/Upload";
 import styled from "styled-components";
-import Comment from "./Comment";
-import MyComment from "./MyComment";
-import EditTextButton from "../../component/EditTextButton";
-import DeleteCheck from "../../component/DeleteCheck";
+import { Message, PostType, Tags } from "../../App";
 import Collect from "../../component/Collect";
-import LastPageButton from "./LastPageButton";
+import DeleteCheck from "../../component/DeleteCheck";
+import EditTextButton from "../../component/EditTextButton";
 import Ellipsis from "../../component/Ellipsis";
-import { Tag, TagWrapper } from "../Upload/Input";
-
-interface PostData {
-  author_avatar: string;
-  author_id: string;
-  author_name: string;
-  created_time: { seconds: number; nanoseconds: number };
-  description: string;
-  post_id: string;
-  title: string;
-  url: string;
-}
+import { CommentActionKind } from "../../store/commentReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { db } from "../../utils/firebase";
+import { OutsideWrapper, Tag, TagWrapper, Wrapper } from "../Upload/Upload";
+import Comment from "./Comment";
+import LastPageButton from "./LastPageButton";
+import MyComment from "./MyComment";
 
 const CoverImgWrapper = styled.div`
   background-color: lightgrey;
@@ -114,10 +104,8 @@ const UserAvatar = styled.img`
   background-color: #e9e9e9;
 `;
 
-const Post = () => {
-  const [post, setPost] = useState<DocumentData | PostData | undefined>(
-    undefined
-  );
+const Post= () => {
+  const [post, setPost] = useState<PostType>();
   const [targetComment, setTargetComment] = useState("");
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");
@@ -127,29 +115,23 @@ const Post = () => {
   const [comment, setComment] = useState(0);
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
-  const st = useContext(GlobalContext) as initialValue;
-
-  interface Post {
-    author_avatar: string;
-    author_id: string;
-    author_name: string;
-    created_time: { seconds: number; nanoseconds: number };
-    description: string;
-    post_id: string;
-    title: string;
-    url: string;
-  }
-
+  const { authState, postState, commentState, commentDispatch } = useContext(
+    Context
+  ) as ContextType;
+  const initStatus = postState.userCollections.some(
+    (item) => item.post_id === postId
+  );
   useEffect(() => {
-    const isAuthor = st.userPost.some((item: Post) => item.post_id === postId);
+    const isAuthor = postState.userPost.some(
+      (item) => item.post_id === postId
+    );
     if (isAuthor) setDeleteTag(true);
-    const postData = st.allPost.find((item: Post) => item.post_id === postId);
+    const postData = postState.allPost.find((item) => item.post_id === postId)!;
     setPost(postData);
-  }, []);
-
+  }, [postId, postState.allPost, postState.userPost]);
   useEffect(() => {
     const getMessage = async () => {
-      st.setMessage([]);
+      commentDispatch({ type: CommentActionKind.RESET_MESSAGE });
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: Message[] = [];
@@ -161,31 +143,29 @@ const Post = () => {
       let sortArr = arr.sort(function (arrA, arrB) {
         return arrA.uploaded_time - arrB.uploaded_time;
       });
-      st.setMessage(sortArr);
+      commentDispatch({
+        type: CommentActionKind.UPDATE_MESSAGE,
+        payload: sortArr,
+      });
     };
     getMessage();
-  }, []);
-
+  }, [commentDispatch, postId]);
   useEffect(() => {
-    setComment(st.message.length);
-  }, [st.message]);
-
+    setComment(commentState.message.length);
+  }, [commentState.message.length]);
   useEffect(() => {
     let arr: string[] = [];
-    st.allTags.forEach((item: { tag: string; post_id: string }) => {
+    commentState.allTags.forEach((item: Tags) => {
       if (item.post_id === postId) {
         arr = [...arr, item.tag];
       }
     });
     setPostTags(arr);
-  }, []);
+  }, [commentState.allTags, postId]);
 
-  const initStatus = st.userCollections.some(
-    (item: Post) => item.post_id === postId
-  );
   return (
     <>
-      {st.isLogged && (
+      {authState.isLogged && (
         <OutsideWrapper>
           <LastPageButton />
           <Wrapper>
@@ -218,7 +198,7 @@ const Post = () => {
                 {comment}則回應
               </p>
               <CommentWrapper>
-                {st.message.map((item, index) => {
+                {commentState.message.map((item: Message, index: number) => {
                   if (targetComment === item.comment_id) {
                     return (
                       <div key={item.comment_id}>
@@ -246,21 +226,20 @@ const Post = () => {
                         userAvatar={item.user_avatar}
                         message={item.message}
                         uploadedTime={item.uploaded_time}
-                        isAuthor={item.user_id === st.userData.user_id}
+                        isAuthor={item.user_id === authState.userId}
                         commentId={item.comment_id}
                         setTargetComment={setTargetComment}
-                        authorId={post?.author_id}
+                        authorId={post?.author_id!}
                       />
                     );
                   }
                 })}
               </CommentWrapper>
               <MyCommentWrapper>
-                <UserAvatar src={st.userData.user_avatar}></UserAvatar>
+                <UserAvatar src={authState.userAvatar}></UserAvatar>
                 <MyComment
                   response={response}
                   setResponse={setResponse}
-                  typing={typing}
                   setTyping={setTyping}
                 />
               </MyCommentWrapper>

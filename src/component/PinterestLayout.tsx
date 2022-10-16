@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from "react";
-import { Post } from "../App";
-import Pin from "./Pin";
 import styled from "styled-components";
+import { PostType } from "../App";
+import Pin from "./Pin";
 
 const PinContainer = styled.div`
   margin: 0;
@@ -18,16 +18,15 @@ const PinContainer = styled.div`
 
 let arr: string[] = ["small", "medium", "large"];
 
-const PinterestLayout = ({ post }: { post: Post[] }) => {
+const PinterestLayout = ({ post }: { post: PostType[] }) => {
   const random = useMemo(() => {
     return Array(post.length)
       .fill(null)
       .map((item) => Math.floor(Math.random() * 3));
   }, [post]);
-
   useEffect(() => {
     const images = document.querySelectorAll("[data-src]");
-    const preloadImage = (img: any) => {
+    const preloadImage = (img: HTMLImageElement) => {
       const src = img.getAttribute("data-src");
       if (!src) {
         return;
@@ -39,7 +38,7 @@ const PinterestLayout = ({ post }: { post: Post[] }) => {
         if (!entry.isIntersecting) {
           return;
         } else {
-          preloadImage(entry.target);
+          preloadImage(entry.target as HTMLImageElement);
           imgObserver.unobserve(entry.target);
         }
       });
