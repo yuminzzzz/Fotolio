@@ -1,17 +1,41 @@
-import { createContext, useReducer } from "react";
-import authReducer, { authInitState } from "./authReducer";
-import postReducer, { postInitState } from "./postReducer";
-import commentReducer, { commentInitState } from "./commentReducer";
+import React, { createContext, useReducer } from "react";
+import authReducer, { AuthAction, AuthState } from "./authReducer";
+import commentReducer, { CommentAction, CommentState } from "./commentReducer";
+import postReducer, { PostAction, PostState } from "./postReducer";
 
-export const Context = createContext<any>(null);
+export const Context = createContext<ContextType | null>(null);
 
-const ContextProvider = (props: any) => {
-  const [authState, authDispatch] = useReducer(authReducer, authInitState);
-  const [postState, postDispatch] = useReducer(postReducer, postInitState);
-  const [commentState, commentDispatch] = useReducer(
-    commentReducer,
-    commentInitState
-  );
+export type ContextType = {
+  authState: AuthState;
+  authDispatch: React.Dispatch<AuthAction>;
+  postState: PostState;
+  postDispatch: React.Dispatch<PostAction>;
+  commentState: CommentState;
+  commentDispatch: React.Dispatch<CommentAction>;
+};
+interface Props {
+  children: React.ReactNode;
+}
+
+const ContextProvider: React.FC<Props> = ({ children }) => {
+  const [authState, authDispatch] = useReducer(authReducer, {
+    login: false,
+    register: false,
+    isLogged: false,
+    userAvatar: "",
+    userEmail: "",
+    userId: "",
+    userName: "",
+  });
+  const [postState, postDispatch] = useReducer(postReducer, {
+    allPost: [],
+    userPost: [],
+    userCollections: [],
+  });
+  const [commentState, commentDispatch] = useReducer(commentReducer, {
+    message: [],
+    allTags: [],
+  });
 
   const value = {
     authState: authState,
@@ -22,7 +46,7 @@ const ContextProvider = (props: any) => {
     commentDispatch: commentDispatch,
   };
 
-  return <Context.Provider value={value}>{props.children}</Context.Provider>;
+  return <Context.Provider value={value}>{children}</Context.Provider>;
 };
 
 export default ContextProvider;

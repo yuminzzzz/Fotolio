@@ -1,23 +1,13 @@
-export const authInitState = {
-  login: false,
-  register: false,
-  isLogged: false,
-  userAvatar: "",
-  userEmail: "",
-  userId: "",
-  userName: "",
-};
+export enum AuthActionKind {
+  TOGGLE_LOGIN = "TOGGLE_LOGIN",
+  TOGGLE_REGISTER = "TOGGLE_REGISTER",
+  TOGGLE_IS_LOGGED = "TOGGLE_IS_LOGGED",
+  GET_USER_INFO = "GET_USER_INFO",
+  LOG_OUT = "LOG_OUT",
+  CLOSE_POP_WINDOW = "CLOSE_POP_WINDOW",
+}
 
-const actionType = {
-  TOGGLE_LOGIN: "TOGGLE_LOGIN",
-  TOGGLE_REGISTER: "TOGGLE_REGISTER",
-  TOGGLE_IS_LOGGED: "TOGGLE_IS_LOGGED",
-  GET_USER_INFO: "GET_USER_INFO",
-  LOG_OUT: "LOG_OUT",
-  CLOSE_POP_WINDOW: "CLOSE_POP_WINDOW",
-};
-
-type State = {
+export interface AuthState {
   login: boolean;
   register: boolean;
   isLogged: boolean;
@@ -25,25 +15,35 @@ type State = {
   userEmail: string;
   userId: string;
   userName: string;
-};
+}
 
-const authReducer = (state: State, action: any) => {
+export interface AuthAction {
+  type: AuthActionKind;
+  payload?: {
+    user_avatar: string;
+    user_email: string;
+    user_id: string;
+    user_name: string;
+  };
+}
+
+const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case actionType.TOGGLE_LOGIN:
+    case AuthActionKind.TOGGLE_LOGIN:
       return { ...state, login: !state.login };
-    case actionType.TOGGLE_REGISTER:
+    case AuthActionKind.TOGGLE_REGISTER:
       return { ...state, register: !state.register };
-    case actionType.TOGGLE_IS_LOGGED:
+    case AuthActionKind.TOGGLE_IS_LOGGED:
       return { ...state, isLogged: !state.isLogged };
-    case actionType.GET_USER_INFO:
+    case AuthActionKind.GET_USER_INFO:
       return {
         ...state,
-        userAvatar: action.payload.user_avatar,
-        userEmail: action.payload.user_email,
-        userId: action.payload.user_id,
-        userName: action.payload.user_name,
+        userAvatar: action.payload!.user_avatar,
+        userEmail: action.payload!.user_email,
+        userId: action.payload!.user_id,
+        userName: action.payload!.user_name,
       };
-    case actionType.LOG_OUT:
+    case AuthActionKind.LOG_OUT:
       return {
         login: false,
         register: false,
@@ -53,7 +53,7 @@ const authReducer = (state: State, action: any) => {
         userId: "",
         userName: "",
       };
-    case actionType.CLOSE_POP_WINDOW:
+    case AuthActionKind.CLOSE_POP_WINDOW:
       return {
         ...state,
         login: false,

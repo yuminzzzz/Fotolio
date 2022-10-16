@@ -1,16 +1,19 @@
-import app from "../../utils/firebase";
-import { db } from "../../utils/firebase";
-import { useState, useContext, useRef } from "react";
-import { collection, setDoc, doc, Timestamp } from "firebase/firestore";
-import { ref, getStorage, uploadBytes, getDownloadURL } from "firebase/storage";
+import {
+  faCircleUp,
+  faTrash,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { faTrash } from "@fortawesome/free-solid-svg-icons";
-import { faCircleUp } from "@fortawesome/free-solid-svg-icons";
+import { collection, doc, setDoc, Timestamp } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref, uploadBytes } from "firebase/storage";
+import { useContext, useRef, useState } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 import styled, { css, keyframes } from "styled-components";
 import { LoadingWrapper } from "../../component/Header/Header";
-import ClipLoader from "react-spinners/ClipLoader";
-import { Context } from "../../store/ContextProvider";
+import { CommentActionKind } from "../../store/commentReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { PostActionKind } from "../../store/postReducer";
+import app, { db } from "../../utils/firebase";
 
 interface Props {
   isUploadPage?: boolean;
@@ -298,10 +301,11 @@ const Upload = () => {
     return Object.values(uploadData).every((item) => item !== "");
   };
   const { authState, postDispatch, postState, commentState, commentDispatch } =
-    useContext(Context);
-
+    useContext(Context) as ContextType;
+  const previewUrl = uploadData.file
+    ? URL.createObjectURL(uploadData.file as File)
+    : "";
   const storage = getStorage(app);
-
   const post = async () => {
     try {
       setLoading(true);
@@ -326,11 +330,11 @@ const Upload = () => {
             }),
           };
           postDispatch({
-            type: "UPDATE_ALL_POST",
+            type: PostActionKind.UPDATE_ALL_POST,
             payload: [...postState.allPost, data],
           });
           postDispatch({
-            type: "UPDATE_USER_POST",
+            type: PostActionKind.UPDATE_USER_POST,
             payload: [...postState.userPost, data],
           });
           if (localTags.length > 0) {
@@ -339,7 +343,7 @@ const Upload = () => {
               tags = [...tags, { tag: item, post_id: docRef.id }];
             });
             commentDispatch({
-              type: "UPDATE_ALL_TAGS",
+              type: CommentActionKind.UPDATE_ALL_TAGS,
               payload: tags,
             });
           }
@@ -396,10 +400,6 @@ const Upload = () => {
       return;
     }
   };
-
-  const previewUrl = uploadData.file
-    ? URL.createObjectURL(uploadData.file as File)
-    : "";
 
   return (
     <>

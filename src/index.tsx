@@ -1,13 +1,12 @@
 import ReactDOM from "react-dom/client";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-
 import App from "./App";
-import Upload from "./pages/Upload/Upload";
-import Post from "./pages/Post/Post";
 import Home from "./pages/Home/Home";
 import HomeLogged from "./pages/HomeLogged/HomeLogged";
+import Post from "./pages/Post/Post";
 import Profile from "./pages/Profile/Profile";
 import Search from "./pages/Search/Search";
+import Upload from "./pages/Upload/Upload";
 import ContextProvider from "./store/ContextProvider";
 
 const root = ReactDOM.createRoot(

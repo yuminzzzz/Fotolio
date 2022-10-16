@@ -1,16 +1,17 @@
-import styled from "styled-components";
-import { db } from "../utils/firebase";
 import {
+  collectionGroup,
+  deleteDoc,
   doc,
   DocumentData,
-  setDoc,
-  deleteDoc,
   getDocs,
-  collectionGroup,
+  setDoc,
 } from "firebase/firestore";
 import { useCallback, useContext, useState } from "react";
-import { Post } from "../App";
-import { Context } from "../store/ContextProvider";
+import styled from "styled-components";
+import { PostType } from "../App";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { db } from "../utils/firebase";
 
 const CollectButton = styled.div`
   width: 64px;
@@ -45,9 +46,11 @@ const Collect = ({
   postId: string;
   initStatus: boolean;
 }) => {
-  const { authState, postState, postDispatch } = useContext(Context);
+  const { authState, postState, postDispatch } = useContext(
+    Context
+  ) as ContextType;
   const [isSaved, setIsSaved] = useState(initStatus);
-  const updateState = useCallback((data: Post[], postId: string) => {
+  const updateState = useCallback((data: PostType[], postId: string) => {
     return data.filter((item) => item.post_id !== postId);
   }, []);
   const modifyCollect = async () => {
@@ -58,18 +61,18 @@ const Collect = ({
     if (isSaved) {
       setIsSaved(false);
       postDispatch({
-        type: "UPDATE_USER_COLLECTIONS",
+        type: PostActionKind.UPDATE_USER_COLLECTIONS,
         payload: updateState(postState.userCollections, postId),
       });
       deleteDoc(collectionRef);
     } else {
       setIsSaved(true);
       const newCollect = postState.allPost.find(
-        (item: Post) => item.post_id === postId
+        (item) => item.post_id === postId
       );
       postDispatch({
-        type: "UPDATE_USER_COLLECTIONS",
-        payload: [...postState.userCollections, newCollect],
+        type: PostActionKind.UPDATE_USER_COLLECTIONS,
+        payload: [...postState.userCollections, newCollect] as PostType[],
       });
       const userPost = collectionGroup(db, "user_posts");
       const querySnapshot = await getDocs(userPost);

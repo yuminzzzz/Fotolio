@@ -1,11 +1,10 @@
 import { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import styled from "styled-components";
-import { Post } from "../App";
-import { Context } from "../store/ContextProvider";
-import Collect from "./Collect";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
+import { useNavigate } from "react-router-dom";
+import styled from "styled-components";
+import { Context, ContextType } from "../store/ContextProvider";
+import Collect from "./Collect";
 
 interface Props {
   card: string;
@@ -76,13 +75,11 @@ const Pin = ({
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const { postState } = useContext(Context);
-
+  const { postState } = useContext(Context) as ContextType;
   const initStatus = useMemo(
-    () => postState.userCollections.some((doc: Post) => doc.post_id === postId),
+    () => postState.userCollections.some((doc) => doc.post_id === postId),
     [postId, postState.userCollections]
   );
-
   const height = (size: string) => {
     if (size === "small") return 230;
     if (size === "medium") return 300;

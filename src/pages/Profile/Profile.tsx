@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import styled from "styled-components";
 import PinterestLayout from "../../component/PinterestLayout";
-import { Context } from "../../store/ContextProvider";
+import { Context, ContextType } from "../../store/ContextProvider";
 
 const Wrapper = styled.div`
   padding: 0 27px;
@@ -59,7 +59,7 @@ const Button = styled.button<Props>`
 
 const Profile = () => {
   const [status, setStatus] = useState(false);
-  const { authState, postState } = useContext(Context);
+  const { authState, postState } = useContext(Context) as ContextType;
 
   return (
     <>

@@ -1,23 +1,25 @@
-import { useState, useContext } from "react";
-import { useLocation } from "react-router-dom";
-import { Context } from "../../store/ContextProvider";
-import styled from "styled-components";
-import EditTextButton from "../EditTextButton";
-import logo from "./fotolio.png";
-import { useNavigate } from "react-router-dom";
+import {
+  faAngleDown,
+  faCircleXmark,
+  faMagnifyingGlass,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faAngleDown } from "@fortawesome/free-solid-svg-icons";
-import { faXmark } from "@fortawesome/free-solid-svg-icons";
-import { faCircleXmark } from "@fortawesome/free-solid-svg-icons";
-import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
-import ClipLoader from "react-spinners/ClipLoader";
-import PopWindow from "../PopWindow";
-import { auth, db } from "../../utils/firebase";
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { setDoc, doc } from "firebase/firestore";
+import { doc, setDoc } from "firebase/firestore";
+import { useContext, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import ClipLoader from "react-spinners/ClipLoader";
+import styled from "styled-components";
+import { AuthActionKind } from "../../store/authReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { auth, db } from "../../utils/firebase";
+import EditTextButton from "../EditTextButton";
+import PopWindow from "../PopWindow";
+import logo from "./fotolio.png";
 
 interface Props {
   isProfile?: boolean;
@@ -301,7 +303,7 @@ const Header = () => {
   const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const { authState, authDispatch } = useContext(Context);
+  const { authState, authDispatch } = useContext(Context) as ContextType;
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
@@ -332,9 +334,11 @@ const Header = () => {
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
-        authDispatch({ type: "TOGGLE_IS_LOGGED" });
+        authDispatch({
+          type: AuthActionKind.TOGGLE_IS_LOGGED,
+        });
         navigate("/home");
-        authDispatch({ type: "TOGGLE_REGISTER" });
+        authDispatch({ type: AuthActionKind.TOGGLE_REGISTER });
         setLoading(false);
         setLoginInfo({ name: "", email: "", password: "" });
       })
@@ -378,7 +382,7 @@ const Header = () => {
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         setLoading(false);
-        authDispatch({ type: "TOGGLE_IS_LOGGED" });
+        authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
         navigate("/home");
       })
       .catch((error) => {
@@ -434,7 +438,15 @@ const Header = () => {
             <EditTextButton buttonTag={"login"} />
           </div>
           {(authState.login || authState.register) && (
-            <LoginWrapper>
+            <LoginWrapper
+              id="background"
+              onClick={(e) => {
+                const target = e.target as HTMLDivElement;
+                if (target.id === "background") {
+                  authDispatch({ type: AuthActionKind.CLOSE_POP_WINDOW });
+                }
+              }}
+            >
               <LoginContainer>
                 {loading && (
                   <LoadingWrapper>
@@ -443,7 +455,7 @@ const Header = () => {
                 )}
                 <CloseIconWrapper
                   onClick={() => {
-                    authDispatch({ type: "CLOSE_POP_WINDOW" });
+                    authDispatch({ type: AuthActionKind.CLOSE_POP_WINDOW });
                   }}
                 >
                   <FontAwesomeIcon
@@ -535,8 +547,10 @@ const Header = () => {
                       <LoginButton onClick={register}>繼續</LoginButton>
                       <RegisterPrompt
                         onClick={() => {
-                          authDispatch({ type: "TOGGLE_REGISTER" });
-                          authDispatch({ type: "TOGGLE_LOGIN" });
+                          authDispatch({
+                            type: AuthActionKind.TOGGLE_REGISTER,
+                          });
+                          authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
                         }}
                       >
                         已經有帳號了? 登入
@@ -547,8 +561,10 @@ const Header = () => {
                       <LoginButton onClick={login}>登入</LoginButton>
                       <RegisterPrompt
                         onClick={() => {
-                          authDispatch({ type: "TOGGLE_REGISTER" });
-                          authDispatch({ type: "TOGGLE_LOGIN" });
+                          authDispatch({
+                            type: AuthActionKind.TOGGLE_REGISTER,
+                          });
+                          authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
                         }}
                       >
                         還未加入Fotolio? 註冊

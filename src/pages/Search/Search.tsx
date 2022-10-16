@@ -1,9 +1,9 @@
 import { useContext, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import styled from "styled-components";
-import { Post, Tags } from "../../App";
+import { PostType, Tags } from "../../App";
 import PinterestLayout from "../../component/PinterestLayout";
-import { Context } from "../../store/ContextProvider";
+import { Context, ContextType } from "../../store/ContextProvider";
 
 interface Props {
   backgroundColor: string;
@@ -38,10 +38,12 @@ const PromptWrapper = styled.div`
 `;
 
 const Search = () => {
-  const { authState, postState, commentState } = useContext(Context);
+  const { authState, postState, commentState } = useContext(
+    Context
+  ) as ContextType;
   const keyword = useParams().search;
   const navigate = useNavigate();
-  const [post, setPost] = useState<Post[]>([]);
+  const [post, setPost] = useState<PostType[]>([]);
   const [tags, setTags] = useState<string[]>([]);
   const backgroundColor = () => {
     const color = [
@@ -80,9 +82,9 @@ const Search = () => {
     return randomColor;
   };
   useEffect(() => {
-    let arr: Post[] = [];
+    let arr: PostType[] = [];
     if (keyword) {
-      postState.allPost.forEach((item: Post) => {
+      postState.allPost.forEach((item) => {
         if (
           item.author_name === keyword ||
           item.title === keyword ||
@@ -98,7 +100,7 @@ const Search = () => {
       (item: { tag: string; post_id: string }) => item.tag
     );
     const filteredTags = rawTags.filter(
-      (ele: Tags, pos: number) => rawTags.indexOf(ele) === pos
+      (ele: string, pos: number) => rawTags.indexOf(ele) === pos
     );
 
     filteredTags.sort(function () {

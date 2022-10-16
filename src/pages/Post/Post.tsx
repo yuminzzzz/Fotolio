@@ -1,30 +1,19 @@
-import { useState, useEffect, useContext } from "react";
-import { Message, Tags } from "../../App";
-import { Context } from "../../store/ContextProvider";
+import { collectionGroup, DocumentData, getDocs } from "firebase/firestore";
+import { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { db } from "../../utils/firebase";
-import { DocumentData, collectionGroup, getDocs } from "firebase/firestore";
-import { Wrapper, OutsideWrapper } from "../Upload/Upload";
 import styled from "styled-components";
-import Comment from "./Comment";
-import MyComment from "./MyComment";
-import EditTextButton from "../../component/EditTextButton";
-import DeleteCheck from "../../component/DeleteCheck";
+import { Message, PostType, Tags } from "../../App";
 import Collect from "../../component/Collect";
-import LastPageButton from "./LastPageButton";
+import DeleteCheck from "../../component/DeleteCheck";
+import EditTextButton from "../../component/EditTextButton";
 import Ellipsis from "../../component/Ellipsis";
-import { Tag, TagWrapper } from "../Upload/Upload";
-
-interface PostData {
-  author_avatar: string;
-  author_id: string;
-  author_name: string;
-  created_time: { seconds: number; nanoseconds: number };
-  description: string;
-  post_id: string;
-  title: string;
-  url: string;
-}
+import { CommentActionKind } from "../../store/commentReducer";
+import { Context, ContextType } from "../../store/ContextProvider";
+import { db } from "../../utils/firebase";
+import { OutsideWrapper, Tag, TagWrapper, Wrapper } from "../Upload/Upload";
+import Comment from "./Comment";
+import LastPageButton from "./LastPageButton";
+import MyComment from "./MyComment";
 
 const CoverImgWrapper = styled.div`
   background-color: lightgrey;
@@ -115,10 +104,8 @@ const UserAvatar = styled.img`
   background-color: #e9e9e9;
 `;
 
-const Post = () => {
-  const [post, setPost] = useState<DocumentData | PostData | undefined>(
-    undefined
-  );
+const Post= () => {
+  const [post, setPost] = useState<PostType>();
   const [targetComment, setTargetComment] = useState("");
   const [typing, setTyping] = useState(false);
   const [response, setResponse] = useState("");
@@ -128,34 +115,23 @@ const Post = () => {
   const [comment, setComment] = useState(0);
   const [postTags, setPostTags] = useState<string[]>([]);
   const postId = useParams().id;
-  const { authState, postState, commentState, commentDispatch } =
-    useContext(Context);
-
-  interface Post {
-    author_avatar: string;
-    author_id: string;
-    author_name: string;
-    created_time: { seconds: number; nanoseconds: number };
-    description: string;
-    post_id: string;
-    title: string;
-    url: string;
-  }
-
+  const { authState, postState, commentState, commentDispatch } = useContext(
+    Context
+  ) as ContextType;
+  const initStatus = postState.userCollections.some(
+    (item) => item.post_id === postId
+  );
   useEffect(() => {
     const isAuthor = postState.userPost.some(
-      (item: Post) => item.post_id === postId
+      (item) => item.post_id === postId
     );
     if (isAuthor) setDeleteTag(true);
-    const postData = postState.allPost.find(
-      (item: Post) => item.post_id === postId
-    );
+    const postData = postState.allPost.find((item) => item.post_id === postId)!;
     setPost(postData);
   }, [postId, postState.allPost, postState.userPost]);
-
   useEffect(() => {
     const getMessage = async () => {
-      commentDispatch({ type: "RESET_MESSAGE" });
+      commentDispatch({ type: CommentActionKind.RESET_MESSAGE });
       const userMessageRef = collectionGroup(db, "messages");
       const querySnapshot = await getDocs(userMessageRef);
       let arr: Message[] = [];
@@ -167,15 +143,16 @@ const Post = () => {
       let sortArr = arr.sort(function (arrA, arrB) {
         return arrA.uploaded_time - arrB.uploaded_time;
       });
-      commentDispatch({ type: "UPDATE_MESSAGE", payload: sortArr });
+      commentDispatch({
+        type: CommentActionKind.UPDATE_MESSAGE,
+        payload: sortArr,
+      });
     };
     getMessage();
   }, [commentDispatch, postId]);
-
   useEffect(() => {
     setComment(commentState.message.length);
   }, [commentState.message.length]);
-
   useEffect(() => {
     let arr: string[] = [];
     commentState.allTags.forEach((item: Tags) => {
@@ -186,9 +163,6 @@ const Post = () => {
     setPostTags(arr);
   }, [commentState.allTags, postId]);
 
-  const initStatus = postState.userCollections.some(
-    (item: Post) => item.post_id === postId
-  );
   return (
     <>
       {authState.isLogged && (
@@ -255,7 +229,7 @@ const Post = () => {
                         isAuthor={item.user_id === authState.userId}
                         commentId={item.comment_id}
                         setTargetComment={setTargetComment}
-                        authorId={post?.author_id}
+                        authorId={post?.author_id!}
                       />
                     );
                   }

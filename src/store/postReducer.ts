@@ -1,37 +1,35 @@
-import { Post } from "../App";
+import { PostType } from "../App";
 
-export const postInitState = {
-  allPost: [],
-  userPost: [],
-  userCollections: [],
-};
+export enum PostActionKind {
+  UPDATE_ALL_POST = "UPDATE_ALL_POST",
+  UPDATE_USER_POST = "UPDATE_USER_POST",
+  UPDATE_USER_COLLECTIONS = "UPDATE_USER_COLLECTIONS",
+  LOG_OUT = "LOG_OUT",
+}
+export interface PostState {
+  allPost: PostType[];
+  userPost: PostType[];
+  userCollections: PostType[];
+}
 
-const actionType = {
-  UPDATE_ALL_POST: "UPDATE_ALL_POST",
-  UPDATE_USER_POST: "UPDATE_USER_POST",
-  UPDATE_USER_COLLECTIONS: "UPDATE_USER_COLLECTIONS",
-  LOG_OUT: "LOG_OUT",
-};
+export interface PostAction {
+  type: PostActionKind;
+  payload?: PostType[];
+}
 
-type State = {
-  allPost: Post[];
-  userPost: Post[];
-  userCollections: Post[];
-};
-
-const postReducer = (state: State, action: any) => {
+const postReducer = (state: PostState, action: PostAction): PostState => {
   switch (action.type) {
-    case actionType.UPDATE_ALL_POST: {
-      return { ...state, allPost: action.payload };
+    case PostActionKind.UPDATE_ALL_POST: {
+      return { ...state, allPost: action.payload as PostType[] };
     }
-    case actionType.UPDATE_USER_POST: {
-      return { ...state, userPost: action.payload };
+    case PostActionKind.UPDATE_USER_POST: {
+      return { ...state, userPost: action.payload as PostType[] };
     }
-    case actionType.UPDATE_USER_COLLECTIONS: {
-      return { ...state, userCollections: action.payload };
+    case PostActionKind.UPDATE_USER_COLLECTIONS: {
+      return { ...state, userCollections: action.payload as PostType[] };
     }
-    case actionType.LOG_OUT: {
-      return { allPost: [], userPost: [], userCollections: [] };
+    case PostActionKind.LOG_OUT: {
+      return { ...state, userPost: [], userCollections: [] };
     }
     default:
       return state;

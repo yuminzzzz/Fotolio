@@ -1,18 +1,21 @@
-import { Dispatch, SetStateAction, useCallback, useContext } from "react";
-import { Post, Tags } from "../App";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import styled from "styled-components";
-import { db } from "../utils/firebase";
 import {
   collection,
-  setDoc,
-  doc,
-  updateDoc,
-  deleteDoc,
   collectionGroup,
+  deleteDoc,
+  doc,
   getDocs,
+  setDoc,
+  updateDoc,
 } from "firebase/firestore";
-import { Context } from "../store/ContextProvider";
+import { Dispatch, SetStateAction, useCallback, useContext } from "react";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { Message, PostType, Tags } from "../App";
+import { AuthActionKind } from "../store/authReducer";
+import { CommentActionKind } from "../store/commentReducer";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { db } from "../utils/firebase";
 
 const ButtonContainer = styled.div`
   display: flex;
@@ -102,7 +105,7 @@ const EditTextButton = ({
     postDispatch,
     commentState,
     commentDispatch,
-  } = useContext(Context);
+  } = useContext(Context) as ContextType;
   let currentPage = useLocation().pathname;
   const postComment = () => {
     if (!response) return;
@@ -122,8 +125,8 @@ const EditTextButton = ({
       };
 
       commentDispatch({
-        type: "UPDATE_MESSAGE",
-        payload: [...commentState.message, data],
+        type: CommentActionKind.UPDATE_MESSAGE,
+        payload: [...commentState.message, data] as Message[],
       });
       setDoc(
         doc(
@@ -140,16 +143,16 @@ const EditTextButton = ({
   };
   const updateComment = async () => {
     setTargetComment && setTargetComment("");
-    const updatedMessage = commentState.message.map((item: any) => {
+    const updatedMessage = commentState.message.map((item: Message) => {
       if (item.comment_id === commentId) {
-        item.message = rawComment;
+        item.message = rawComment!;
       }
       return item;
     });
-    commentDispatch({ type: "RESET_MESSAGE" });
+    commentDispatch({ type: CommentActionKind.RESET_MESSAGE });
     commentDispatch({
-      type: "UPDATE_MESSAGE",
-      payload: updatedMessage,
+      type: CommentActionKind.UPDATE_MESSAGE,
+      payload: updatedMessage as Message[],
     });
     if (!authorId) return;
     const docRef = doc(
@@ -158,25 +161,24 @@ const EditTextButton = ({
     );
     await updateDoc(docRef, { message: rawComment });
   };
-  const updateState = useCallback((data: Post[], postId: string) => {
+  const updateState = useCallback((data: PostType[], postId: string) => {
     return data.filter((item) => item.post_id !== postId);
   }, []);
-
   const deletePost = async () => {
     postDispatch({
-      type: "UPDATE_ALL_POST",
+      type: PostActionKind.UPDATE_ALL_POST,
       payload: updateState(postState.allPost, postId!),
     });
     postDispatch({
-      type: "UPDATE_USER_POST",
+      type: PostActionKind.UPDATE_USER_POST,
       payload: updateState(postState.userPost, postId!),
     });
     postDispatch({
-      type: "UPDATE_USER_COLLECTIONS",
+      type: PostActionKind.UPDATE_USER_COLLECTIONS,
       payload: updateState(postState.userCollections, postId!),
     });
     commentDispatch({
-      type: "UPDATE_ALL_TAGS",
+      type: CommentActionKind.UPDATE_ALL_TAGS,
       payload: commentState.allTags.filter(
         (item: Tags) => item.post_id !== postId
       ),
@@ -186,7 +188,7 @@ const EditTextButton = ({
     const querySnapshot = await getDocs(
       collectionGroup(db, "user_collections")
     );
-    let deletePromise: any[] = [deleteDoc(docRef)];
+    let deletePromise: Promise<void>[] = [deleteDoc(docRef)];
     querySnapshot.forEach((item) => {
       const postDocRef = doc(db, item.ref.path);
       if (postId && item.ref.path.includes(postId)) {
@@ -280,13 +282,15 @@ const EditTextButton = ({
         </>
       ) : buttonTag === "login" ? (
         <>
-          <ActiveButton onClick={() => authDispatch({ type: "TOGGLE_LOGIN" })}>
+          <ActiveButton
+            onClick={() => authDispatch({ type: AuthActionKind.TOGGLE_LOGIN })}
+          >
             登入
           </ActiveButton>
           <Button
             cancel={true}
             onClick={() => {
-              authDispatch({ type: "TOGGLE_REGISTER" });
+              authDispatch({ type: AuthActionKind.TOGGLE_REGISTER });
             }}
           >
             註冊

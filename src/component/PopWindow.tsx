@@ -1,13 +1,16 @@
-import { Dispatch, SetStateAction, useState, useContext } from "react";
-import { Message } from "../App";
-import styled from "styled-components";
-import DeleteCheck from "./DeleteCheck";
-import { getDownloadURL, getStorage, ref } from "firebase/storage";
-import { auth, db } from "../utils/firebase";
-import { doc, deleteDoc } from "firebase/firestore";
-import { useParams, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
-import { Context } from "../store/ContextProvider";
+import { deleteDoc, doc } from "firebase/firestore";
+import { getDownloadURL, getStorage, ref } from "firebase/storage";
+import { Dispatch, SetStateAction, useContext, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import styled from "styled-components";
+import { Message } from "../App";
+import { AuthActionKind } from "../store/authReducer";
+import { CommentActionKind } from "../store/commentReducer";
+import { Context, ContextType } from "../store/ContextProvider";
+import { PostActionKind } from "../store/postReducer";
+import { auth, db } from "../utils/firebase";
+import DeleteCheck from "./DeleteCheck";
 
 interface Props {
   userInfo: boolean;
@@ -90,7 +93,7 @@ const PopWindow = ({
     postDispatch,
     commentState,
     commentDispatch,
-  } = useContext(Context);
+  } = useContext(Context) as ContextType;
   const [deleteModifyCheck, setDeleteModifyCheck] = useState(false);
   const navigate = useNavigate();
   const storage = getStorage();
@@ -100,7 +103,10 @@ const PopWindow = ({
     const updatedComment = commentState.message.filter(
       (item: Message) => item.comment_id !== commentId
     );
-    commentDispatch({ type: "UPDATE_MESSAGE", payload: updatedComment });
+    commentDispatch({
+      type: CommentActionKind.UPDATE_MESSAGE,
+      payload: updatedComment,
+    });
     await deleteDoc(
       doc(db, `/users/${authorId}/user_posts/${postId}/messages/${commentId}`)
     );
@@ -141,12 +147,13 @@ const PopWindow = ({
   const logout = () => {
     signOut(auth)
       .then(() => {
-        authDispatch({ type: "LOG_OUT" });
-        postDispatch({ type: "LOG_OUT" });
-        commentDispatch({ type: "LOG_OUT" });
+        authDispatch({ type: AuthActionKind.LOG_OUT });
+        postDispatch({ type: PostActionKind.LOG_OUT });
+        commentDispatch({ type: CommentActionKind.LOG_OUT });
       })
       .catch((error) => {});
   };
+  
   if (location === "post") {
     return (
       <EditWrapper

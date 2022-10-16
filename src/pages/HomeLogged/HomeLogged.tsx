@@ -1,10 +1,11 @@
 import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import PinterestLayout from "../../component/PinterestLayout";
-import { Context } from "../../store/ContextProvider";
+import { Context, ContextType } from "../../store/ContextProvider";
 
 const HomeLogged = () => {
-  const { authState, postState } = useContext(Context);
+  const { authState, postState } = useContext(Context) as ContextType;
+  
   if (!authState.isLogged) {
     return <Navigate to="/" />;
   } else {
