@@ -1,12 +1,5 @@
-import {
-  collectionGroup,
-  deleteDoc,
-  doc,
-  DocumentData,
-  getDocs,
-  setDoc,
-} from "firebase/firestore";
-import { useCallback, useContext, useState } from "react";
+import { deleteDoc, doc, setDoc } from "firebase/firestore";
+import { useContext } from "react";
 import styled from "styled-components";
 import { PostType } from "../App";
 import { Context, ContextType } from "../store/ContextProvider";
@@ -38,54 +31,38 @@ const CollectedButton = styled(CollectButton)`
     background-color: black;
   }
 `;
+const updateState = (data: PostType[], postId: string) => {
+  return data.filter((item) => item.post_id !== postId);
+};
 
-const Collect = ({
-  postId,
-  initStatus,
-}: {
-  postId: string;
-  initStatus: boolean;
-}) => {
+const Collect = ({ postId }: { postId: string }) => {
   const { authState, postState, postDispatch } = useContext(
     Context
   ) as ContextType;
-  const [isSaved, setIsSaved] = useState(initStatus);
-  const updateState = useCallback((data: PostType[], postId: string) => {
-    return data.filter((item) => item.post_id !== postId);
-  }, []);
-  const modifyCollect = async () => {
-    const collectionRef = doc(
-      db,
-      `/users/${authState.userId}/user_collections/${postId}`
-    );
+  const isSaved = postState.userCollections.some(
+    (doc) => doc.post_id === postId
+  );
+  const collectionRef = doc(
+    db,
+    `/users/${authState.userId}/user_collections/${postId}`
+  );
+  const newCollect = postState.allPost.find((item) => item.post_id === postId);
+
+  const modifyCollect = () => {
     if (isSaved) {
-      setIsSaved(false);
       postDispatch({
         type: PostActionKind.UPDATE_USER_COLLECTIONS,
         payload: updateState(postState.userCollections, postId),
       });
       deleteDoc(collectionRef);
     } else {
-      setIsSaved(true);
-      const newCollect = postState.allPost.find(
-        (item) => item.post_id === postId
-      );
       postDispatch({
         type: PostActionKind.UPDATE_USER_COLLECTIONS,
         payload: [...postState.userCollections, newCollect] as PostType[],
       });
-      const userPost = collectionGroup(db, "user_posts");
-      const querySnapshot = await getDocs(userPost);
-      let postData;
-      querySnapshot.forEach((doc: DocumentData) => {
-        if (doc.ref.path.includes(postId)) {
-          postData = doc.data();
-        }
-      });
-      setDoc(collectionRef, postData);
+      setDoc(collectionRef, newCollect);
     }
   };
-
   return isSaved ? (
     <CollectedButton
       onClick={(e) => {
