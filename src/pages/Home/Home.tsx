@@ -1,7 +1,7 @@
 import { collectionGroup, DocumentData, getDocs } from "firebase/firestore";
 import { useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
-import { Autoplay, EffectCoverflow, Pagination } from "swiper";
+import SwiperCore, { Autoplay, EffectCoverflow, Pagination } from "swiper";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
 import "swiper/css/navigation";
@@ -11,10 +11,11 @@ import { AuthActionKind } from "../../store/authReducer";
 import { Context, ContextType } from "../../store/ContextProvider";
 import { db } from "../../utils/firebase";
 import "./styles.css";
+SwiperCore.use([Autoplay, Pagination, EffectCoverflow]);
 
 const Home = () => {
-  const [imgUrlArr, setImgUrlArr] = useState<string[]>([]);
   const { authState, authDispatch } = useContext(Context) as ContextType;
+  const [imgUrlArr, setImgUrlArr] = useState<string[]>([]);
   useEffect(() => {
     const getPost = async () => {
       const userPost = collectionGroup(db, "user_posts");
@@ -25,7 +26,6 @@ const Home = () => {
           arr.push(doc.data().url);
         }
       });
-      arr.sort(() => Math.random() - 0.5);
       setImgUrlArr(arr);
     };
     getPost();
@@ -47,9 +47,9 @@ const Home = () => {
         }}
       >
         <Swiper
-          effect={"coverflow"}
+          effect="coverflow"
           grabCursor={true}
-          centeredSlides={true}
+          centeredSlides
           autoplay={{
             delay: 2500,
             disableOnInteraction: false,
@@ -63,21 +63,20 @@ const Home = () => {
             modifier: 1,
             slideShadows: false,
           }}
-          modules={[EffectCoverflow, Pagination, Autoplay]}
           className="mySwiper"
         >
           {imgUrlArr.map((item, index) => {
             return (
-              <SwiperSlide key={index}>
-                <img
-                  src={item}
-                  style={{ cursor: "pointer" }}
-                  onClick={() => {
-                    authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
-                  }}
-                  alt=""
-                />
-              </SwiperSlide>
+              <SwiperSlide
+                key={index}
+                style={{
+                  cursor: "pointer",
+                  backgroundImage: `url(${item})`,
+                }}
+                onClick={() => {
+                  authDispatch({ type: AuthActionKind.TOGGLE_LOGIN });
+                }}
+              ></SwiperSlide>
             );
           })}
         </Swiper>

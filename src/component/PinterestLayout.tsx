@@ -32,6 +32,7 @@ const PinterestLayout = ({ post }: { post: PostType[] }) => {
         return;
       }
       img.src = src;
+      img.removeAttribute("data-src");
     };
     const imgObserver = new IntersectionObserver((entries, imgObserver) => {
       entries.forEach((entry) => {

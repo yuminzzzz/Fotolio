@@ -121,9 +121,8 @@ export type Tags = {
 let isMounted = true;
 
 function App() {
-  const { authState, authDispatch, postDispatch, commentDispatch, postState } = useContext(
-    Context
-  ) as ContextType;
+  const { authState, authDispatch, postDispatch, commentDispatch } =
+    useContext(Context) as ContextType;
   const navigate = useNavigate();
 
   useLayoutEffect(() => {
@@ -169,9 +168,6 @@ function App() {
       userPost.forEach((item: DocumentData) => {
         arr.push(item.data());
       });
-      arr.sort(function () {
-        return Math.random() > 0.5 ? -1 : 1;
-      });
       postDispatch({ type: PostActionKind.UPDATE_ALL_POST, payload: arr });
     };
     getAllPost();
@@ -203,12 +199,11 @@ function App() {
         payload: arr,
       });
     };
-
     if (authState.userId) {
       getPost();
       getCollect();
     }
-  }, [authState.isLogged, authState.userId, postDispatch]);
+  }, [authState.userId, postDispatch]);
   return (
     <>
       <GlobalStyle />
