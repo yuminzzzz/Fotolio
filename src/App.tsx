@@ -8,8 +8,8 @@ import {
   getDocs,
   Timestamp,
 } from "firebase/firestore";
-import { useContext, useEffect, useLayoutEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { useContext, useEffect } from "react";
+import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
 import NotoSansTCBold from "./fonts/NotoSansTC-Bold.otf";
@@ -118,33 +118,26 @@ export type Tags = {
   tag: string;
   post_id: string;
 };
-let isMounted = true;
 
 function App() {
-  const { authState, authDispatch, postDispatch, commentDispatch } =
-    useContext(Context) as ContextType;
-  const navigate = useNavigate();
-
-  useLayoutEffect(() => {
-    if (isMounted) {
-      onAuthStateChanged(auth, async (user) => {
-        if (user) {
-          authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
-          const getUserInfo = async () => {
-            const docSnap: DocumentData = await getDoc(
-              doc(db, `users/${user.uid}`)
-            );
-            const data = docSnap.data();
-            authDispatch({ type: AuthActionKind.GET_USER_INFO, payload: data });
-          };
-          getUserInfo();
-        } else {
-          navigate("/");
-        }
-      });
-      isMounted = false;
-    }
-  }, [authDispatch, navigate]);
+  const { authState, authDispatch, postDispatch, commentDispatch } = useContext(
+    Context
+  ) as ContextType;
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
+        const getUserInfo = async () => {
+          const docSnap: DocumentData = await getDoc(
+            doc(db, `users/${user.uid}`)
+          );
+          const data = docSnap.data();
+          authDispatch({ type: AuthActionKind.GET_USER_INFO, payload: data });
+        };
+        getUserInfo();
+      }
+    });
+  }, []);
   useEffect(() => {
     const getTags = async () => {
       const tags = await getDocs(collectionGroup(db, "user_posts"));
@@ -204,6 +197,7 @@ function App() {
       getCollect();
     }
   }, [authState.userId, postDispatch]);
+  
   return (
     <>
       <GlobalStyle />

@@ -42,13 +42,14 @@ const Collect = ({ postId }: { postId: string }) => {
   const isSaved = postState.userCollections.some(
     (doc) => doc.post_id === postId
   );
-  const collectionRef = doc(
-    db,
-    `/users/${authState.userId}/user_collections/${postId}`
-  );
-  const newCollect = postState.allPost.find((item) => item.post_id === postId);
-
   const modifyCollect = () => {
+    const collectionRef = doc(
+      db,
+      `/users/${authState.userId}/user_collections/${postId}`
+    );
+    const newCollect = postState.allPost.find(
+      (item) => item.post_id === postId
+    );
     if (isSaved) {
       postDispatch({
         type: PostActionKind.UPDATE_USER_COLLECTIONS,

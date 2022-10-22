@@ -34,7 +34,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
     case AuthActionKind.TOGGLE_REGISTER:
       return { ...state, register: !state.register };
     case AuthActionKind.TOGGLE_IS_LOGGED:
-      return { ...state, isLogged: !state.isLogged };
+      return { ...state, isLogged: true };
     case AuthActionKind.GET_USER_INFO:
       return {
         ...state,
