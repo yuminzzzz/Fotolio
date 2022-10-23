@@ -1,7 +1,8 @@
 export enum AuthActionKind {
   TOGGLE_LOGIN = "TOGGLE_LOGIN",
   TOGGLE_REGISTER = "TOGGLE_REGISTER",
-  TOGGLE_IS_LOGGED = "TOGGLE_IS_LOGGED",
+  IS_LOGGED_TRUE = "IS_LOGGED_TRUE",
+  IS_LOGGED_FALSE = "IS_LOGGED_FALSE",
   GET_USER_INFO = "GET_USER_INFO",
   LOG_OUT = "LOG_OUT",
   CLOSE_POP_WINDOW = "CLOSE_POP_WINDOW",
@@ -10,7 +11,7 @@ export enum AuthActionKind {
 export interface AuthState {
   login: boolean;
   register: boolean;
-  isLogged: boolean;
+  isLogged: boolean | null;
   userAvatar: string;
   userEmail: string;
   userId: string;
@@ -33,8 +34,13 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
       return { ...state, login: !state.login };
     case AuthActionKind.TOGGLE_REGISTER:
       return { ...state, register: !state.register };
-    case AuthActionKind.TOGGLE_IS_LOGGED:
+    case AuthActionKind.IS_LOGGED_TRUE:
       return { ...state, isLogged: true };
+    case AuthActionKind.IS_LOGGED_FALSE:
+      return {
+        ...state,
+        isLogged: false,
+      };
     case AuthActionKind.GET_USER_INFO:
       return {
         ...state,

@@ -1,14 +1,4 @@
-import { onAuthStateChanged } from "firebase/auth";
-import {
-  collection,
-  collectionGroup,
-  doc,
-  DocumentData,
-  getDoc,
-  getDocs,
-  Timestamp,
-} from "firebase/firestore";
-import { useContext, useEffect } from "react";
+import { Timestamp } from "firebase/firestore";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
@@ -16,11 +6,6 @@ import NotoSansTCBold from "./fonts/NotoSansTC-Bold.otf";
 import NotoSansTCLight from "./fonts/NotoSansTC-Light.otf";
 import NotoSansTCMedium from "./fonts/NotoSansTC-Medium.otf";
 import NotoSansTCRegular from "./fonts/NotoSansTC-Regular.otf";
-import { AuthActionKind } from "./store/authReducer";
-import { CommentActionKind } from "./store/commentReducer";
-import { Context, ContextType } from "./store/ContextProvider";
-import { PostActionKind } from "./store/postReducer";
-import { auth, db } from "./utils/firebase";
 
 const GlobalStyle = createGlobalStyle`
 
@@ -120,84 +105,6 @@ export type Tags = {
 };
 
 function App() {
-  const { authState, authDispatch, postDispatch, commentDispatch } = useContext(
-    Context
-  ) as ContextType;
-  useEffect(() => {
-    onAuthStateChanged(auth, async (user) => {
-      if (user) {
-        authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
-        const getUserInfo = async () => {
-          const docSnap: DocumentData = await getDoc(
-            doc(db, `users/${user.uid}`)
-          );
-          const data = docSnap.data();
-          authDispatch({ type: AuthActionKind.GET_USER_INFO, payload: data });
-        };
-        getUserInfo();
-      }
-    });
-  }, []);
-  useEffect(() => {
-    const getTags = async () => {
-      const tags = await getDocs(collectionGroup(db, "user_posts"));
-      let arr: { tag: string; post_id: string }[] = [];
-      tags.forEach((item: DocumentData) => {
-        if (item.data().tags !== undefined) {
-          arr.push(...item.data().tags);
-        }
-      });
-      commentDispatch({
-        type: CommentActionKind.UPDATE_ALL_TAGS,
-        payload: arr,
-      });
-    };
-    getTags();
-  }, [commentDispatch]);
-  useEffect(() => {
-    const getAllPost = async () => {
-      const userPost = await getDocs(collectionGroup(db, "user_posts"));
-      let arr: PostType[] = [];
-      userPost.forEach((item: DocumentData) => {
-        arr.push(item.data());
-      });
-      postDispatch({ type: PostActionKind.UPDATE_ALL_POST, payload: arr });
-    };
-    getAllPost();
-  }, [postDispatch]);
-  useEffect(() => {
-    const getPost = async () => {
-      const userPost = await getDocs(
-        collection(db, `/users/${authState.userId}/user_posts`)
-      );
-      let arr: PostType[] = [];
-      userPost.forEach((item: DocumentData) => {
-        arr.push(item.data());
-      });
-      arr.sort(function (postA, postB) {
-        return postA.created_time.seconds - postB.created_time.seconds;
-      });
-      postDispatch({ type: PostActionKind.UPDATE_USER_POST, payload: arr });
-    };
-    const getCollect = async () => {
-      const userPost = await getDocs(
-        collection(db, `/users/${authState.userId}/user_collections`)
-      );
-      let arr: PostType[] = [];
-      userPost.forEach((item: DocumentData) => {
-        arr.push(item.data());
-      });
-      postDispatch({
-        type: PostActionKind.UPDATE_USER_COLLECTIONS,
-        payload: arr,
-      });
-    };
-    if (authState.userId) {
-      getPost();
-      getCollect();
-    }
-  }, [authState.userId, postDispatch]);
-  
   return (
     <>
       <GlobalStyle />

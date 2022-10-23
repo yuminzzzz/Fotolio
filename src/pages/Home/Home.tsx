@@ -1,5 +1,4 @@
-import { collectionGroup, DocumentData, getDocs } from "firebase/firestore";
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { Navigate } from "react-router-dom";
 import SwiperCore, { Autoplay, EffectCoverflow, Pagination } from "swiper";
 import "swiper/css";
@@ -9,27 +8,14 @@ import "swiper/css/pagination";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { AuthActionKind } from "../../store/authReducer";
 import { Context, ContextType } from "../../store/ContextProvider";
-import { db } from "../../utils/firebase";
 import "./styles.css";
 SwiperCore.use([Autoplay, Pagination, EffectCoverflow]);
 
 const Home = () => {
-  const { authState, authDispatch } = useContext(Context) as ContextType;
-  const [imgUrlArr, setImgUrlArr] = useState<string[]>([]);
-  useEffect(() => {
-    const getPost = async () => {
-      const userPost = collectionGroup(db, "user_posts");
-      const querySnapshot = await getDocs(userPost);
-      let arr: string[] = [];
-      querySnapshot.forEach((doc: DocumentData) => {
-        if (arr.length < 10) {
-          arr.push(doc.data().url);
-        }
-      });
-      setImgUrlArr(arr);
-    };
-    getPost();
-  }, []);
+  const { authState, authDispatch, postState } = useContext(
+    Context
+  ) as ContextType;
+  const imgUrlArr = postState.allPost.slice(0, 10).map((item) => item.url);
 
   if (authState.isLogged) {
     return <Navigate to="/home" />;
