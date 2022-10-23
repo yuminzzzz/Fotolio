@@ -7,15 +7,27 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   createUserWithEmailAndPassword,
+  onAuthStateChanged,
   signInWithEmailAndPassword,
 } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { useContext, useState } from "react";
+import {
+  collection,
+  collectionGroup,
+  doc,
+  DocumentData,
+  getDoc,
+  getDocs,
+  setDoc,
+} from "firebase/firestore";
+import { memo, useContext, useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import ClipLoader from "react-spinners/ClipLoader";
 import styled from "styled-components";
+import { PostType } from "../../App";
 import { AuthActionKind } from "../../store/authReducer";
+import { CommentActionKind } from "../../store/commentReducer";
 import { Context, ContextType } from "../../store/ContextProvider";
+import { PostActionKind } from "../../store/postReducer";
 import { auth, db } from "../../utils/firebase";
 import EditTextButton from "../EditTextButton";
 import PopWindow from "../PopWindow";
@@ -291,19 +303,21 @@ const RegisterPrompt = styled.p`
   margin-top: 10px;
 `;
 
-const Header = () => {
+const Header = memo(() => {
+  const { authState, authDispatch, postDispatch, commentDispatch } = useContext(
+    Context
+  ) as ContextType;
   const [loginInfo, setLoginInfo] = useState({
     name: "",
     email: "test@test.com",
     password: "Aaa123",
   });
   const [focus, setFocus] = useState(false);
-  const [search, setSearch] = useState("");
+  const keyWordRef = useRef<HTMLInputElement | null>(null);
   const [toggle, setToggle] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorPrompt, setErrorPrompt] = useState({ acctPWT: "", name: "" });
   const navigate = useNavigate();
-  const { authState, authDispatch } = useContext(Context) as ContextType;
   let isProfile = false;
   if (useLocation().pathname === "/profile") {
     isProfile = true;
@@ -334,10 +348,6 @@ const Header = () => {
             "https://firebasestorage.googleapis.com/v0/b/fotolio-799f4.appspot.com/o/fotolio.png?alt=media&token=a4f66b86-4ac4-4e09-a473-df89428eb80f",
         };
         setDoc(docRef, data);
-        authDispatch({
-          type: AuthActionKind.TOGGLE_IS_LOGGED,
-        });
-        navigate("/home");
         authDispatch({ type: AuthActionKind.TOGGLE_REGISTER });
         setLoading(false);
         setLoginInfo({ name: "", email: "", password: "" });
@@ -382,8 +392,6 @@ const Header = () => {
     signInWithEmailAndPassword(auth, loginInfo.email, loginInfo.password)
       .then((userCredential) => {
         setLoading(false);
-        authDispatch({ type: AuthActionKind.TOGGLE_IS_LOGGED });
-        navigate("/home");
       })
       .catch((error) => {
         setLoading(false);
@@ -414,13 +422,90 @@ const Header = () => {
         }
       });
   };
+  useEffect(() => {
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        authDispatch({ type: AuthActionKind.IS_LOGGED_TRUE });
+        const getUserInfo = async () => {
+          const docSnap: DocumentData = await getDoc(
+            doc(db, `users/${user.uid}`)
+          );
+          const data = docSnap.data();
+          authDispatch({ type: AuthActionKind.GET_USER_INFO, payload: data });
+          authDispatch({ type: AuthActionKind.IS_LOGGED_TRUE });
+        };
+        getUserInfo();
+      } else {
+        authDispatch({ type: AuthActionKind.IS_LOGGED_FALSE });
+      }
+    });
+  }, [authDispatch]);
+  useEffect(() => {
+    const getTags = async () => {
+      const tags = await getDocs(collectionGroup(db, "user_posts"));
+      let arr: { tag: string; post_id: string }[] = [];
+      tags.forEach((item: DocumentData) => {
+        if (item.data().tags !== undefined) {
+          arr.push(...item.data().tags);
+        }
+      });
+      commentDispatch({
+        type: CommentActionKind.UPDATE_ALL_TAGS,
+        payload: arr,
+      });
+    };
+    getTags();
+  }, [commentDispatch]);
+  useEffect(() => {
+    const getAllPost = async () => {
+      const userPost = await getDocs(collectionGroup(db, "user_posts"));
+      let arr: PostType[] = [];
+      userPost.forEach((item: DocumentData) => {
+        arr.push(item.data());
+      });
+      postDispatch({ type: PostActionKind.UPDATE_ALL_POST, payload: arr });
+    };
+    getAllPost();
+  }, [postDispatch]);
+  useEffect(() => {
+    const getPost = async () => {
+      const userPost = await getDocs(
+        collection(db, `/users/${authState.userId}/user_posts`)
+      );
+      let arr: PostType[] = [];
+      userPost.forEach((item: DocumentData) => {
+        arr.push(item.data());
+      });
+      arr.sort(function (postA, postB) {
+        return postA.created_time.seconds - postB.created_time.seconds;
+      });
+      postDispatch({ type: PostActionKind.UPDATE_USER_POST, payload: arr });
+    };
+    const getCollect = async () => {
+      const userPost = await getDocs(
+        collection(db, `/users/${authState.userId}/user_collections`)
+      );
+      let arr: PostType[] = [];
+      userPost.forEach((item: DocumentData) => {
+        arr.push(item.data());
+      });
+      postDispatch({
+        type: PostActionKind.UPDATE_USER_COLLECTIONS,
+        payload: arr,
+      });
+    };
+    if (authState.userId) {
+      getPost();
+      getCollect();
+    }
+  }, [authState.userId, postDispatch]);
   return (
     <Wrapper>
       <LogoWrapper>
         {authState.isLogged === false && (
           <>
-            <Logo src={logo} onClick={() => navigate("/")}></Logo>
-            <LogoName onClick={() => navigate("/")}>Fotolio</LogoName>
+            <Logo src={logo}></Logo>
+            <LogoName>Fotolio</LogoName>
           </>
         )}
         {authState.isLogged === true && (
@@ -589,8 +674,11 @@ const Header = () => {
             <SearchInputForm
               onSubmit={(e) => {
                 e.preventDefault();
-                if (search.trim() !== "") {
-                  navigate(`/search/${search}`);
+                if (keyWordRef.current) {
+                  if (keyWordRef.current.value.trim() !== "") {
+                    navigate(`/search/${keyWordRef.current.value}`);
+                    keyWordRef.current.value = "";
+                  }
                 }
               }}
             >
@@ -604,9 +692,7 @@ const Header = () => {
                   setFocus(false);
                   e.target.value = "";
                 }}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                }}
+                ref={keyWordRef}
               ></SearchInput>
             </SearchInputForm>
             {focus && (
@@ -655,7 +741,7 @@ const Header = () => {
       )}
     </Wrapper>
   );
-};
+});
 
 export default Header;
 

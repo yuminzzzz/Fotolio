@@ -175,7 +175,7 @@ const Post= () => {
             <CommentSection>
               <ButtonWrapper>
                 <Ellipsis roundSize={"48px"} deleteTag={deleteTag} />
-                <Collect postId={postId!} initStatus={initStatus} />
+                <Collect postId={postId!} />
               </ButtonWrapper>
 
               <PostTitle>{post?.title}</PostTitle>

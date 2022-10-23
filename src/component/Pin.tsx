@@ -1,9 +1,8 @@
-import { useContext, useMemo, useState } from "react";
+import { useState } from "react";
 import Skeleton from "react-loading-skeleton";
 import "react-loading-skeleton/dist/skeleton.css";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
-import { Context, ContextType } from "../store/ContextProvider";
 import Collect from "./Collect";
 
 interface Props {
@@ -75,11 +74,6 @@ const Pin = ({
   const [isHover, setIsHover] = useState(false);
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(true);
-  const { postState } = useContext(Context) as ContextType;
-  const initStatus = useMemo(
-    () => postState.userCollections.some((doc) => doc.post_id === postId),
-    [postId, postState.userCollections]
-  );
   const height = (size: string) => {
     if (size === "small") return 230;
     if (size === "medium") return 300;
@@ -111,7 +105,7 @@ const Pin = ({
       {isHover && (
         <HoverBackground>
           <CollectPosition>
-            <Collect postId={postId} initStatus={initStatus} />
+            <Collect postId={postId} />
           </CollectPosition>
         </HoverBackground>
       )}
