@@ -21,7 +21,7 @@ const ContextProvider: React.FC<Props> = ({ children }) => {
   const [authState, authDispatch] = useReducer(authReducer, {
     login: false,
     register: false,
-    isLogged: false,
+    isLogged: null,
     userAvatar: "",
     userEmail: "",
     userId: "",
