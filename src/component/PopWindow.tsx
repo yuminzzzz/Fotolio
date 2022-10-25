@@ -114,7 +114,7 @@ const PopWindow = ({
   const downloadImg = async () => {
     const gsReference = ref(
       storage,
-      `gs://fotolio-799f4.appspot.com/post-image/${postId}`
+      `gs://fotolio-799f4.appspot.com/post-image/${postId}_1000x1000`
     );
     getDownloadURL(gsReference)
       .then((url) => {
@@ -152,6 +152,7 @@ const PopWindow = ({
         commentDispatch({ type: CommentActionKind.LOG_OUT });
       })
       .catch((error) => {});
+    navigate("/")
   };
   
   if (location === "post") {
