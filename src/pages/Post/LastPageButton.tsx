@@ -14,6 +14,7 @@ const Wrapper = styled.div`
   justify-content: center;
   align-items: center;
   cursor: pointer;
+  z-index: 10;
   &:hover {
     background-color: lightgrey;
   }

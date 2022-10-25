@@ -118,9 +118,6 @@ const Post= () => {
   const { authState, postState, commentState, commentDispatch } = useContext(
     Context
   ) as ContextType;
-  const initStatus = postState.userCollections.some(
-    (item) => item.post_id === postId
-  );
   useEffect(() => {
     const isAuthor = postState.userPost.some(
       (item) => item.post_id === postId

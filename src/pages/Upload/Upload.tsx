@@ -312,60 +312,64 @@ const Upload = () => {
       const docRef = doc(
         collection(db, `users/${authState.userId}/user_posts`)
       );
-      const fileRef = ref(storage, `post-image/${docRef.id}`);
+      const fileRef = ref(storage, docRef.id);
+      const resizeRef = ref(storage, `post-image/${docRef.id}_1000x1000`);
 
       uploadBytes(fileRef, uploadData.file as File).then(() => {
-        getDownloadURL(fileRef).then((url) => {
-          const data = {
-            post_id: docRef.id,
-            title: uploadData.title,
-            description: uploadData.description,
-            created_time: Timestamp.now(),
-            author_id: authState.userId,
-            author_name: authState.userName,
-            author_avatar: authState.userAvatar,
-            url,
-            tags: localTags.map((item: string) => {
-              return { tag: item, post_id: docRef.id };
-            }),
-          };
-          postDispatch({
-            type: PostActionKind.UPDATE_ALL_POST,
-            payload: [...postState.allPost, data],
-          });
-          postDispatch({
-            type: PostActionKind.UPDATE_USER_POST,
-            payload: [...postState.userPost, data],
-          });
-          if (localTags.length > 0) {
-            let tags = commentState.allTags;
-            localTags.forEach((item) => {
-              tags = [...tags, { tag: item, post_id: docRef.id }];
+        setTimeout(() => {
+          getDownloadURL(resizeRef).then((url) => {
+            const data = {
+              post_id: docRef.id,
+              title: uploadData.title,
+              description: uploadData.description,
+              created_time: Timestamp.now(),
+              author_id: authState.userId,
+              author_name: authState.userName,
+              author_avatar: authState.userAvatar,
+              url,
+              tags: localTags.map((item: string) => {
+                return { tag: item, post_id: docRef.id };
+              }),
+            };
+            postDispatch({
+              type: PostActionKind.UPDATE_ALL_POST,
+              payload: [...postState.allPost, data],
             });
-            commentDispatch({
-              type: CommentActionKind.UPDATE_ALL_TAGS,
-              payload: tags,
+            postDispatch({
+              type: PostActionKind.UPDATE_USER_POST,
+              payload: [...postState.userPost, data],
             });
-          }
-          const postDocRef = doc(
-            db,
-            `/users/${authState.userId}/user_posts/${docRef.id}`
-          );
-          setDoc(postDocRef, data);
-          setLoading(false);
-          setAnimate(true);
-          setTimeout(() => {
-            setAnimate(false);
-          }, 2900);
-          setUploadData({
-            file: "",
-            title: "",
-            description: "",
+            if (localTags.length > 0) {
+              let tags = commentState.allTags;
+              localTags.forEach((item) => {
+                tags = [...tags, { tag: item, post_id: docRef.id }];
+              });
+              commentDispatch({
+                type: CommentActionKind.UPDATE_ALL_TAGS,
+                payload: tags,
+              });
+            }
+            const postDocRef = doc(
+              db,
+              `/users/${authState.userId}/user_posts/${docRef.id}`
+            );
+            setDoc(postDocRef, data);
+            setLoading(false);
+            setAnimate(true);
+            setTimeout(() => {
+              setAnimate(false);
+            }, 2900);
+            setUploadData({
+              file: "",
+              title: "",
+              description: "",
+            });
+            setLocalTags([]);
           });
-          setLocalTags([]);
-        });
+        }, 3000);
       });
     } catch (e) {
+      setLoading(false);
       console.error("Error adding document: ", e);
     }
   };
