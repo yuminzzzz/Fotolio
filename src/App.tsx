@@ -2,37 +2,8 @@ import { Timestamp } from "firebase/firestore";
 import { Outlet } from "react-router-dom";
 import { createGlobalStyle } from "styled-components";
 import Header from "./component/Header/Header";
-import NotoSansTCBold from "./fonts/NotoSansTC-Bold.otf";
-import NotoSansTCLight from "./fonts/NotoSansTC-Light.otf";
-import NotoSansTCMedium from "./fonts/NotoSansTC-Medium.otf";
-import NotoSansTCRegular from "./fonts/NotoSansTC-Regular.otf";
 
 const GlobalStyle = createGlobalStyle`
-
- @font-face {
-    font-family: NotoSansTC;
-    src: url(${NotoSansTCLight}) format('opentype');
-    font-weight: 300;
-  }
-
-  @font-face {
-    font-family: NotoSansTC;
-    src: url(${NotoSansTCRegular}) format('opentype');
-    font-weight: 400;
-  }
-
-   @font-face {
-    font-family: NotoSansTC;
-    src: url(${NotoSansTCMedium}) format('opentype');
-    font-weight: 500;
-  }
-
-   @font-face {
-    font-family: NotoSansTC;
-    src: url(${NotoSansTCBold}) format('opentype');
-    font-weight: 700;
-  }
-
 
 * {
     box-sizing: border-box;
@@ -52,7 +23,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    font-family: "NotoSansTC";
+    font-family: "Noto Sans TC", sans-serif;
     margin: 0; 
     scrollbar-width: none;
   }
@@ -71,7 +42,7 @@ const GlobalStyle = createGlobalStyle`
   }
 
   textarea {
-    font-family: "NotoSansTC";
+    font-family: "Noto Sans TC";
   }
 
   li {
